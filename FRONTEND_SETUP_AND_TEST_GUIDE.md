@@ -2,6 +2,8 @@
 
 **Audience:** you (or a new developer) with the `playnext-web` folder and nothing else set up. **Goal:** compile it, run it against the backend, and prove each screen works.
 
+**CI status (2026-10-25).** GitHub Actions (`.github/workflows/ci.yml`) ran `npm install`, `npm run typecheck`, `npm test` (29 pass) and `npm run build` on a clean machine, and all passed on the first run. So the code **does compile and build**. It has still **never been opened in a browser**: every manual check in section 8 is unverified, and the section 5 error tables below are precautionary.
+
 **Honesty note, read first.** This frontend was written in a sandbox that could not reach the npm registry. What was actually executed there: **29 automated logic tests** (Node's built-in runner) and a TypeScript check of the plain-TypeScript files in `lib/`. What has **never** been run: `npm install`, `next build`, a TypeScript check of any React/Next file (`app/`, `components/`), the dev server, or any page in a browser. So the very first thing to do is the compile step in section 5, and **expect a few type errors and small runtime bugs** — that is normal for code that has never met a compiler. Send the exact messages back and they get fixed in one pass.
 
 Companion document for the backend: `playnext/COMPLETE_SETUP_AND_TEST_GUIDE.md`. Endpoint shapes: `playnext/PHASE_9_CONTRACT.md`.
