@@ -26,6 +26,9 @@ export interface SettingsView {
   region: Region | null;
   budget_ceiling_toman: number | null;
   region_options: { code: Region; label: string }[];
+  /** Highest price in the catalog, in Toman: the top of the budget slider. NOT sent by the backend yet
+   *  (needs adding to GET /settings); the UI falls back to DEFAULT_BUDGET_MAX_TOMAN until it is. */
+  budget_max_toman?: number;
 }
 
 export interface PriceFields {

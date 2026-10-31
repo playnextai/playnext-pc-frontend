@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { shouldSearch, normalizeQuery } from "../lib/search.ts";
-import { counterLabel, toggleSelection } from "../lib/quiz.ts";
+import { counterKey, toggleSelection } from "../lib/quiz.ts";
 import { dismiss, isDismissed } from "../lib/dismiss.ts";
 import { CARD_ACTIONS, REMOVES_CARD, feedbackFor } from "../lib/cards.ts";
 
@@ -21,9 +21,9 @@ test("quiz selection toggles without mutating the old set", () => {
 });
 
 test("counter label has no minimum and pluralizes", () => {
-  assert.equal(counterLabel(0), "Tap the games you like");
-  assert.equal(counterLabel(1), "1 game picked");
-  assert.equal(counterLabel(5), "5 games picked");
+  assert.equal(counterKey(0), "quiz.none");
+  assert.equal(counterKey(1), "quiz.one");
+  assert.equal(counterKey(5), "quiz.many");
 });
 
 test("dismissal persists, and broken storage never throws", () => {

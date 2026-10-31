@@ -1,49 +1,80 @@
-/* Tokens taken from the PlayNext logo: violet -> cyan -> mint on near-black. */
+/* Tokens from the confirmed design catalog (mockups 01-22). Logical properties throughout so the
+   same CSS serves English (ltr) and Farsi (rtl). */
 :root {
-  --bg: #07070d;
-  --surface: #11111c;
-  --surface-2: #1a1a29;
-  --text: #f4f4fb;
-  --muted: #9a9ab5;
-  --violet: #a35cff;
-  --cyan: #29d9f0;
-  --mint: #2df0b0;
-  --danger: #ff6b81;
-  --radius: 14px;
-  --gradient: linear-gradient(135deg, var(--violet), var(--cyan) 60%, var(--mint));
+  --bg: #141414;
+  --surface: #1b1b1a;
+  --surface-2: #232322;
+  --border: #2d2d2c;
+  --text: #ececea;
+  --muted: #9b9b96;
+  --mint: #5ac8a0;
+  --lime: #9bc653;
+  --lilac: #a8b0ee;
+  --danger: #ff8d93;
+  --danger-bg: #3a1518;
+  --radius: 16px;
+  --gradient: linear-gradient(90deg, #5fcba5, #9bc653);
+  --brand: linear-gradient(135deg, #a8b0ee, #7fd09c);
+  --cover: linear-gradient(160deg, #272726, #191918);
+  --font-en: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-fa: Vazirmatn, Inter, system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-a { color: var(--cyan); }
-.container { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-en); }
+html[lang="fa"] body, html[lang="fa"] input, html[lang="fa"] select, html[lang="fa"] button { font-family: var(--font-fa); }
+button, input, select { font-family: inherit; }
+a { color: var(--mint); }
+:focus-visible { outline: 2px solid var(--lilac); outline-offset: 2px; }
+.container { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
 .btn {
-  display: inline-block; border: 0; border-radius: 999px; padding: 12px 22px; font-size: 1rem; font-weight: 600;
-  cursor: pointer; text-decoration: none; color: #07070d; background: var(--gradient);
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; border: 0; border-radius: 12px;
+  padding: 0 22px; font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none; color: #0c1a12; background: var(--gradient);
 }
-.btn.secondary { background: transparent; color: var(--text); border: 1px solid var(--surface-2); }
+.btn.secondary { background: transparent; color: var(--text); border: 1px solid #3a3a38; }
+.btn.small { min-height: 36px; padding: 0 14px; font-size: .9rem; border-radius: 10px; }
 .btn[disabled] { opacity: .5; cursor: not-allowed; }
-.card { background: var(--surface); border-radius: var(--radius); padding: 16px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+.card.dashed { border-style: dashed; background: transparent; }
 .muted { color: var(--muted); }
+.price { color: var(--mint); font-weight: 600; }
 .error { color: var(--danger); }
-.grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
-select, input { background: var(--surface-2); color: var(--text); border: 1px solid #2a2a40; border-radius: 10px; padding: 12px; font-size: 1rem; width: 100%; }
+.grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+select, input[type="text"], input:not([type]), input[type="search"] {
+  background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 12px; padding: 0 14px; min-height: 46px; font-size: 1rem; width: 100%;
+}
+.icon { width: 20px; height: 20px; flex: none; }
+.cover { background: var(--cover); border-radius: 10px; aspect-ratio: 3 / 4; width: 100%; object-fit: cover; display: block; }
+.chip { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid #3a3a38; font-size: .85rem; background: transparent; color: var(--text); }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.tab { min-height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--surface-2); color: var(--text); border-color: var(--mint); }
+.page-title { font-size: 1.8rem; font-weight: 600; margin: 28px 0 6px; }
 
 /* ---- app shell ---- */
-.nav { position: sticky; top: 0; z-index: 10; background: rgba(7,7,13,.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--surface-2); }
-.nav-inner { display: flex; align-items: center; gap: 8px; padding: 10px 16px; max-width: 1080px; margin: 0 auto; }
-.nav a.item, .nav .chip { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 999px; color: var(--text); text-decoration: none; font-size: .95rem; background: transparent; border: 0; cursor: pointer; }
-.nav a.item:hover, .nav .chip:hover { background: var(--surface-2); }
+.nav { position: sticky; top: 0; z-index: 10; background: rgba(20,20,20,.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+.nav-inner { display: flex; align-items: center; gap: 6px; padding: 10px 20px; max-width: 1120px; margin: 0 auto; }
+.wordmark { font-weight: 700; font-size: 1.15rem; text-decoration: none; background: var(--brand); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.nav a.item, .nav button.item { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-radius: 999px; color: var(--text); text-decoration: none; font-size: .95rem; background: transparent; border: 0; cursor: pointer; }
+.nav a.item:hover, .nav button.item:hover { background: var(--surface-2); }
 .nav .spacer { flex: 1; }
-.nav .badge { background: var(--gradient); color: #07070d; border-radius: 999px; font-size: .72rem; font-weight: 700; padding: 1px 7px; }
-.nav .chip-box { background: var(--surface-2); color: var(--text); border: 1px solid #2a2a40; border-radius: 999px; padding: 6px 10px; width: auto; font-size: .85rem; }
-.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gradient); color: #07070d; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+.nav .badge { background: var(--gradient); color: #0c1a12; border-radius: 999px; font-size: .72rem; font-weight: 700; padding: 1px 7px; }
+.nav .budget-chip { border: 1px dashed var(--lilac); color: var(--lilac); }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--brand); color: #0c1a12; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+.popover { position: absolute; inset-inline-end: 20px; top: 56px; width: 300px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; z-index: 20; }
+.popover input[type="range"] { width: 100%; accent-color: var(--mint); }
 .feed-row { margin: 28px 0; }
-.feed-row h2 { margin: 0 0 4px; font-size: 1.25rem; }
+.feed-row h2 { margin: 0 0 4px; font-size: 1.25rem; font-weight: 600; }
 .banner { border-radius: var(--radius); padding: 12px 16px; margin-top: 16px; }
-.banner.progress { background: #12263a; border: 1px solid var(--cyan); }
-.banner.problem { background: #2a1620; border: 1px solid var(--danger); }
+.banner.progress { background: var(--surface); border: 1px solid var(--lilac); }
+.banner.problem { background: var(--danger-bg); border: 1px solid var(--danger); }
+.lang-btn { min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text); cursor: pointer; font-size: .9rem; }
+html[dir="rtl"] .flip { transform: scaleX(-1); }
 @media (max-width: 640px) {
   /* mobile: icon-only nav, single-column stacked cards */
   .nav .label { display: none; }
+  .nav-inner { padding: 8px 12px; gap: 2px; }
   .grid { grid-template-columns: 1fr; }
+  .popover { inset-inline: 12px; width: auto; }
 }

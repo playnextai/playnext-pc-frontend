@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { shouldPollSync, syncBanner } from "@/lib/feed";
 import type { SyncStatus } from "@/lib/types";
+import { useI18n } from "@/components/I18nProvider";
 
 const POLL_MS = 4000;
 
@@ -10,6 +11,7 @@ const POLL_MS = 4000;
  *  sync is queued/running, stops otherwise, and calls onFinished once when it moves to done so the
  *  feed can refetch its (now richer) recommendations. Never blocks anything. */
 export default function SyncBanner({ onFinished }: { onFinished?: () => void }) {
+  const { t } = useI18n();
   const [status, setStatus] = useState<SyncStatus | null>(null);
   const was = useRef<SyncStatus | null>(null);
   const finished = useRef(onFinished);
@@ -34,5 +36,5 @@ export default function SyncBanner({ onFinished }: { onFinished?: () => void }) 
 
   const b = syncBanner(status);
   if (!b.show) return null;
-  return <div className={`banner ${b.tone}`} role="status">{b.text}</div>;
+  return <div className={`banner ${b.tone}`} role="status">{t(b.key)}</div>;
 }

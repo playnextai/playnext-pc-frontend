@@ -5,12 +5,15 @@ import Gate from "@/components/Gate";
 import SearchAndAdd from "@/components/SearchAndAdd";
 import { api } from "@/lib/api";
 import type { SearchResult } from "@/lib/types";
+import { useI18n } from "@/components/I18nProvider";
+import Icon from "@/components/Icon";
 
 const HEART_RATING = 5; // stored with the game; the recommender does not use ratings yet
 
 // Manual entry: search-and-add, an added list with remove and an optional heart, skip link.
 // Copy differs for Steam-linked people (a Steam library is synced separately) and email-only people.
 export default function LibraryStep() {
+  const { t } = useI18n();
   const router = useRouter();
   const [steamLinked, setSteamLinked] = useState<boolean | null>(null);
   const [added, setAdded] = useState<SearchResult[]>([]);
@@ -26,7 +29,7 @@ export default function LibraryStep() {
       await api.removeFromLibrary(id);
       setAdded((a) => a.filter((g) => g.game_id !== id));
       setHearted((h) => { const n = new Set(h); n.delete(id); return n; });
-    } catch { setError("Could not remove that game."); }
+    } catch { setError(t("add.removeFailed")); }
   }
 
   async function heart(id: number) {
@@ -34,7 +37,7 @@ export default function LibraryStep() {
     try {
       await api.addToLibrary(id, undefined, HEART_RATING);
       setHearted((h) => new Set(h).add(id));
-    } catch { setError("Could not save that."); }
+    } catch { setError(t("common.saveFailed")); }
   }
 
   async function finish() {
@@ -42,34 +45,32 @@ export default function LibraryStep() {
     try {
       const status = await api.completeStep("library");
       router.replace(status.next_route ?? "/discover");
-    } catch { setError("Could not continue. Try again."); setBusy(false); }
+    } catch { setError(t("add.continueFailed")); setBusy(false); }
   }
 
   return (
     <Gate>
       <main className="container" style={{ maxWidth: 640, paddingTop: 32 }}>
-        <h1>Add games you've played</h1>
+        <h1 style={{ fontWeight: 600 }}>{t("add.title")}</h1>
         <p className="muted">
-          {steamLinked
-            ? "Your Steam library is being imported. You can also add games from other stores here."
-            : "Search for games you own or have played, on any store. The more you add, the better your picks."}
+          {steamLinked ? t("add.subSteam") : t("add.subEmail")}
         </p>
         <SearchAndAdd target="library" alreadyAddedIds={ids} onAdded={(g) => setAdded((a) => [...a, g])} />
         {error && <p className="error">{error}</p>}
         <ul style={{ listStyle: "none", padding: 0, marginTop: 24, display: "grid", gap: 8 }}>
           {added.map((g) => (
             <li key={g.game_id} className="card" style={{ display: "flex", gap: 12, alignItems: "center" }}>
-              {g.cover_url && <img src={g.cover_url} alt="" width={36} height={50} style={{ borderRadius: 6 }} />}
+              {g.cover_url ? <img src={g.cover_url} alt="" width={36} height={50} style={{ borderRadius: 6 }} /> : <span style={{ width: 36, height: 50, borderRadius: 6, background: "var(--cover)", flex: "none" }} />}
               <strong style={{ flex: 1 }}>{g.title}</strong>
-              <button aria-label="Loved it" aria-pressed={hearted.has(g.game_id)} onClick={() => heart(g.game_id)}
-                style={{ background: "none", border: 0, cursor: "pointer", fontSize: "1.2rem", color: hearted.has(g.game_id) ? "var(--violet)" : "var(--muted)" }}>♥</button>
-              <button className="btn secondary" onClick={() => remove(g.game_id)}>Remove</button>
+              <button aria-label={t("add.loved")} aria-pressed={hearted.has(g.game_id)} onClick={() => heart(g.game_id)}
+                style={{ background: "none", border: 0, cursor: "pointer", color: hearted.has(g.game_id) ? "var(--mint)" : "var(--muted)", display: "inline-flex" }}><Icon name="heart" /></button>
+              <button className="btn secondary" onClick={() => remove(g.game_id)}>{t("common.remove")}</button>
             </li>
           ))}
         </ul>
         <p style={{ display: "flex", gap: 12, marginTop: 24 }}>
-          <button className="btn" disabled={busy} onClick={finish}>{added.length ? "Done" : "Continue"}</button>
-          {added.length === 0 && <button className="btn secondary" disabled={busy} onClick={finish}>Skip for now</button>}
+          <button className="btn" disabled={busy} onClick={finish}>{added.length ? t("add.done") : t("common.continue")}</button>
+          {added.length === 0 && <button className="btn secondary" disabled={busy} onClick={finish}>{t("add.skipNow")}</button>}
         </p>
       </main>
     </Gate>

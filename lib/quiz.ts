@@ -6,8 +6,7 @@ export function toggleSelection(selected: ReadonlySet<number>, id: number): Set<
   return next;
 }
 
-/** Live counter under the quiz grid. There is no minimum: "Let's go" is live from the first tap. */
-export function counterLabel(n: number): string {
-  if (n === 0) return "Tap the games you like";
-  return n === 1 ? "1 game picked" : `${n} games picked`;
+/** Live counter under the quiz grid (text key + count). No minimum: "Let's go" is live from the first tap. */
+export function counterKey(n: number): "quiz.none" | "quiz.one" | "quiz.many" {
+  return n === 0 ? "quiz.none" : n === 1 ? "quiz.one" : "quiz.many";
 }

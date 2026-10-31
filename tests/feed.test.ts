@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { dedupeRows, isColdStart, shouldPollSync, syncBanner, type FeedRowData } from "../lib/feed.ts";
+import { budgetFromSlider, dedupeRows, isColdStart, shouldPollSync, sliderFromBudget, syncBanner, type FeedRowData } from "../lib/feed.ts";
 import type { GameCard } from "../lib/types.ts";
 
 const card = (id: number): GameCard => ({ game_id: id, title: `g${id}`, cover_url: null, price_native: null, price_currency: null, price_toman: null, discount_pct: null });
@@ -20,7 +20,7 @@ test("cold start only when every personal row is empty", () => {
 });
 
 test("sync banner shows for in-progress and failed only", () => {
-  assert.deepEqual(syncBanner("running"), { show: true, tone: "progress", text: syncBanner("queued") && (syncBanner("running") as { text: string }).text });
+  assert.deepEqual(syncBanner("running"), { show: true, tone: "progress", key: "sync.progress" });
   assert.equal(syncBanner("queued").show, true);
   const failed = syncBanner("failed");
   assert.ok(failed.show && failed.tone === "problem");
@@ -31,4 +31,13 @@ test("polling only while queued or running", () => {
   assert.equal(shouldPollSync("queued"), true);
   assert.equal(shouldPollSync("running"), true);
   for (const s of ["done", "failed", "never", "not_applicable", null] as const) assert.equal(shouldPollSync(s), false);
+});
+
+test("budget slider: top means no limit, bottom is zero, out-of-range is clamped", () => {
+  assert.equal(budgetFromSlider(5_000_000, 5_000_000), null);
+  assert.equal(budgetFromSlider(0, 5_000_000), 0);
+  assert.equal(budgetFromSlider(250_000, 5_000_000), 250_000);
+  assert.equal(sliderFromBudget(null, 5_000_000), 5_000_000);
+  assert.equal(sliderFromBudget(9_000_000, 5_000_000), 5_000_000);
+  assert.equal(sliderFromBudget(-5, 5_000_000), 0);
 });

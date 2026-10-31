@@ -5,6 +5,8 @@ import AppShell from "@/components/AppShell";
 import FeedRow from "@/components/FeedRow";
 import SyncBanner from "@/components/SyncBanner";
 import { api } from "@/lib/api";
+import { useI18n } from "@/components/I18nProvider";
+import Icon from "@/components/Icon";
 import { dedupeRows, isColdStart, type FeedRowData } from "@/lib/feed";
 
 const LIMIT = 12;
@@ -14,6 +16,7 @@ const LIMIT = 12;
 //   -> Good deals for you -> Out of the usual
 // Cold start (no personal rows): "Popular right now" + buttons back to the quiz / manual add.
 export default function Discover() {
+  const { t, lang } = useI18n();
   const [rows, setRows] = useState<FeedRowData[] | null>(null);
   const [popular, setPopular] = useState<FeedRowData | null>(null);
   const [failed, setFailed] = useState(false);
@@ -29,21 +32,22 @@ export default function Discover() {
       safe(api.outOfUsual(LIMIT).then((r) => r.items), []),
     ]);
     const personal = dedupeRows([
-      { id: "picked", title: "Picked for you", cards: picked },
-      { id: "next", title: "What to play next", subtitle: "From games you already own", cards: next },
-      { id: "unplayed", title: "Still in your library", subtitle: "Owned, barely played", cards: unplayed },
-      { id: "deals", title: "Good deals for you", cards: deals },
-      { id: "unusual", title: "Out of the usual", subtitle: "Strong matches outside your usual genres", cards: unusual },
+      { id: "picked", title: t("feed.picked"), cards: picked },
+      { id: "next", title: t("feed.next"), subtitle: t("feed.nextSub"), cards: next },
+      { id: "unplayed", title: t("feed.unplayed"), subtitle: t("feed.unplayedSub"), cards: unplayed },
+      { id: "deals", title: t("feed.deals"), cards: deals },
+      { id: "unusual", title: t("feed.unusual"), subtitle: t("feed.unusualSub"), cards: unusual },
     ]);
     setRows(personal);
     if (isColdStart(personal)) {
       const items = await safe(api.popular(LIMIT).then((r) => r.items), []);
-      setPopular({ id: "popular", title: "Popular right now", cards: items });
+      setPopular({ id: "popular", title: t("feed.popular"), cards: items });
     } else {
       setPopular(null);
     }
     setFailed(false);
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
 
   useEffect(() => { load().catch(() => setFailed(true)); }, [load]);
 
@@ -56,17 +60,17 @@ export default function Discover() {
     <AppShell onBudgetChange={() => { load().catch(() => setFailed(true)); }}>
       <main className="container" style={{ paddingBottom: 64 }}>
         <SyncBanner onFinished={() => { load().catch(() => setFailed(true)); }} />
-        {failed && <p className="error">Something went wrong loading your feed. Refresh to try again.</p>}
-        {rows === null && !failed && <p className="muted">Loading…</p>}
+        {failed && <p className="error">{t("feed.loadFailed")}</p>}
+        {rows === null && !failed && <p className="muted">{t("common.loading")}</p>}
         {rows?.map((row) => <FeedRow key={row.id} row={row} onRemove={drop} />)}
         {rows && popular && (
           <>
             {popular.cards.length > 0 && <FeedRow row={popular} onRemove={drop} />}
-            <div className="card" style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", justifyContent: "space-between" }}>
-              <span>Tell us what you like and your picks will show up here.</span>
-              <span style={{ display: "flex", gap: 8 }}>
-                <Link className="btn" href="/onboarding/quiz">Take the taste quiz</Link>
-                <Link className="btn secondary" href="/onboarding/library">Add games you've played</Link>
+            <div className="card dashed" style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", justifyContent: "space-between" }}>
+              <span><Icon name="gamepad" className="icon" /> {t("feed.coldSub")}</span>
+              <span style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <Link className="btn" href="/onboarding/quiz">{t("feed.takeQuiz")}</Link>
+                <Link className="btn secondary" href="/onboarding/library">{t("feed.addPlayed")}</Link>
               </span>
             </div>
           </>

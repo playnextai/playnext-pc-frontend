@@ -2,12 +2,16 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Gate from "@/components/Gate";
+import { useI18n } from "@/components/I18nProvider";
 import { api, ApiError } from "@/lib/api";
 import type { Region, SettingsView } from "@/lib/types";
 
+const CURRENCY: Record<Region, string> = { US: "USD $", UK: "GBP £", EU: "EUR €", UA: "UAH ₴", TR: "TRY ₺", AR: "ARS $" };
+
 // Required onboarding step: without a pricing region the whole app has no prices.
-// The same choice can be changed later in /settings.
+// The same choice can be changed later in /settings. Six regions, one radio list (as designed).
 export default function RegionStep() {
+  const { t } = useI18n();
   const router = useRouter();
   const [settings, setSettings] = useState<SettingsView | null>(null);
   const [region, setRegion] = useState<Region | "">("");
@@ -15,7 +19,8 @@ export default function RegionStep() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api.settings().then((s) => { setSettings(s); if (s.region) setRegion(s.region); }).catch(() => setError("Could not load options."));
+    api.settings().then((s) => { setSettings(s); if (s.region) setRegion(s.region); }).catch(() => setError(t("region.loadFailed")));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function save() {
@@ -27,27 +32,35 @@ export default function RegionStep() {
       const status = await api.onboardingStatus();
       router.replace(status.next_route ?? "/discover");
     } catch (e) {
-      setError(e instanceof ApiError && e.code === "invalid_region" ? "Pick one of the listed regions." : "Could not save. Try again.");
+      setError(e instanceof ApiError && e.code === "invalid_region" ? t("region.invalid") : t("common.saveFailed"));
       setBusy(false);
     }
   }
 
   return (
     <Gate>
-      <main className="container" style={{ maxWidth: 520, paddingTop: 64 }}>
-        <div className="card">
-          <h1 style={{ marginTop: 0 }}>Where should prices come from?</h1>
-          <p className="muted">
-            Steam has no store for Iran, so pick the region whose prices you want to see. We show them in Toman.
-            You can change this any time in Settings.
-          </p>
-          <select value={region} onChange={(e) => setRegion(e.target.value as Region)} aria-label="Pricing region">
-            <option value="" disabled>Choose a region…</option>
-            {settings?.region_options.map((o) => <option key={o.code} value={o.code}>{o.label}</option>)}
-          </select>
-          {error && <p className="error">{error}</p>}
-          <p><button className="btn" disabled={!region || busy} onClick={save}>Continue</button></p>
+      <main className="container" style={{ maxWidth: 560, paddingTop: 48 }}>
+        <div className="muted" style={{ marginBottom: 8 }}>{t("region.step", { n: 1 })}</div>
+        <h1 style={{ margin: "0 0 8px", fontWeight: 600 }}>{t("region.title")}</h1>
+        <p className="muted">{t("region.sub")}</p>
+        <div role="radiogroup" aria-label={t("nav.region")} className="stack">
+          {settings?.region_options.map((o) => {
+            const on = region === o.code;
+            return (
+              <button key={o.code} role="radio" aria-checked={on} onClick={() => setRegion(o.code)} className="card"
+                style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", color: "inherit", textAlign: "start", borderColor: on ? "var(--mint)" : "var(--border)", minHeight: 52 }}>
+                <span style={{ display: "flex", gap: 14, alignItems: "center" }}>
+                  <span aria-hidden="true" style={{ width: 18, height: 18, borderRadius: "50%", border: `2px solid ${on ? "var(--mint)" : "#3a3a38"}`, background: on ? "var(--mint)" : "transparent", boxShadow: on ? "inset 0 0 0 3px var(--surface)" : "none" }} />
+                  {o.label}
+                </span>
+                <span className="muted" style={{ fontSize: ".9rem" }}>{CURRENCY[o.code]}</span>
+              </button>
+            );
+          })}
         </div>
+        <p className="muted" style={{ fontSize: ".9rem" }}>{t("region.note")}</p>
+        {error && <p className="error" role="alert">{error}</p>}
+        <p style={{ display: "flex", justifyContent: "flex-end" }}><button className="btn" disabled={!region || busy} onClick={save}>{t("common.continue")}</button></p>
       </main>
     </Gate>
   );

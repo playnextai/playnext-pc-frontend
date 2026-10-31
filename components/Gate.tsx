@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { signInUrl } from "@/lib/auth";
 import { decideGate, isOnboardingPath } from "@/lib/flow";
+import { useI18n } from "@/components/I18nProvider";
 
 /**
  * Wrap every signed-in page. On load it asks the backend who you are and
@@ -17,6 +18,7 @@ export default function Gate({ children, allowIncompleteOnboarding = false }: {
   children: React.ReactNode;
   allowIncompleteOnboarding?: boolean;
 }) {
+  const { t } = useI18n();
   const router = useRouter();
   const path = usePathname() ?? "/";
   const [ready, setReady] = useState(false);
@@ -44,16 +46,17 @@ export default function Gate({ children, allowIncompleteOnboarding = false }: {
         if (e instanceof ApiError && e.isUnauthenticated) {
           window.location.assign(signInUrl(path + window.location.search));
         } else if (e instanceof ApiError && e.isRateLimited) {
-          setError(`Too many requests. Try again in ${e.retryAfterSec ?? 60} seconds.`);
+          setError(t("common.rateLimited", { n: e.retryAfterSec ?? 60 }));
         } else {
-          setError("Something went wrong. Please refresh the page.");
+          setError(t("common.refresh"));
         }
       }
     })();
     return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path, router, allowIncompleteOnboarding]);
 
   if (error) return <main className="container"><p className="error">{error}</p></main>;
-  if (!ready) return <main className="container"><p className="muted">Loading…</p></main>;
+  if (!ready) return <main className="container"><p className="muted">{t("common.loading")}</p></main>;
   return <>{children}</>;
 }

@@ -21,17 +21,17 @@ export function isColdStart(personalRows: FeedRowData[]): boolean {
   return personalRows.every((r) => r.cards.length === 0);
 }
 
-export type SyncBanner = { show: false } | { show: true; tone: "progress" | "problem"; text: string };
+export type SyncBanner = { show: false } | { show: true; tone: "progress" | "problem"; key: "sync.progress" | "sync.failed" };
 
 /** The "still syncing your library" banner. Only shown while a sync is queued/running,
- *  or when it failed (so the person knows why their library looks empty). */
+ *  or when it failed (so the person knows why their library looks empty). Returns a text key. */
 export function syncBanner(status: SyncStatus | null): SyncBanner {
   switch (status) {
     case "queued":
     case "running":
-      return { show: true, tone: "progress", text: "Syncing your Steam library… picks will get better as it finishes." };
+      return { show: true, tone: "progress", key: "sync.progress" };
     case "failed":
-      return { show: true, tone: "problem", text: "We couldn't sync your Steam library. Make sure game details are public on your Steam profile, then sign in again." };
+      return { show: true, tone: "problem", key: "sync.failed" };
     default:
       return { show: false };
   }
@@ -40,4 +40,18 @@ export function syncBanner(status: SyncStatus | null): SyncBanner {
 /** Poll while a sync is in progress; stop on every other state. */
 export const shouldPollSync = (status: SyncStatus | null) => status === "queued" || status === "running";
 
-export const BUDGET_PRESETS_TOMAN = [100_000, 250_000, 500_000, 1_000_000, 2_000_000];
+
+/** Budget slider: 0 .. highest price in the database. Until the backend reports that top value
+ *  (SettingsView.budget_max_toman) the slider uses this fallback. */
+export const DEFAULT_BUDGET_MAX_TOMAN = 5_000_000;
+export const BUDGET_STEP_TOMAN = 50_000;
+
+/** Slider position -> stored budget. The top of the slider means "no limit" (null). */
+export function budgetFromSlider(position: number, max: number): number | null {
+  return position >= max ? null : Math.max(0, Math.round(position));
+}
+
+/** Stored budget -> slider position (no limit sits at the top). Out-of-range values are clamped. */
+export function sliderFromBudget(budget: number | null, max: number): number {
+  return budget === null ? max : Math.min(Math.max(0, budget), max);
+}
