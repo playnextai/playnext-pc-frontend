@@ -13,9 +13,22 @@ jobs:
         with: { node-version: 22 }
       - name: Install (no lockfile yet, so npm install)
         run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
-      - run: npm run typecheck
-      - run: npm test
-      - run: npm run build
+      # Each step prints its tail as annotations, because job logs can't be downloaded from the sandbox.
+      - name: Typecheck
+        run: |
+          set +e; npm run typecheck > out.txt 2>&1; rc=$?
+          head -c 3000 out.txt | tr '\n' '|' | sed 's/^/::notice title=typecheck::rc='$rc' /'; echo
+          exit $rc
+      - name: Test
+        run: |
+          set +e; npm test > out.txt 2>&1; rc=$?
+          grep -E "^# (tests|pass|fail)|^not ok" out.txt | tr '\n' '|' | sed 's/^/::notice title=test::rc='$rc' /'; echo
+          exit $rc
+      - name: Build
+        run: |
+          set +e; npm run build > out.txt 2>&1; rc=$?
+          tail -c 3000 out.txt | tr '\n' '|' | sed 's/^/::notice title=build::rc='$rc' /'; echo
+          exit $rc
         env:
           BACKEND_URL: http://localhost:8000
           NEXT_PUBLIC_SITE_URL: https://pc.playnextai.com
