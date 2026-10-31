@@ -256,7 +256,14 @@ export const en = {
   "detail.tags": "Tags",
   "detail.similar": "Similar games",
   "detail.whyPicked": "Why we picked this",
-  "detail.signInPrompt": "Sign in to see prices in your region and add this to your lists.",
+  "detail.signInPrompt": "Sign in to see prices for your region and add this game to your lists.",
+  "detail.signIn": "Sign in",
+  "detail.region.US": "United States",
+  "detail.region.UK": "United Kingdom",
+  "detail.region.EU": "Eurozone",
+  "detail.region.UA": "Ukraine",
+  "detail.region.TR": "Turkey",
+  "detail.region.AR": "Argentina",
   "detail.notFound": "We couldn't find that game.",
   "detail.by": "by {name}",
   "detail.reviews": "{n}% positive reviews",
@@ -283,7 +290,7 @@ export const en = {
   "dna.type.genre_explorer": "The Genre Explorer",
   "dna.type.loyalist": "The Loyalist",
   "dna.type.genre_specialist": "The Genre Specialist",
-  "dna.type.balanced": "The Balanced Player",
+  "dna.type.balanced": "The Balanced Gamer",
 
   // states
   "wishlist.view": "View game",
@@ -297,6 +304,16 @@ export const en = {
 } as const;
 
 export type Key = keyof typeof en;
+
+/** The backend sends Gamer DNA types as English labels (gamer_dna_router.derive_label). Map them to keys. */
+export const DNA_TYPE_KEYS: Record<string, Key> = {
+  "The Completionist": "dna.type.completionist",
+  "The Backlog Collector": "dna.type.backlog_collector",
+  "The Genre Explorer": "dna.type.genre_explorer",
+  "The Loyalist": "dna.type.loyalist",
+  "The Genre Specialist": "dna.type.genre_specialist",
+  "The Balanced Gamer": "dna.type.balanced",
+};
 
 export const fa: Record<Key, string> = {
   "common.loading": "در حال بارگذاری…",
@@ -473,7 +490,14 @@ export const fa: Record<Key, string> = {
   "detail.tags": "برچسب‌ها",
   "detail.similar": "بازی‌های مشابه",
   "detail.whyPicked": "چرا این را انتخاب کردیم",
-  "detail.signInPrompt": "برای دیدن قیمت منطقه‌ات و افزودن به فهرست‌ها وارد شو.",
+  "detail.signInPrompt": "برای دیدن قیمت منطقه‌ات و افزودن این بازی به فهرست‌ها وارد شو.",
+  "detail.signIn": "ورود",
+  "detail.region.US": "ایالات متحده",
+  "detail.region.UK": "بریتانیا",
+  "detail.region.EU": "منطقه‌ی یورو",
+  "detail.region.UA": "اوکراین",
+  "detail.region.TR": "ترکیه",
+  "detail.region.AR": "آرژانتین",
   "detail.notFound": "این بازی را پیدا نکردیم.",
   "detail.by": "از {name}",
   "detail.reviews": "{n}٪ نظر مثبت",
@@ -499,7 +523,7 @@ export const fa: Record<Key, string> = {
   "dna.type.genre_explorer": "کاوشگر ژانر",
   "dna.type.loyalist": "وفادار",
   "dna.type.genre_specialist": "متخصص ژانر",
-  "dna.type.balanced": "بازیکن متعادل",
+  "dna.type.balanced": "گیمر متعادل",
 
   "wishlist.view": "دیدن بازی",
   "state.notFoundTitle": "این صفحه وجود ندارد",

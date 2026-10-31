@@ -69,3 +69,14 @@ test("language comes from the saved choice, else the browser, else English; brok
   assert.doesNotThrow(() => saveLang("en", broken));
   assert.equal(detectLang("en", null), "en");
 });
+
+test("every Gamer DNA label the backend can send maps to a translated string", async () => {
+  const { DNA_TYPE_KEYS } = await import("../lib/i18n.ts");
+  assert.deepEqual(Object.keys(DNA_TYPE_KEYS).sort(), [
+    "The Backlog Collector", "The Balanced Gamer", "The Completionist", "The Genre Explorer", "The Genre Specialist", "The Loyalist",
+  ]);
+  for (const k of Object.values(DNA_TYPE_KEYS)) {
+    assert.ok(en[k].length > 0 && fa[k].length > 0);
+  }
+  assert.equal(en["dna.type.balanced"], "The Balanced Gamer");
+});

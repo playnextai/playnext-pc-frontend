@@ -6,12 +6,10 @@ import Thumb from "@/components/Thumb";
 import { useI18n } from "@/components/I18nProvider";
 import { api, ApiError } from "@/lib/api";
 import { steamSignInUrl } from "@/lib/auth";
-import { en, type Key } from "@/lib/i18n";
+import { DNA_TYPE_KEYS } from "@/lib/i18n";
 import type { GamerDna } from "@/lib/types";
 
 type State = { kind: "loading" } | { kind: "ok"; dna: GamerDna } | { kind: "needs_steam" } | { kind: "error" };
-
-const typeKey = (label: string): Key | null => (`dna.type.${label}` in en ? (`dna.type.${label}` as Key) : null);
 
 // Gamer DNA: a light-hearted type plus plain stats from the Steam library. Email-only people get a
 // gated "needs Steam" card (the backend answers 403 steam_required); a first sync still running shows a wait card.
@@ -56,13 +54,13 @@ export default function DnaPage() {
 function Stats({ dna, hours, percent }: { dna: GamerDna; hours: (n: number) => string; percent: (n: number) => string }) {
   const { t, lang } = useI18n();
   const nf = new Intl.NumberFormat(lang === "fa" ? "fa-IR" : "en-US");
-  const tk = dna.type_label ? typeKey(dna.type_label) : null;
+  const tk = dna.type_label ? DNA_TYPE_KEYS[dna.type_label] ?? null : null;
   const top = dna.top_genres.slice(0, 3);
   const maxH = Math.max(1, ...top.map((g) => g.hours));
   const tiles: [string, string][] = [
     [hours(Math.round(dna.total_hours)), t("dna.totalPlaytime")],
     [nf.format(dna.backlog_count), t("dna.backlog")],
-    ...(dna.avg_achievement_completion !== null ? [[percent(Math.round(dna.avg_achievement_completion)), t("dna.achievements")] as [string, string]] : []),
+    ...(dna.avg_achievement_completion !== null ? [[percent(Math.round(dna.avg_achievement_completion * 100)), t("dna.achievements")] as [string, string]] : []),
     ...(dna.most_played_studio ? [[dna.most_played_studio.name, t("dna.studio")] as [string, string]] : []),
   ];
   return (

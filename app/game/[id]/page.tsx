@@ -3,18 +3,40 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import AppShell from "@/components/AppShell";
+import LangToggle from "@/components/LangToggle";
+import { signInUrl } from "@/lib/auth";
 import Empty from "@/components/Empty";
 import Icon, { type IconName } from "@/components/Icon";
 import Thumb from "@/components/Thumb";
 import { useI18n } from "@/components/I18nProvider";
 import { api, ApiError } from "@/lib/api";
-import type { FeedbackAction, GameDetail } from "@/lib/types";
+import type { FeedbackAction, GameDetail, Region } from "@/lib/types";
 
 const PLATFORM_NAME: Record<string, string> = { steam: "Steam", gog: "GOG", epic: "Epic" };
 
 // Game detail: five actions (like, dislike, not interested, already own, wishlist), Steam editions with
 // the person's regional price (Toman first), tags, similar games. Descriptions stay in English by decision.
 export default function GamePage() {
+  const { t } = useI18n();
+  const params = useParams<{ id: string }>();
+  const [authed, setAuthed] = useState<boolean | null>(null);
+  useEffect(() => { api.me().then((m) => setAuthed(m.authenticated)).catch(() => setAuthed(false)); }, []);
+  if (authed === null) return <main className="container"><p className="muted">{t("common.loading")}</p></main>;
+  // Signed in: the full page inside the app shell. Signed out: the same page, public (no actions, every region's price).
+  return authed
+    ? <AppShell><GameBody authed /></AppShell>
+    : (
+      <>
+        <header className="nav"><nav className="nav-inner">
+          <a className="wordmark" href="/">PlayNext</a><span className="spacer" /><LangToggle />
+          <a className="btn small" href={signInUrl(`/game/${params?.id ?? ""}`)}>{t("detail.signIn")}</a>
+        </nav></header>
+        <GameBody authed={false} />
+      </>
+    );
+}
+
+function GameBody({ authed }: { authed: boolean }) {
   const { t, toman, native, percent } = useI18n();
   const params = useParams<{ id: string }>();
   const id = Number(params?.id);
@@ -59,7 +81,7 @@ export default function GamePage() {
   ] : [];
 
   return (
-    <AppShell>
+    <>
       <main className="container" style={{ paddingBottom: 64, maxWidth: 860 }}>
         {missing && <div style={{ marginTop: 32 }}><Empty icon="warn" title={t("detail.notFound")}><Link className="btn" href="/discover">{t("state.toFeed")}</Link></Empty></div>}
         {error && <p className="error" role="alert">{error}</p>}
@@ -78,14 +100,15 @@ export default function GamePage() {
                   {g.review_score !== null && <> · {t("detail.reviews", { n: Math.round(g.review_score) })}</>}
                 </div>
                 {g.recommendation?.reason && <p style={{ margin: "0 0 10px" }}><strong>{t("detail.whyPicked")}:</strong> <span className="muted">{g.recommendation.reason}</span></p>}
-                <div role="group" aria-label={t("card.actions")} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {!authed && <p className="muted" style={{ margin: "0 0 8px" }}>{t("detail.signInPrompt")}</p>}
+                {authed && <div role="group" aria-label={t("card.actions")} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {actions.map((a) => (
                     <button key={a.key} aria-pressed={a.on} disabled={busy} onClick={a.run} className="chip"
                       style={{ minHeight: 40, cursor: "pointer", color: a.on ? "var(--mint)" : "var(--text)", borderColor: a.on ? "var(--mint)" : "#3a3a38" }}>
                       <Icon name={a.icon} /> {a.label}
                     </button>
                   ))}
-                </div>
+                </div>}
               </div>
             </div>
 
@@ -95,23 +118,32 @@ export default function GamePage() {
             <section className="stack" style={{ marginTop: 24 }}>
               <h2 style={{ fontSize: "1.1rem", fontWeight: 600, margin: 0 }}>{t("detail.editions")}</h2>
               {g.editions.map((ed) => {
-                const p = ed.prices.find((x) => x.is_user_region) ?? ed.prices[0];
-                const nat = p ? native(p.price_native, p.price_currency) : null;
+                const shown = authed ? [ed.prices.find((x) => x.is_user_region) ?? ed.prices[0]].filter(Boolean) : ed.prices;
                 return (
                   <div key={ed.game_edition_id} className="card" style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
                     <div style={{ flex: 1, minWidth: 160 }}>
                       <strong dir="auto">{ed.edition_name ?? g.title}</strong>
                       <div className="muted" style={{ fontSize: ".85rem" }}>{ed.platforms.map((x) => PLATFORM_NAME[x] ?? x).join(" · ")}</div>
                     </div>
-                    <div style={{ textAlign: "end" }}>
-                      <div className="price">{p?.is_free ? t("detail.free") : toman(p?.price_toman)}
-                        {!!p?.discount_pct && <span style={{ color: "var(--danger)", background: "var(--danger-bg)", borderRadius: 6, padding: "1px 6px", marginInlineStart: 8, fontSize: ".8rem" }}>-{percent(p.discount_pct)}</span>}
-                      </div>
-                      {nat && <div className="muted" style={{ fontSize: ".85rem" }}>{nat}</div>}
+                    <div style={{ textAlign: "end", display: "grid", gap: 6 }}>
+                      {shown.map((p) => {
+                        if (!p) return null;
+                        const nat = native(p.price_native, p.price_currency);
+                        return (
+                          <div key={p.region}>
+                            {!authed && <span className="muted" style={{ fontSize: ".85rem", marginInlineEnd: 8 }}>{t(`detail.region.${p.region as Region}`)}</span>}
+                            <span className="price">{p.is_free ? t("detail.free") : toman(p.price_toman)}</span>
+                            {!!p.discount_pct && <span style={{ color: "var(--danger)", background: "var(--danger-bg)", borderRadius: 6, padding: "1px 6px", marginInlineStart: 8, fontSize: ".8rem" }}>-{percent(p.discount_pct)}</span>}
+                            {nat && <div className="muted" style={{ fontSize: ".85rem" }}>{nat}</div>}
+                          </div>
+                        );
+                      })}
                     </div>
-                    <button className="btn small" disabled={busy || g.user_state.in_cart} onClick={() => addToCart(ed.game_edition_id)}>
-                      {g.user_state.in_cart ? t("detail.inCart") : t("detail.addToCart")}
-                    </button>
+                    {authed && (
+                      <button className="btn small" disabled={busy || g.user_state.in_cart} onClick={() => addToCart(ed.game_edition_id)}>
+                        {g.user_state.in_cart ? t("detail.inCart") : t("detail.addToCart")}
+                      </button>
+                    )}
                     {ed.buy_url && <a className="btn secondary small" href={ed.buy_url} target="_blank" rel="noopener noreferrer">{t("detail.buy")}</a>}
                   </div>
                 );
@@ -129,6 +161,6 @@ export default function GamePage() {
           </>
         )}
       </main>
-    </AppShell>
+    </>
   );
 }

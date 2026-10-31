@@ -127,6 +127,7 @@ export interface GamerDna {
   games_count: number;
   total_hours: number;
   backlog_count: number;
+  /** 0..1 fraction (0.63 = 63%). */
   avg_achievement_completion: number | null;
   most_played_studio: { name: string; hours: number } | null;
   top_genres: { genre: string; hours: number }[];
