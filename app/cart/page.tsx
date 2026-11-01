@@ -51,7 +51,7 @@ export default function CartPage() {
                       <li key={it.item_id} className="card" style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
                         <Thumb url={it.cover_url} />
                         <div style={{ flex: 1, minWidth: 160 }}>
-                          <Link href={`/game/${it.game_id}`} style={{ color: "var(--text)", fontWeight: 600, textDecoration: "none" }}>{it.title}</Link>
+                          <Link href={`/game/${it.game_id}`} className="link-title">{it.title}</Link>
                           {it.edition_name && <div className="muted" style={{ fontSize: ".85rem" }}>{it.edition_name}</div>}
                           {it.price_changed && <div style={{ color: "var(--danger)", fontSize: ".85rem" }} role="status">{t("cart.priceChanged")} · {t("cart.locked", { price: was ?? "—" })}</div>}
                         </div>

@@ -149,6 +149,7 @@ export const en = {
   "search.noResults": "We couldn't find that one. No worries - we'll still learn from everything else you add.",
 
   // feed
+  "feed.title": "Your feed",
   "feed.picked": "Picked for you",
   "feed.next": "What to play next",
   "feed.nextSub": "From games you already own",
@@ -391,6 +392,7 @@ export const fa: Record<Key, string> = {
   "search.addFailed": "این بازی اضافه نشد. دوباره امتحان کن.",
   "search.noResults": "این یکی را پیدا نکردیم. نگران نباش، از بقیه‌ی چیزهایی که اضافه کنی یاد می‌گیریم.",
 
+  "feed.title": "فید تو",
   "feed.picked": "انتخاب شده برای تو",
   "feed.next": "بعدی چه بازی کنم؟",
   "feed.nextSub": "از بازی‌هایی که از قبل داری",

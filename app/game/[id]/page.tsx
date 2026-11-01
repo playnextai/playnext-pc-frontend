@@ -83,12 +83,12 @@ function GameBody({ authed }: { authed: boolean }) {
   return (
     <>
       <main className="container" style={{ paddingBottom: 64, maxWidth: 860 }}>
-        {missing && <div style={{ marginTop: 32 }}><Empty icon="warn" title={t("detail.notFound")}><Link className="btn" href="/discover">{t("state.toFeed")}</Link></Empty></div>}
+        {missing && <div style={{ marginTop: 32 }}><Empty icon="warn" asPage title={t("detail.notFound")}><Link className="btn" href="/discover">{t("state.toFeed")}</Link></Empty></div>}
         {error && <p className="error" role="alert">{error}</p>}
         {!g && !missing && !error && <p className="muted">{t("common.loading")}</p>}
         {g && (
           <>
-            <Link href="/discover" style={{ display: "inline-flex", gap: 6, alignItems: "center", margin: "20px 0 0", textDecoration: "none" }}>
+            <Link href="/discover" style={{ display: "inline-flex", gap: 6, alignItems: "center", margin: "12px 0 0", minHeight: 40, textDecoration: "none" }}>
               <Icon name="arrow" className="icon flip" /> {t("detail.back")}
             </Link>
             <div style={{ display: "flex", gap: 24, margin: "16px 0", flexWrap: "wrap" }}>

@@ -55,12 +55,14 @@ select, input[type="text"], input:not([type]), input[type="search"] {
 /* ---- app shell ---- */
 .nav { position: sticky; top: 0; z-index: 10; background: rgba(20,20,20,.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
 .nav-inner { display: flex; align-items: center; gap: 6px; padding: 10px 20px; max-width: 1120px; margin: 0 auto; }
-.wordmark { font-weight: 700; font-size: 1.15rem; text-decoration: none; background: var(--brand); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.wordmark { display: inline-flex; align-items: center; min-height: 40px; font-weight: 700; font-size: 1.15rem; text-decoration: none; background: var(--brand); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .nav a.item, .nav button.item { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-radius: 999px; color: var(--text); text-decoration: none; font-size: .95rem; background: transparent; border: 0; cursor: pointer; }
 .nav a.item:hover, .nav button.item:hover { background: var(--surface-2); }
 .nav .spacer { flex: 1; }
 .nav .badge { background: var(--gradient); color: #0c1a12; border-radius: 999px; font-size: .72rem; font-weight: 700; padding: 1px 7px; }
 .nav .budget-chip { border: 1px dashed var(--lilac); color: var(--lilac); }
+.link-title { display: inline-flex; align-items: center; min-height: 36px; color: var(--text); font-weight: 600; text-decoration: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--brand); color: #0c1a12; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
 .popover { position: absolute; inset-inline-end: 20px; top: 56px; width: 300px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; z-index: 20; }
 .popover input[type="range"] { width: 100%; accent-color: var(--mint); }
@@ -74,7 +76,10 @@ html[dir="rtl"] .flip { transform: scaleX(-1); }
 @media (max-width: 640px) {
   /* mobile: icon-only nav, single-column stacked cards */
   .nav .label { display: none; }
-  .nav-inner { padding: 8px 12px; gap: 2px; }
+  .nav .region-link { display: none; } /* Settings stays one tap away via the avatar */
+  .nav-inner { padding: 6px 10px; gap: 0; flex-wrap: wrap; }
+  .nav a.item, .nav button.item { padding: 0 8px; min-width: 38px; justify-content: center; }
+  .lang-btn { padding: 0 10px; }
   .grid { grid-template-columns: 1fr; }
   .popover { inset-inline: 12px; width: auto; }
 }

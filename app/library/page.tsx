@@ -61,7 +61,7 @@ export default function LibraryPage() {
             <li key={g.game_id} className="card" style={{ display: "flex", gap: 14, alignItems: "center" }}>
               <Thumb url={g.cover_url} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <Link href={`/game/${g.game_id}`} style={{ color: "var(--text)", fontWeight: 600, textDecoration: "none" }}>{g.title}</Link>
+                <Link href={`/game/${g.game_id}`} className="link-title">{g.title}</Link>
                 <div className="muted" style={{ fontSize: ".9rem" }}>
                   {g.playtime_hours !== null ? t("library.hours", { h: hours(Math.round(g.playtime_hours)) })
                     : g.playtime_bucket ? t(`library.bucket.${g.playtime_bucket}`) : ""}

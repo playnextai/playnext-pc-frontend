@@ -59,6 +59,7 @@ export default function Discover() {
   return (
     <AppShell onBudgetChange={() => { load().catch(() => setFailed(true)); }}>
       <main className="container" style={{ paddingBottom: 64 }}>
+        <h1 className="sr-only">{t("feed.title")}</h1>
         <SyncBanner onFinished={() => { load().catch(() => setFailed(true)); }} />
         {failed && <p className="error">{t("feed.loadFailed")}</p>}
         {rows === null && !failed && <p className="muted">{t("common.loading")}</p>}

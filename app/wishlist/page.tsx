@@ -52,7 +52,7 @@ export default function WishlistPage() {
               <li key={g.game_id} className="card" style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
                 <Thumb url={g.cover_url} />
                 <div style={{ flex: 1, minWidth: 160 }}>
-                  <Link href={`/game/${g.game_id}`} style={{ color: "var(--text)", fontWeight: 600, textDecoration: "none" }}>{g.title}</Link>
+                  <Link href={`/game/${g.game_id}`} className="link-title">{g.title}</Link>
                   <div className="muted" style={{ fontSize: ".85rem" }}>{g.source === "steam" ? t("wishlist.fromSteam") : t("wishlist.addedByYou")}</div>
                 </div>
                 <div style={{ textAlign: "end" }}>

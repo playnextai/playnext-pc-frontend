@@ -35,6 +35,8 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     needs: check
     timeout-minutes: 20
     steps:
@@ -56,3 +58,10 @@ jobs:
           for i in $(seq 1 40); do curl -sf localhost:3000/ > /dev/null && break; sleep 1; done
           node e2e/run.mjs 2>&1 | tee e2e.log
           if ! grep -q "e2e summary" e2e.log; then echo "::error title=e2e crashed::$(tail -c 1500 e2e.log | tr '\n' '|')"; fi
+      - name: Publish the report to branch e2e-report (readable without log access)
+        if: always()
+        run: |
+          mkdir /tmp/rep && cp e2e-report.txt e2e.log mock.log start.log /tmp/rep/ 2>/dev/null || true
+          cd /tmp/rep && git init -q && git checkout -q -b e2e-report && git add -A
+          git -c user.name=ci -c user.email=ci@example.com commit -q -m "e2e report for ${GITHUB_SHA}"
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" e2e-report

@@ -26,7 +26,7 @@ export default function AppShell({ children, onBudgetChange }: { children: React
 }
 
 function Nav({ onBudgetChange }: { onBudgetChange?: () => void }) {
-  const { t, toman } = useI18n();
+  const { t, toman, num } = useI18n();
   const [settings, setSettings] = useState<SettingsView | null>(null);
   const [cartCount, setCartCount] = useState(0);
   const [open, setOpen] = useState(false);
@@ -45,16 +45,16 @@ function Nav({ onBudgetChange }: { onBudgetChange?: () => void }) {
   return (
     <header className="nav" style={{ position: "sticky" }}>
       <nav className="nav-inner" aria-label={t("nav.main")}>
-        <Link className="wordmark" href="/discover" aria-label={t("nav.home")}>PlayNext</Link>
+        <Link className="wordmark" href="/discover" aria-label="PlayNext">PlayNext</Link>
         <span className="spacer" />
         <Link className="item" href="/library" aria-label={t("nav.library")}><Icon name="library" /><span className="label">{t("nav.library")}</span></Link>
         <Link className="item" href="/wishlist" aria-label={t("nav.wishlist")}><Icon name="star" /><span className="label">{t("nav.wishlist")}</span></Link>
         <Link className="item" href="/dna" aria-label={t("nav.dna")}><Icon name="dna" /><span className="label">{t("nav.dna")}</span></Link>
-        <Link className="item" href="/cart" aria-label={t("nav.cart")}><Icon name="cart" /><span className="label">{t("nav.cart")}</span>{cartCount > 0 && <span className="badge">{cartCount}</span>}</Link>
+        <Link className="item" href="/cart" aria-label={t("nav.cart")}><Icon name="cart" /><span className="label">{t("nav.cart")}</span>{cartCount > 0 && <span className="badge">{num(cartCount)}</span>}</Link>
         <button className="item budget-chip" aria-expanded={open} aria-controls="filters-menu" aria-label={t("nav.filters")} onClick={() => setOpen((o) => !o)}>
           <Icon name="filters" /><span className="label">{chipText}</span>
         </button>
-        <Link className="item" href="/settings" aria-label={t("nav.region")}><Icon name="globe" /><span className="label">{regionLabel ?? t("nav.regionFallback")}</span></Link>
+        <Link className="item region-link" href="/settings" aria-label={t("nav.region")}><Icon name="globe" /><span className="label">{regionLabel ?? t("nav.regionFallback")}</span></Link>
         <LangToggle />
         <Link className="item" href="/settings" aria-label={t("nav.profile")}><span className="avatar">{initial}</span></Link>
       </nav>

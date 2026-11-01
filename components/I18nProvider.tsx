@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
-  DEFAULT_LANG, detectLang, dirOf, hoursText, nativeText, percentText, saveLang, tomanText, translate,
+  DEFAULT_LANG, detectLang, dirOf, formatInt, hoursText, nativeText, percentText, saveLang, tomanText, translate,
   type Key, type Lang,
 } from "@/lib/i18n";
 
@@ -14,6 +14,7 @@ interface I18n {
   native: (v: number | null | undefined, currency: string | null | undefined) => string | null;
   percent: (n: number) => string;
   hours: (n: number) => string;
+  num: (n: number) => string;
 }
 
 const Ctx = createContext<I18n | null>(null);
@@ -41,6 +42,7 @@ export default function I18nProvider({ children }: { children: React.ReactNode }
     native: (v, c) => nativeText(v, c, lang),
     percent: (n) => percentText(n, lang),
     hours: (n) => hoursText(n, lang),
+    num: (n) => formatInt(n, lang),
   }), [lang, setLang]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

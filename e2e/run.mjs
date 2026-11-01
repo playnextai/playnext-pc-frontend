@@ -42,7 +42,7 @@ function inspect(lang) {
   out.overflowX = document.documentElement.scrollWidth - window.innerWidth;
   out.h1 = document.querySelectorAll("h1").length;
   const inter = [...document.querySelectorAll("a, button, input, select, [role=radio], [role=tab]")].filter(vis);
-  out.unnamed = inter.filter((e) => !name(e) && !(e.tagName === "INPUT" && (e.getAttribute("aria-label") || e.id))).map((e) => e.outerHTML.slice(0, 80));
+  out.unnamed = inter.filter((e) => !name(e) && !(e.tagName === "INPUT" && (e.getAttribute("aria-label") || (e.labels && e.labels.length)))).map((e) => e.outerHTML.slice(0, 80));
   out.small = inter.filter((e) => { const r = e.getBoundingClientRect(); return (r.height < 36 || r.width < 36) && e.type !== "range" && e.type !== "checkbox"; }).map((e) => `${name(e).slice(0, 24) || e.tagName} ${Math.round(e.getBoundingClientRect().width)}x${Math.round(e.getBoundingClientRect().height)}`);
   out.clipped = [...document.querySelectorAll("main *")].filter((e) => vis(e) && e.children.length === 0 && e.scrollWidth > e.clientWidth + 2 && getComputedStyle(e).overflow !== "visible").map((e) => (e.textContent || "").slice(0, 30));
   // Prices and counts must use Persian digits in Farsi, Latin in English.
@@ -76,7 +76,7 @@ for (const vp of VIEWPORTS) {
       const errs = [];
       page.on("pageerror", (e) => errs.push(`pageerror: ${e.message.slice(0, 160)}`));
       page.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource/.test(m.text())) errs.push(`console: ${m.text().slice(0, 160)}`); });
-      page.on("response", (r) => { const u = r.url(); if (r.status() >= 400 && u.startsWith(BASE) && !/\/api\/(games\/999|gamer-dna|auth\/me)/.test(u) && !(pg.scenario === "out" && r.status() === 401)) errs.push(`HTTP ${r.status()} ${u.replace(BASE, "")}`); });
+      page.on("response", (r) => { const u = r.url(); if (r.status() >= 400 && u.startsWith(BASE) && !/\/api\/(games\/999|gamer-dna|auth\/me)|\/no-such-page/.test(u) && !(pg.scenario === "out" && r.status() === 401)) errs.push(`HTTP ${r.status()} ${u.replace(BASE, "")}`); });
       try {
         await page.goto(BASE + pg.path, { waitUntil: "networkidle", timeout: 30000 });
         await page.waitForTimeout(400);
@@ -176,4 +176,6 @@ console.log(`::notice title=e2e summary::${errors} errors, ${findings.filter((f)
 emit("e2e errors", chunk(findings.filter((f) => f.level === "error")));
 emit("e2e warnings", chunk(findings.filter((f) => f.level === "warn")));
 emit("e2e info", chunk(findings.filter((f) => f.level === "info")));
+import { writeFileSync } from "node:fs";
+writeFileSync("e2e-report.txt", chunk(findings).join("\n"));
 process.exit(0); // findings are reported, not gated, until we've triaged them
