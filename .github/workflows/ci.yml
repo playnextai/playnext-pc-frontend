@@ -32,3 +32,27 @@ jobs:
         env:
           BACKEND_URL: http://localhost:8000
           NEXT_PUBLIC_SITE_URL: https://pc.playnextai.com
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: check
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install
+      - name: Build
+        run: npm run build
+        env:
+          BACKEND_URL: http://localhost:8000
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      - name: Browser tools
+        run: npm install --no-save playwright@1.49.1 && npx playwright install --with-deps chromium
+      - name: Run browser tests against a mock backend
+        run: |
+          node e2e/mock-backend.mjs > mock.log 2>&1 &
+          npm start > start.log 2>&1 &
+          for i in $(seq 1 40); do curl -sf localhost:3000/ > /dev/null && break; sleep 1; done
+          node e2e/run.mjs 2>&1 | tee e2e.log
+          if ! grep -q "e2e summary" e2e.log; then echo "::error title=e2e crashed::$(tail -c 1500 e2e.log | tr '\n' '|')"; fi
