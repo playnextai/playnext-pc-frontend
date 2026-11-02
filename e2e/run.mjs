@@ -201,7 +201,7 @@ await flow("onboarding add-games shows the playtime gauge", async (page) => {
   await page.getByText("Hollow Knight").click();
   await page.getByRole("radiogroup", { name: "How much did you play it?" }).waitFor({ timeout: 3000 });
   await page.getByRole("radio", { name: "50+ hours" }).click();
-  expect((await page.getByRole("radio", { name: "50+ hours" }).getAttribute("aria-checked")) === "true", "bucket not selected");
+  await page.locator('[role=radio][aria-checked=true]').filter({ hasText: "50+ hours" }).waitFor({ timeout: 3000 });
   await setScenario("full");
 });
 
