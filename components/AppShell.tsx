@@ -26,7 +26,7 @@ export default function AppShell({ children, onBudgetChange }: { children: React
 }
 
 function Nav({ onBudgetChange }: { onBudgetChange?: () => void }) {
-  const { t, toman, num } = useI18n();
+  const { t, toman, num, region } = useI18n();
   const [settings, setSettings] = useState<SettingsView | null>(null);
   const [cartCount, setCartCount] = useState(0);
   const [open, setOpen] = useState(false);
@@ -36,7 +36,7 @@ function Nav({ onBudgetChange }: { onBudgetChange?: () => void }) {
     api.cart().then((c) => setCartCount(c.count)).catch(() => {});
   }, []);
 
-  const regionLabel = settings?.region_options.find((o) => o.code === settings.region)?.label;
+  const regionLabel = settings?.region ? region(settings.region) : undefined;
   const initial = (settings?.display_name ?? settings?.email ?? "?").trim().charAt(0).toUpperCase();
   const max = settings?.budget_max_toman ?? DEFAULT_BUDGET_MAX_TOMAN;
   const budget = settings?.budget_ceiling_toman ?? null;

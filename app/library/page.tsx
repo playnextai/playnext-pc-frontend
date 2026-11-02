@@ -6,6 +6,7 @@ import Empty from "@/components/Empty";
 import SearchAndAdd from "@/components/SearchAndAdd";
 import SyncBanner from "@/components/SyncBanner";
 import Thumb from "@/components/Thumb";
+import SkeletonRows from "@/components/Skeleton";
 import { useI18n } from "@/components/I18nProvider";
 import { api } from "@/lib/api";
 import type { LibraryItem } from "@/lib/types";
@@ -52,7 +53,7 @@ export default function LibraryPage() {
         </div>
         <SearchAndAdd target="library" alreadyAddedIds={ids} onAdded={() => { load(tab); }} />
         {error && <p className="error" role="alert">{error}</p>}
-        {items === null && !error && <p className="muted">{t("common.loading")}</p>}
+        {items === null && !error && <SkeletonRows />}
         {items && items.length === 0 && (
           <div style={{ marginTop: 24 }}><Empty icon="library" title={t("library.empty")} text={t("library.emptySub")} /></div>
         )}
@@ -64,7 +65,7 @@ export default function LibraryPage() {
                 <Link href={`/game/${g.game_id}`} className="link-title">{g.title}</Link>
                 <div className="muted" style={{ fontSize: ".9rem" }}>
                   {g.playtime_hours !== null ? t("library.hours", { h: hours(Math.round(g.playtime_hours)) })
-                    : g.playtime_bucket ? t(`library.bucket.${g.playtime_bucket}`) : ""}
+                    : g.playtime_bucket && !g.removable ? t(`library.bucket.${g.playtime_bucket}`) : ""}
                 </div>
               </div>
               {g.removable && g.playtime_bucket && (

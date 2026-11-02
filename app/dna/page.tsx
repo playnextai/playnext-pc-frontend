@@ -52,7 +52,7 @@ export default function DnaPage() {
 }
 
 function Stats({ dna, hours, percent }: { dna: GamerDna; hours: (n: number) => string; percent: (n: number) => string }) {
-  const { t, lang } = useI18n();
+  const { t, lang, genre } = useI18n();
   const nf = new Intl.NumberFormat(lang === "fa" ? "fa-IR" : "en-US");
   const tk = dna.type_label ? DNA_TYPE_KEYS[dna.type_label] ?? null : null;
   const top = dna.top_genres.slice(0, 3);
@@ -84,7 +84,7 @@ function Stats({ dna, hours, percent }: { dna: GamerDna; hours: (n: number) => s
           <h2 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 600 }}>{t("dna.topGenres")}</h2>
           {top.map((g) => (
             <div key={g.genre}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}><span>{g.genre}</span><span className="muted">{hours(Math.round(g.hours))}</span></div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}><span>{genre(g.genre)}</span><span className="muted">{hours(Math.round(g.hours))}</span></div>
               <div style={{ height: 10, borderRadius: 6, background: "#1f1f1e", overflow: "hidden", marginTop: 4 }}>
                 <div style={{ height: 10, width: `${Math.round((g.hours / maxH) * 100)}%`, background: "linear-gradient(90deg, #a8b0ee, #5ac8a0)" }} />
               </div>

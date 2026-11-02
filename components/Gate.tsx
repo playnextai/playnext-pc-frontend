@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { signInUrl } from "@/lib/auth";
 import { decideGate, isOnboardingPath } from "@/lib/flow";
+import Empty from "@/components/Empty";
 import { useI18n } from "@/components/I18nProvider";
 
 /**
@@ -23,6 +24,7 @@ export default function Gate({ children, allowIncompleteOnboarding = false }: {
   const path = usePathname() ?? "/";
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [limited, setLimited] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -46,6 +48,7 @@ export default function Gate({ children, allowIncompleteOnboarding = false }: {
         if (e instanceof ApiError && e.isUnauthenticated) {
           window.location.assign(signInUrl(path + window.location.search));
         } else if (e instanceof ApiError && e.isRateLimited) {
+          setLimited(true);
           setError(t("common.rateLimited", { n: e.retryAfterSec ?? 60 }));
         } else {
           setError(t("common.refresh"));
@@ -56,6 +59,7 @@ export default function Gate({ children, allowIncompleteOnboarding = false }: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path, router, allowIncompleteOnboarding]);
 
+  if (limited) return <main className="container" style={{ paddingTop: 64 }}><Empty icon="warn" asPage title={t("state.rateTitle")} text={t("state.rateText")} /></main>;
   if (error) return <main className="container"><p className="error">{error}</p></main>;
   if (!ready) return <main className="container"><p className="muted">{t("common.loading")}</p></main>;
   return <>{children}</>;

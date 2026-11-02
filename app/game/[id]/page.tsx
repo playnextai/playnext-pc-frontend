@@ -37,7 +37,7 @@ export default function GamePage() {
 }
 
 function GameBody({ authed }: { authed: boolean }) {
-  const { t, toman, native, percent } = useI18n();
+  const { t, toman, native, percent, reason, genre } = useI18n();
   const params = useParams<{ id: string }>();
   const id = Number(params?.id);
   const [g, setG] = useState<GameDetail | null>(null);
@@ -96,10 +96,10 @@ function GameBody({ authed }: { authed: boolean }) {
               <div style={{ flex: 1, minWidth: 240 }}>
                 <h1 style={{ margin: "0 0 6px", fontWeight: 600 }} dir="auto">{g.title}</h1>
                 <div className="muted" style={{ marginBottom: 10 }} dir="auto">
-                  {[g.developer ? t("detail.by", { name: g.developer }) : null, g.release_year, g.genres.slice(0, 3).join(" · ")].filter(Boolean).join(" · ")}
+                  {[g.developer ? t("detail.by", { name: g.developer }) : null, g.release_year, g.genres.slice(0, 3).map(genre).join(" · ")].filter(Boolean).join(" · ")}
                   {g.review_score !== null && <> · {t("detail.reviews", { n: Math.round(g.review_score) })}</>}
                 </div>
-                {g.recommendation?.reason && <p style={{ margin: "0 0 10px" }}><strong>{t("detail.whyPicked")}:</strong> <span className="muted">{g.recommendation.reason}</span></p>}
+                {g.recommendation?.reason && <p style={{ margin: "0 0 10px" }}><strong>{t("detail.whyPicked")}:</strong> <span className="muted">{reason(g.recommendation.reason)}</span></p>}
                 {!authed && <p className="muted" style={{ margin: "0 0 8px" }}>{t("detail.signInPrompt")}</p>}
                 {authed && <div role="group" aria-label={t("card.actions")} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {actions.map((a) => (
@@ -133,7 +133,7 @@ function GameBody({ authed }: { authed: boolean }) {
                           <div key={p.region}>
                             {!authed && <span className="muted" style={{ fontSize: ".85rem", marginInlineEnd: 8 }}>{t(`detail.region.${p.region as Region}`)}</span>}
                             <span className="price">{p.is_free ? t("detail.free") : toman(p.price_toman)}</span>
-                            {!!p.discount_pct && <span style={{ color: "var(--danger)", background: "var(--danger-bg)", borderRadius: 6, padding: "1px 6px", marginInlineStart: 8, fontSize: ".8rem" }}>-{percent(p.discount_pct)}</span>}
+                            {!!p.discount_pct && p.price_toman !== null && <span style={{ color: "var(--danger)", background: "var(--danger-bg)", borderRadius: 6, padding: "1px 6px", marginInlineStart: 8, fontSize: ".8rem" }}>-{percent(p.discount_pct)}</span>}
                             {nat && <div className="muted" style={{ fontSize: ".85rem" }}>{nat}</div>}
                           </div>
                         );

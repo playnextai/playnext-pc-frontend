@@ -149,6 +149,13 @@ export const en = {
   "search.noResults": "We couldn't find that one. No worries - we'll still learn from everything else you add.",
 
   // feed
+  "reason.newRelease": "New release matching your taste",
+  "reason.matches": "Matches your taste profile",
+  "reason.because": "Because you liked {title}",
+  "reason.becauseWishlist": "Because you liked {title} (on your wishlist)",
+  "undo.bar": "Removed from your feed",
+  "undo.failed": "Couldn't undo that. Try again.",
+  "add.gauge": "How much did you play it?",
   "feed.title": "Your feed",
   "feed.picked": "Picked for you",
   "feed.next": "What to play next",
@@ -223,6 +230,7 @@ export const en = {
   "cart.priceChanged": "Price changed since you added it",
   "cart.locked": "Was {price}",
   "cart.removeFailed": "Could not remove that item.",
+  "cart.disclaimer": "This total is not a payment. Purchases happen on each store's own site.",
 
   // settings
   "settings.title": "Settings",
@@ -392,6 +400,13 @@ export const fa: Record<Key, string> = {
   "search.addFailed": "این بازی اضافه نشد. دوباره امتحان کن.",
   "search.noResults": "این یکی را پیدا نکردیم. نگران نباش، از بقیه‌ی چیزهایی که اضافه کنی یاد می‌گیریم.",
 
+  "reason.newRelease": "تازه منتشر شده و به سلیقه‌ات می‌خورد",
+  "reason.matches": "با پروفایل سلیقه‌ات می‌خواند",
+  "reason.because": "چون {title} را پسندیدی",
+  "reason.becauseWishlist": "چون {title} (در علاقه‌مندی‌هایت) را پسندیدی",
+  "undo.bar": "از فیدت برداشته شد",
+  "undo.failed": "بازگردانی نشد. دوباره امتحان کن.",
+  "add.gauge": "چقدر بازی‌اش کرده‌ای؟",
   "feed.title": "فید تو",
   "feed.picked": "انتخاب شده برای تو",
   "feed.next": "بعدی چه بازی کنم؟",
@@ -460,6 +475,7 @@ export const fa: Record<Key, string> = {
   "cart.priceChanged": "قیمت از زمان افزودن تغییر کرده است",
   "cart.locked": "قبلاً {price}",
   "cart.removeFailed": "این مورد حذف نشد.",
+  "cart.disclaimer": "این مجموع پرداخت نیست. خرید در سایت خود هر فروشگاه انجام می‌شود.",
 
   "settings.title": "تنظیمات",
   "settings.accounts": "حساب‌های متصل",
@@ -552,4 +568,34 @@ export function translate(lang: Lang, key: Key, vars?: Record<string, string | n
 
 export function placeholdersOf(s: string): string[] {
   return [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
+}
+
+/** Region names come from the region CODE (the backend's English labels are not used in the UI). */
+export const regionKey = (code: string): Key | null => (`detail.region.${code}` in en ? (`detail.region.${code}` as Key) : null);
+
+const FA_GENRES: Record<string, string> = {
+  "Action": "اکشن", "Action RPG": "اکشن RPG", "RPG": "RPG", "Roguelike": "راگ‌لایک", "Strategy": "استراتژی",
+  "Adventure": "ماجراجویی", "Indie": "ایندی", "Simulation": "شبیه‌سازی", "Puzzle": "پازل", "Shooter": "تیراندازی",
+  "Platformer": "پلتفرمر", "Horror": "ترسناک", "Sports": "ورزشی", "Racing": "مسابقه‌ای", "Fighting": "مبارزه‌ای",
+  "Open World": "جهان باز", "Survival": "بقا", "Card Game": "بازی کارتی", "Turn-Based Strategy": "استراتژی نوبتی",
+};
+/** Genre names: Farsi for the common ones, otherwise the catalog's English name (tags always stay English). */
+export function genreText(genre: string, lang: Lang): string {
+  return lang === "fa" ? FA_GENRES[genre] ?? genre : genre;
+}
+
+/** Recommendation reasons are stored by the backend as English sentences (recommendation_engine._compute_reason).
+ *  Translate the known templates; anything unknown is shown as-is. The game name stays as the catalog has it. */
+export function reasonText(reason: string | null | undefined, lang: Lang): string | null {
+  if (!reason) return null;
+  if (lang === "en") return reason;
+  if (reason === "New release matching your taste") return translate(lang, "reason.newRelease");
+  if (reason === "Matches your taste profile") return translate(lang, "reason.matches");
+  const m = reason.match(/^Because you liked (.+?)( \(on your wishlist\))?$/);
+  if (m) {
+    return m[2]
+      ? translate(lang, "reason.becauseWishlist", { title: m[1] })
+      : translate(lang, "reason.because", { title: m[1] });
+  }
+  return reason;
 }

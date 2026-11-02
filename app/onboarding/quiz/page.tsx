@@ -9,7 +9,7 @@ import type { QuizOption } from "@/lib/types";
 
 // Taste quiz: tappable genre-diverse grid, live counter, no minimum, skip link.
 export default function QuizStep() {
-  const { t } = useI18n();
+  const { t, genre } = useI18n();
   const router = useRouter();
   const [options, setOptions] = useState<QuizOption[] | null>(null);
   const [picked, setPicked] = useState<Set<number>>(new Set());
@@ -47,7 +47,7 @@ export default function QuizStep() {
                 className="card" style={{ textAlign: "start", cursor: "pointer", color: "inherit", outline: on ? "2px solid var(--mint)" : "none" }}>
                 {o.cover_url ? <img className="cover" src={o.cover_url} alt="" /> : <span className="cover" />}
                 <strong style={{ display: "block", marginTop: 8 }}>{o.title}</strong>
-                <span className="muted" style={{ fontSize: ".8rem" }}>{o.genres.slice(0, 2).join(" · ")}</span>
+                <span className="muted" style={{ fontSize: ".8rem" }}>{o.genres.slice(0, 2).map(genre).join(" · ")}</span>
               </button>
             );
           })}

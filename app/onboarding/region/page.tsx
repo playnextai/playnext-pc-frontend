@@ -11,7 +11,7 @@ const CURRENCY: Record<Region, string> = { US: "USD $", UK: "GBP Â£", EU: "EUR â
 // Required onboarding step: without a pricing region the whole app has no prices.
 // The same choice can be changed later in /settings. Six regions, one radio list (as designed).
 export default function RegionStep() {
-  const { t } = useI18n();
+  const { t, region: regionName } = useI18n();
   const router = useRouter();
   const [settings, setSettings] = useState<SettingsView | null>(null);
   const [region, setRegion] = useState<Region | "">("");
@@ -51,7 +51,7 @@ export default function RegionStep() {
                 style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", color: "inherit", textAlign: "start", borderColor: on ? "var(--mint)" : "var(--border)", minHeight: 52 }}>
                 <span style={{ display: "flex", gap: 14, alignItems: "center" }}>
                   <span aria-hidden="true" style={{ width: 18, height: 18, borderRadius: "50%", border: `2px solid ${on ? "var(--mint)" : "#3a3a38"}`, background: on ? "var(--mint)" : "transparent", boxShadow: on ? "inset 0 0 0 3px var(--surface)" : "none" }} />
-                  {o.label}
+                  {regionName(o.code, o.label)}
                 </span>
                 <span className="muted" style={{ fontSize: ".9rem" }}>{CURRENCY[o.code]}</span>
               </button>

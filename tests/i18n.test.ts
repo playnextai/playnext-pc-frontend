@@ -80,3 +80,19 @@ test("every Gamer DNA label the backend can send maps to a translated string", a
   }
   assert.equal(en["dna.type.balanced"], "The Balanced Gamer");
 });
+
+test("recommendation reasons: known English templates are translated, titles kept, unknown text untouched", async () => {
+  const { reasonText, genreText, regionKey } = await import("../lib/i18n.ts");
+  assert.equal(reasonText("Because you liked Hades", "en"), "Because you liked Hades");
+  assert.equal(reasonText("Because you liked Hades", "fa"), "چون Hades را پسندیدی");
+  assert.equal(reasonText("Because you liked Hades (on your wishlist)", "fa"), "چون Hades (در علاقه‌مندی‌هایت) را پسندیدی");
+  assert.equal(reasonText("Matches your taste profile", "fa"), "با پروفایل سلیقه‌ات می‌خواند");
+  assert.equal(reasonText("New release matching your taste", "fa"), "تازه منتشر شده و به سلیقه‌ات می‌خورد");
+  assert.equal(reasonText("Something new the backend invented", "fa"), "Something new the backend invented");
+  assert.equal(reasonText(null, "fa"), null);
+  assert.equal(genreText("Roguelike", "fa"), "راگ‌لایک");
+  assert.equal(genreText("Metroidvania", "fa"), "Metroidvania");
+  assert.equal(genreText("Roguelike", "en"), "Roguelike");
+  assert.equal(regionKey("TR"), "detail.region.TR");
+  assert.equal(regionKey("XX"), null);
+});

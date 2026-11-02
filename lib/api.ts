@@ -84,6 +84,8 @@ export const api = {
   feedback: (gameId: number, action: FeedbackAction, recommendationId?: number) =>
     request<unknown>("POST", "/feedback", { game_id: gameId, action, recommendation_id: recommendationId }),
 
+  undoFeedback: (gameId: number) => request<{ status: string; action: string; removed_library_row: boolean }>("DELETE", `/feedback/${gameId}`),
+
   // library / wishlist (search-and-add component)
   searchGames: (q: string) => request<{ results: SearchResult[] }>("GET", `/games/search${qs({ q })}`),
   library: (source: "all" | "synced" | "manual" = "all") =>

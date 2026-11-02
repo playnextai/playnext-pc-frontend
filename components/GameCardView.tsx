@@ -14,7 +14,7 @@ export default function GameCardView({ game, onRemove, onOpen }: {
   onRemove?: (gameId: number) => void;
   onOpen?: (gameId: number) => void;
 }) {
-  const { t, toman, native: nativeFmt, percent } = useI18n();
+  const { t, toman, native: nativeFmt, percent, reason } = useI18n();
   const [wishlisted, setWishlisted] = useState(!!game.in_wishlist);
   const [liked, setLiked] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -45,10 +45,10 @@ export default function GameCardView({ game, onRemove, onOpen }: {
         {game.cover_url ? <img className="cover" src={game.cover_url} alt="" /> : <span className="cover" />}
         <h3 style={{ margin: "10px 0 4px", fontSize: "1rem" }}>{game.title}</h3>
       </button>
-      {game.reason && <p className="muted" style={{ fontSize: ".8rem", margin: "0 0 6px" }}>{game.reason}</p>}
+      {game.reason && <p className="muted" style={{ fontSize: ".8rem", margin: "0 0 6px" }}>{reason(game.reason)}</p>}
       <div className="price">
         {toman(game.price_toman)}
-        {!!game.discount_pct && <span style={{ color: "var(--danger)", background: "var(--danger-bg)", borderRadius: 6, padding: "1px 6px", marginInlineStart: 8, fontSize: ".8rem" }}>-{percent(game.discount_pct)}</span>}
+        {!!game.discount_pct && game.price_toman !== null && <span style={{ color: "var(--danger)", background: "var(--danger-bg)", borderRadius: 6, padding: "1px 6px", marginInlineStart: 8, fontSize: ".8rem" }}>-{percent(game.discount_pct)}</span>}
       </div>
       {native && <div className="muted" style={{ fontSize: ".85rem" }}>{native}</div>}
       <div role="group" aria-label={t("card.actions")} style={{ display: "flex", gap: 6, marginTop: 10 }}>

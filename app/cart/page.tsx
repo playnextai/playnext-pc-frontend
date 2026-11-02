@@ -4,6 +4,7 @@ import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import Empty from "@/components/Empty";
 import Thumb from "@/components/Thumb";
+import SkeletonRows from "@/components/Skeleton";
 import { useI18n } from "@/components/I18nProvider";
 import { api } from "@/lib/api";
 import type { CartView } from "@/lib/types";
@@ -32,7 +33,7 @@ export default function CartPage() {
       <main className="container" style={{ paddingBottom: 64, maxWidth: 820 }}>
         <h1 className="page-title">{t("cart.title")}</h1>
         {error && <p className="error" role="alert">{error}</p>}
-        {cart === null && !error && <p className="muted">{t("common.loading")}</p>}
+        {cart === null && !error && <SkeletonRows />}
         {cart && cart.count === 0 && (
           <Empty icon="cart" title={t("cart.empty")} text={t("cart.emptySub")}>
             <Link className="btn" href="/discover">{t("cart.browse")}</Link>
@@ -72,7 +73,7 @@ export default function CartPage() {
             <div className="card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "1.1rem" }}>
               <span>{t("cart.total")}</span><span className="price">{toman(cart.total_toman)}</span>
             </div>
-            {cart.disclaimer && <p className="muted" style={{ fontSize: ".85rem" }}>{cart.disclaimer}</p>}
+            <p className="muted" style={{ fontSize: ".85rem" }}>{t("cart.disclaimer")}</p>
           </>
         )}
       </main>

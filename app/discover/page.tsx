@@ -1,10 +1,11 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import FeedRow from "@/components/FeedRow";
 import SyncBanner from "@/components/SyncBanner";
 import { api } from "@/lib/api";
+import SkeletonRows from "@/components/Skeleton";
 import { useI18n } from "@/components/I18nProvider";
 import Icon from "@/components/Icon";
 import { dedupeRows, isColdStart, type FeedRowData } from "@/lib/feed";
@@ -20,6 +21,9 @@ export default function Discover() {
   const [rows, setRows] = useState<FeedRowData[] | null>(null);
   const [popular, setPopular] = useState<FeedRowData | null>(null);
   const [failed, setFailed] = useState(false);
+  // "Undo" bar: the last removed card (feedback is only undoable for that one), with the feed as it was.
+  const [undo, setUndo] = useState<{ gameId: number; rows: FeedRowData[] | null; popular: FeedRowData | null; failed?: boolean } | null>(null);
+  const undoTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const load = useCallback(async () => {
     // A single failing row must not take the whole feed down.
@@ -52,9 +56,24 @@ export default function Discover() {
   useEffect(() => { load().catch(() => setFailed(true)); }, [load]);
 
   const drop = (id: number) => {
+    if (undoTimer.current) clearTimeout(undoTimer.current);
+    setUndo({ gameId: id, rows, popular });
+    undoTimer.current = setTimeout(() => setUndo(null), 8000);
     setRows((r) => r && dedupeRows(r.map((x) => ({ ...x, cards: x.cards.filter((c) => c.game_id !== id) }))));
     setPopular((p) => p && { ...p, cards: p.cards.filter((c) => c.game_id !== id) });
   };
+
+  async function undoRemove() {
+    if (!undo) return;
+    try {
+      await api.undoFeedback(undo.gameId);
+      setRows(undo.rows);
+      setPopular(undo.popular);
+      setUndo(null);
+    } catch {
+      setUndo({ ...undo, failed: true });
+    }
+  }
 
   return (
     <AppShell onBudgetChange={() => { load().catch(() => setFailed(true)); }}>
@@ -62,7 +81,7 @@ export default function Discover() {
         <h1 className="sr-only">{t("feed.title")}</h1>
         <SyncBanner onFinished={() => { load().catch(() => setFailed(true)); }} />
         {failed && <p className="error">{t("feed.loadFailed")}</p>}
-        {rows === null && !failed && <p className="muted">{t("common.loading")}</p>}
+        {rows === null && !failed && <SkeletonRows n={6} grid />}
         {rows?.map((row) => <FeedRow key={row.id} row={row} onRemove={drop} />)}
         {rows && popular && (
           <>
@@ -77,6 +96,12 @@ export default function Discover() {
           </>
         )}
       </main>
+      {undo && (
+        <div role="status" className="card" style={{ position: "fixed", insetInline: 16, bottom: 16, maxWidth: 480, marginInline: "auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, zIndex: 30 }}>
+          <span className={undo.failed ? "error" : undefined}>{undo.failed ? t("undo.failed") : t("undo.bar")}</span>
+          <button className="btn small" onClick={undoRemove}>{undo.failed ? t("common.tryAgain") : t("card.undo")}</button>
+        </div>
+      )}
     </AppShell>
   );
 }

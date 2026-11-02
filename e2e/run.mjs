@@ -44,7 +44,7 @@ function inspect(lang) {
   const inter = [...document.querySelectorAll("a, button, input, select, [role=radio], [role=tab]")].filter(vis);
   out.unnamed = inter.filter((e) => !name(e) && !(e.tagName === "INPUT" && (e.getAttribute("aria-label") || (e.labels && e.labels.length)))).map((e) => e.outerHTML.slice(0, 80));
   out.small = inter.filter((e) => { const r = e.getBoundingClientRect(); return (r.height < 36 || r.width < 36) && e.type !== "range" && e.type !== "checkbox"; }).map((e) => `${name(e).slice(0, 24) || e.tagName} ${Math.round(e.getBoundingClientRect().width)}x${Math.round(e.getBoundingClientRect().height)}`);
-  out.clipped = [...document.querySelectorAll("main *")].filter((e) => vis(e) && e.children.length === 0 && e.scrollWidth > e.clientWidth + 2 && getComputedStyle(e).overflow !== "visible").map((e) => (e.textContent || "").slice(0, 30));
+  out.clipped = [...document.querySelectorAll("main *")].filter((e) => vis(e) && e.children.length === 0 && e.scrollWidth > e.clientWidth + 2 && getComputedStyle(e).overflow !== "visible" && !e.closest(".sr-only")).map((e) => (e.textContent || "").slice(0, 30));
   // Prices and counts must use Persian digits in Farsi, Latin in English.
   const nums = [...document.querySelectorAll(".price, .badge, .chip")].filter(vis).map((e) => e.textContent || "");
   out.wrongDigits = lang === "fa" ? nums.filter((t) => /[0-9]/.test(t)).slice(0, 5) : nums.filter((t) => /[۰-۹]/.test(t)).slice(0, 5);
@@ -163,6 +163,46 @@ await flow("search-and-add shows result and no-results copy", async (page) => {
   await page.goto(BASE + "/library", { waitUntil: "networkidle" });
   await page.getByLabel("Search games").fill("Hollow");
   await page.getByText("Hollow Knight").waitFor({ timeout: 3000 });
+});
+
+await flow("undo bar brings a removed card back", async (page) => {
+  await page.goto(BASE + "/discover", { waitUntil: "networkidle" });
+  const before = await page.getByRole("button", { name: "Not interested" }).count();
+  await page.getByRole("button", { name: "Not interested" }).first().click();
+  await page.getByText("Removed from your feed").waitFor({ timeout: 3000 });
+  expect((await page.getByRole("button", { name: "Not interested" }).count()) === before - 1, "card was not removed");
+  await page.getByRole("button", { name: "Undo" }).click();
+  await page.waitForTimeout(400);
+  expect((await page.getByRole("button", { name: "Not interested" }).count()) === before, "card did not come back");
+});
+await flow("wishlist: Steam item labelled From Steam, add to cart works, no stray discount badge", async (page) => {
+  await page.goto(BASE + "/wishlist", { waitUntil: "networkidle" });
+  const t = await page.locator("main").innerText();
+  expect(t.includes("From Steam"), "synced item should say From Steam");
+  expect(!/—\s*-20%/.test(t), "discount badge shown with no price");
+  await page.getByRole("button", { name: "Add to cart" }).first().click();
+  await page.getByRole("button", { name: "In cart" }).waitFor({ timeout: 3000 });
+});
+await flow("Farsi: regions, reasons and genres are translated", async (page) => {
+  await page.addInitScript(() => localStorage.setItem("playnext:lang", "fa"));
+  await page.goto(BASE + "/discover", { waitUntil: "networkidle" });
+  const t = await page.locator("body").innerText();
+  expect(t.includes("چون Dark Souls III را پسندیدی"), "reason not translated");
+  await page.goto(BASE + "/onboarding/region", { waitUntil: "networkidle" });
+  const r = await page.locator("main").innerText();
+  expect(r.includes("ترکیه") && !r.includes("Turkey"), "region names not translated");
+  await page.goto(BASE + "/dna", { waitUntil: "networkidle" });
+  expect((await page.locator("main").innerText()).includes("اکشن RPG"), "genre not translated");
+});
+await flow("onboarding add-games shows the playtime gauge", async (page) => {
+  await setScenario("empty");
+  await page.goto(BASE + "/onboarding/library", { waitUntil: "networkidle" });
+  await page.getByLabel("Search games").fill("Hollow");
+  await page.getByText("Hollow Knight").click();
+  await page.getByRole("radiogroup", { name: "How much did you play it?" }).waitFor({ timeout: 3000 });
+  await page.getByRole("radio", { name: "50+ hours" }).click();
+  expect((await page.getByRole("radio", { name: "50+ hours" }).getAttribute("aria-checked")) === "true", "bucket not selected");
+  await setScenario("full");
 });
 
 await browser.close();

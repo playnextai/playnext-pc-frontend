@@ -13,7 +13,7 @@ const PRIVACY_EMAIL = "playnextai@gmail.com";
 // Settings: connected accounts, pricing region, budget (same value as the nav chip), language
 // (this browser only) and the privacy note. Account deletion is by email during the beta.
 export default function SettingsPage() {
-  const { t } = useI18n();
+  const { t, region: regionName } = useI18n();
   const [s, setS] = useState<SettingsView | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -47,7 +47,7 @@ export default function SettingsPage() {
               <label htmlFor="region" style={{ fontWeight: 600 }}>{t("settings.region")}</label>
               <select id="region" value={s.region ?? ""} onChange={(e) => setRegion(e.target.value as Region)}>
                 <option value="" disabled>{t("nav.regionFallback")}</option>
-                {s.region_options.map((o) => <option key={o.code} value={o.code}>{o.label}</option>)}
+                {s.region_options.map((o) => <option key={o.code} value={o.code}>{regionName(o.code, o.label)}</option>)}
               </select>
               {saved && <span className="price" role="status">{t("settings.saved")}</span>}
             </section>

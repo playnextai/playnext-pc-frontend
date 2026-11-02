@@ -66,6 +66,8 @@ export interface LibraryItem {
 
 export interface WishlistItem extends PriceFields {
   game_id: number;
+  /** Primary edition, for adding straight to the cart; null when the game has no edition yet. */
+  game_edition_id: number | null;
   title: string;
   cover_url: string | null;
   source: string;

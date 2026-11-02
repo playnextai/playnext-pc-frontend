@@ -10,7 +10,7 @@ let scenario = "full";
 const cover = null; // placeholders (the design's gradient box); real covers are IGDB URLs
 const price = (t, n, c, d = null) => ({ price_toman: t, price_native: n, price_currency: c, discount_pct: d });
 const card = (id, title, extra = {}) => ({ game_id: id, title, cover_url: cover, genres: ["Action RPG"], ...price(3317470, 1249.5, "TRY", id % 2 ? 20 : null), ...extra });
-const CARDS = [card(1, "Elden Ring", { reason: "Because you played Dark Souls III" }), card(2, "Hades"), card(3, "Baldur's Gate 3", { price_toman: null, price_native: null, price_currency: null }), card(4, "Balatro")];
+const CARDS = [card(1, "Elden Ring", { reason: "Because you liked Dark Souls III" }), card(2, "Hades"), card(3, "Baldur's Gate 3", { price_toman: null, price_native: null, price_currency: null }), card(4, "Balatro")];
 const regionOptions = ["US:United States", "UK:United Kingdom", "EU:Europe (Eurozone)", "UA:Ukraine", "TR:Turkey", "AR:Argentina"].map((x) => { const [code, label] = x.split(":"); return { code, label }; });
 
 const settings = () => ({
@@ -24,7 +24,7 @@ const detail = (signedIn) => ({
   editions: [{ game_edition_id: 11, edition_name: "Standard Edition", is_primary: true, platforms: ["steam"], buy_url: "https://store.steampowered.com/app/1245620",
     prices: ["US:USD:59.99", "UK:GBP:49.99", "EU:EUR:59.99", "UA:UAH:1999", "TR:TRY:1249.5", "AR:USD:30"].map((x, i) => { const [region, cur, p] = x.split(":"); return { region, is_user_region: signedIn && region === "TR", is_free: false, ...price(3317470 - i * 100000, Number(p), cur, i === 4 ? 20 : null) }; }) }],
   user_state: { owned: false, wishlisted: false, in_cart: false, feedback: null },
-  recommendation: signedIn ? { reason: "Because you played Dark Souls III", score: 0.9, kind: "new_game" } : null,
+  recommendation: signedIn ? { reason: "Because you liked Dark Souls III", score: 0.9, kind: "new_game" } : null,
   similar: [{ game_id: 2, title: "Hades", cover_url: cover, similarity: 0.8, ...price(1200000, 400, "TRY", null) }],
 });
 
@@ -53,8 +53,8 @@ function route(method, path) {
     { game_id: 2, title: "Hades", cover_url: cover, source: "manual", removable: true, playtime_hours: null, playtime_bucket: "some_hours", user_rating: null },
     { game_id: 4, title: "Balatro", cover_url: cover, source: "manual", removable: true, playtime_hours: null, playtime_bucket: "sunk_50plus", user_rating: 5 }] };
   if (path.startsWith("/wishlist")) return empty ? { items: [], count: 0, region: "TR" } : { count: 2, region: "TR", items: [
-    { game_id: 3, title: "Baldur's Gate 3", cover_url: cover, source: "steam", removable: false, added_at: null, ...price(3317470, 1249.5, "TRY", 20) },
-    { game_id: 4, title: "Balatro", cover_url: cover, source: "manual", removable: true, added_at: null, ...price(null, null, null) }] };
+    { game_id: 3, title: "Baldur's Gate 3", cover_url: cover, source: "steam_sync", removable: false, added_at: null, game_edition_id: 31, ...price(3317470, 1249.5, "TRY", 20) },
+    { game_id: 4, title: "Balatro", cover_url: cover, source: "manual", removable: true, added_at: null, game_edition_id: null, ...price(null, null, null, 20) }] };
   if (path.startsWith("/games/search")) return { results: [{ game_id: 5, title: "Hollow Knight", developer: "Team Cherry", release_year: 2017, cover_url: cover }] };
   if (path.startsWith("/onboarding/quiz-options")) return { options: CARDS.map((c) => ({ game_id: c.game_id, title: c.title, genres: c.genres, cover_url: cover })) };
   if (path === "/games/1") return detail(authed);
