@@ -205,6 +205,22 @@ await flow("onboarding add-games shows the playtime gauge", async (page) => {
   await setScenario("full");
 });
 
+await flow("landing: sign-in links go to the auth site with a return_url, sections and Farsi copy present", async (page) => {
+  await setScenario("out");
+  await page.goto(BASE + "/", { waitUntil: "networkidle" });
+  const hrefs = await page.locator("a.btn").evaluateAll((els) => els.map((e) => e.getAttribute("href")));
+  expect(hrefs.length >= 3, "expected sign-in buttons (nav, hero, final)");
+  for (const h of hrefs) expect(/^https:\/\/auth\.playnextai\.com\/.+return_url=/.test(h), `bad sign-in link: ${h}`);
+  expect(hrefs.some((h) => h.includes("/steam/")), "no Steam sign-in link");
+  const t = await page.locator("body").innerText();
+  for (const s of ["How it works", "Real regional pricing", "Every edition, one place", "Contact"]) expect(t.includes(s), `missing: ${s}`);
+  expect((await page.locator("#how").count()) === 1 && (await page.locator("#feat").count()) === 1, "anchor targets missing");
+  await page.getByRole("button", { name: "Language" }).click();
+  const fa = await page.locator("body").innerText();
+  expect(fa.includes("چطور کار می‌کند") && fa.includes("۹۲٪ تطابق"), "Farsi copy / Persian digits missing");
+  await setScenario("full");
+});
+
 await browser.close();
 
 const order = { error: 0, warn: 1, info: 2 };
