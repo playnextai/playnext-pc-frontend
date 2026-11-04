@@ -119,3 +119,4 @@ html[lang="fa"] .lp-hero h1 { line-height: 1.4; }
 }
 .lp-inline { display: inline-flex; align-items: center; min-height: 36px; }
 .lp-foot .lp-inline { min-width: 44px; justify-content: center; }
+.accent { background: var(--brand); -webkit-background-clip: text; background-clip: text; color: transparent; }

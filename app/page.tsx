@@ -47,7 +47,7 @@ export default function Landing() {
 
       <main>
         <section className="lp-hero">
-          <h1>{t("lp.h1a")}<span className="wordmark" style={{ minHeight: 0 }}>{t("lp.h1b")}</span>{t("lp.h1c")}</h1>
+          <h1>{t("lp.h1a")}<span className="accent">{t("lp.h1b")}</span>{t("lp.h1c")}</h1>
           <p className="muted lp-sub">{t("lp.sub")}</p>
           <a className="btn lp-cta" href={steam}><Icon name="gamepad" />{t("landing.steam")}</a>
           <div className="muted" style={{ fontSize: ".9rem" }}>{t("lp.note")}</div>
