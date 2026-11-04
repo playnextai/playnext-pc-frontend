@@ -238,6 +238,17 @@ for (const vp of VIEWPORTS) for (const lang of ["en", "fa"]) {
   await ctx.close();
 }
 await setScenario("full");
+for (const vp of VIEWPORTS) for (const lang of ["en", "fa"]) {
+  const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
+  await ctx.addInitScript((l) => { try { localStorage.setItem("playnext:lang", l); } catch {} }, lang);
+  const page = await ctx.newPage();
+  await page.goto(BASE + "/onboarding/quiz", { waitUntil: "networkidle" });
+  const tiles = page.locator(".quiz-tile");
+  for (let i = 0; i < 3; i++) await tiles.nth(i).click();
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: `shots/quiz-${lang}-${vp.id}.png` });
+  await ctx.close();
+}
 
 await browser.close();
 
