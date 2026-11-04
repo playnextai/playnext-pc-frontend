@@ -118,3 +118,4 @@ html[lang="fa"] .lp-hero h1 { line-height: 1.4; }
   .lp-links { gap: 8px; }
 }
 .lp-inline { display: inline-flex; align-items: center; min-height: 36px; }
+.lp-foot .lp-inline { min-width: 44px; justify-content: center; }
