@@ -117,3 +117,4 @@ html[lang="fa"] .lp-hero h1 { line-height: 1.4; }
   .lp-two { grid-template-columns: 1fr; }
   .lp-links { gap: 8px; }
 }
+.lp-inline { display: inline-flex; align-items: center; min-height: 36px; }

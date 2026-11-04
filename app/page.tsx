@@ -54,7 +54,7 @@ export default function Landing() {
           <div className="muted lp-or"><span />{t("lp.or")}<span /></div>
           <div className="muted" style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "center", flexWrap: "wrap" }}>
             <Icon name="mail" />
-            <span>{t("lp.noSteamA")}<a href={email} style={{ color: "var(--text)" }}>{t("lp.noSteamLink")}</a>{t("lp.noSteamB")}</span>
+            <span>{t("lp.noSteamA")}<a href={email} className="lp-inline" style={{ color: "var(--text)" }}>{t("lp.noSteamLink")}</a>{t("lp.noSteamB")}</span>
           </div>
         </section>
 
@@ -98,7 +98,7 @@ export default function Landing() {
 
       <footer className="lp-foot muted">
         <span>© PlayNext</span>
-        <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: "var(--muted)" }}>{t("lp.contact")}</a>
+        <a href={`mailto:${CONTACT_EMAIL}`} className="lp-inline" style={{ color: "var(--muted)" }}>{t("lp.contact")}</a>
       </footer>
     </div>
   );
