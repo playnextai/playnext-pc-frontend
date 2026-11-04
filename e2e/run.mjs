@@ -221,6 +221,20 @@ await flow("landing: sign-in links go to the auth site with a return_url, sectio
   await setScenario("full");
 });
 
+import { mkdirSync } from "node:fs";
+mkdirSync("shots", { recursive: true });
+await setScenario("out");
+for (const vp of VIEWPORTS) for (const lang of ["en", "fa"]) {
+  const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
+  await ctx.addInitScript((l) => { try { localStorage.setItem("playnext:lang", l); } catch {} }, lang);
+  const page = await ctx.newPage();
+  await page.goto(BASE + "/", { waitUntil: "networkidle" });
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: `shots/landing-${lang}-${vp.id}.png`, fullPage: true });
+  await ctx.close();
+}
+await setScenario("full");
+
 await browser.close();
 
 const order = { error: 0, warn: 1, info: 2 };
