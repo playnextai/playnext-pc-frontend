@@ -58,6 +58,7 @@ export default function LibraryStep() {
   return (
     <Gate>
       <main className="container" style={{ maxWidth: 640, paddingTop: 32 }}>
+        <div className="muted" style={{ marginBottom: 8 }}>{t("region.step", { n: 3 })}</div>
         <h1 style={{ fontWeight: 600 }}>{t("add.title")}</h1>
         <p className="muted">
           {steamLinked ? t("add.subSteam") : t("add.subEmail")}

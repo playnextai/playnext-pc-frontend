@@ -143,10 +143,14 @@ await flow("feed card actions and card opens detail", async (page) => {
 });
 await flow("quiz counter and region radio", async (page) => {
   await page.goto(BASE + "/onboarding/quiz", { waitUntil: "networkidle" });
-  expect((await page.locator("[aria-live=polite]").innerText()).includes("Tap the games"), "initial counter");
+  expect((await page.locator("[aria-live=polite]").innerText()).includes("Tap a few you've loved"), "initial counter");
   await page.getByRole("button", { name: /Hades/ }).click();
   await page.getByRole("button", { name: /Balatro/ }).click();
   expect((await page.locator("[aria-live=polite]").innerText()).includes("2 games picked"), "counter did not update");
+  await page.getByRole("button", { name: /Elden Ring/ }).click();
+  expect((await page.locator("[aria-live=polite]").innerText()).includes("3 picked, nice spread"), "spread message missing for 3 picks over 3 genres");
+  expect((await page.locator(".quiz-tile.on").count()) === 3 && (await page.locator(".quiz-check").count()) === 3, "check badges missing");
+  expect((await page.getByText("Step 2 of 3").count()) === 1, "step label missing");
   await page.goto(BASE + "/onboarding/region", { waitUntil: "networkidle" });
   expect((await page.getByRole("radio").count()) === 6, "should list six regions");
 });

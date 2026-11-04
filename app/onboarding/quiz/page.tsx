@@ -1,15 +1,18 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Gate from "@/components/Gate";
-import { api } from "@/lib/api";
-import { counterKey, toggleSelection } from "@/lib/quiz";
+import Icon from "@/components/Icon";
+import SkeletonRows from "@/components/Skeleton";
 import { useI18n } from "@/components/I18nProvider";
+import { api } from "@/lib/api";
+import { counterKey, genreSpread, toggleSelection } from "@/lib/quiz";
 import type { QuizOption } from "@/lib/types";
 
-// Taste quiz: tappable genre-diverse grid, live counter, no minimum, skip link.
+// Taste quiz (step 2 of 3): a 3x3 grid of well-known games, one per genre. Tap a few you've loved; a check
+// badge marks each pick. No minimum, skip link at the top, live counter bar at the bottom.
 export default function QuizStep() {
-  const { t, genre } = useI18n();
+  const { t, genre, lang } = useI18n();
   const router = useRouter();
   const [options, setOptions] = useState<QuizOption[] | null>(null);
   const [picked, setPicked] = useState<Set<number>>(new Set());
@@ -18,7 +21,10 @@ export default function QuizStep() {
 
   useEffect(() => {
     api.quizOptions().then((r) => setOptions(r.options)).catch(() => setError(t("quiz.loadFailed")));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const spread = useMemo(() => genreSpread(options ?? [], picked), [options, picked]);
 
   async function next(skip: boolean) {
     setBusy(true);
@@ -35,30 +41,35 @@ export default function QuizStep() {
 
   return (
     <Gate>
-      <main className="container" style={{ paddingTop: 32, paddingBottom: 96 }}>
-        <h1 style={{ fontWeight: 600 }}>{t("quiz.title")}</h1>
-        <p className="muted">{t("quiz.sub")}</p>
-        {options === null && !error && <p className="muted">{t("common.loading")}</p>}
-        <div className="grid">
+      <main className="container" style={{ paddingTop: 28, paddingBottom: 112, maxWidth: 860 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }} className="muted">
+          <span>{t("region.step", { n: 2 })}</span>
+          <button disabled={busy} onClick={() => next(true)} className="link-btn">{t("quiz.skip")}</button>
+        </div>
+        <h1 style={{ textAlign: "center", fontWeight: 600, margin: "20px 0 8px" }}>{t("quiz.title")}</h1>
+        <p className="muted" style={{ textAlign: "center", margin: "0 0 28px", lineHeight: 1.7 }}>{t("quiz.sub")}</p>
+
+        {options === null && !error && <SkeletonRows n={6} grid />}
+        <div className="quiz-grid" role="group" aria-label={t("quiz.grid")}>
           {options?.map((o) => {
             const on = picked.has(o.game_id);
             return (
-              <button key={o.game_id} aria-pressed={on} onClick={() => setPicked((p) => toggleSelection(p, o.game_id))}
-                className="card" style={{ textAlign: "start", cursor: "pointer", color: "inherit", outline: on ? "2px solid var(--mint)" : "none" }}>
-                {o.cover_url ? <img className="cover" src={o.cover_url} alt="" /> : <span className="cover" />}
-                <strong style={{ display: "block", marginTop: 8 }}>{o.title}</strong>
-                <span className="muted" style={{ fontSize: ".8rem" }}>{o.genres.slice(0, 2).map(genre).join(" · ")}</span>
+              <button key={o.game_id} aria-pressed={on} onClick={() => setPicked((p) => toggleSelection(p, o.game_id))} className={`quiz-tile${on ? " on" : ""}`}>
+                {on && <span className="quiz-check" aria-hidden="true"><Icon name="check" className="icon-sm" /></span>}
+                <span className="quiz-name" dir="auto">{o.title}</span>
+                <span className="quiz-genre">{o.genres.slice(0, 2).map(genre).join(" · ")}</span>
               </button>
             );
           })}
         </div>
-        {error && <p className="error">{error}</p>}
-        <div className="card" style={{ position: "fixed", insetInline: 0, bottom: 0, display: "flex", gap: 12, alignItems: "center", justifyContent: "space-between", borderRadius: 0 }}>
-          <span aria-live="polite">{t(counterKey(picked.size), { n: picked.size })}</span>
-          <span style={{ display: "flex", gap: 12, alignItems: "center" }}>
-            <button className="btn secondary" disabled={busy} onClick={() => next(true)}>{t("common.skip")}</button>
-            <button className="btn" disabled={busy} onClick={() => next(false)}>{t("quiz.go")}</button>
+        {error && <p className="error" role="alert">{error}</p>}
+
+        <div className="quiz-bar">
+          <span aria-live="polite" style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            {picked.size > 0 && <span style={{ color: "var(--mint)", display: "inline-flex" }}><Icon name="check" /></span>}
+            {t(counterKey(picked.size, spread), { n: picked.size })}
           </span>
+          <button className="btn" disabled={busy} onClick={() => next(false)}>{t("quiz.go")}</button>
         </div>
       </main>
     </Gate>
