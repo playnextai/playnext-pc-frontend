@@ -40,31 +40,33 @@ export default function GameCardView({ game, onRemove, onOpen }: {
 
   const native = nativeFmt(game.price_native, game.price_currency);
   return (
-    <article className="card">
-      <button onClick={() => onOpen?.(game.game_id)} style={{ all: "unset", cursor: onOpen ? "pointer" : "default", display: "block", width: "100%" }}>
-        {game.cover_url ? <img className="cover" src={game.cover_url} alt="" /> : <span className="cover" />}
-        <h3 style={{ margin: "10px 0 4px", fontSize: "1rem" }}>{game.title}</h3>
+    <article className="gcard">
+      <button onClick={() => onOpen?.(game.game_id)} className="gc-open" style={{ cursor: onOpen ? "pointer" : "default" }}>
+        <span className="gc-cover">
+          {game.cover_url ? <img src={game.cover_url} alt="" /> : <span className="gc-name" dir="auto" aria-hidden="true">{game.title}</span>}
+          {!!game.discount_pct && game.price_toman !== null && <span className="gc-badge">-{percent(game.discount_pct)}</span>}
+        </span>
+        <h3 dir="auto">{game.title}</h3>
       </button>
-      {game.reason && <p className="muted" style={{ fontSize: ".8rem", margin: "0 0 6px" }}>{reason(game.reason)}</p>}
-      <div className="price">
-        {toman(game.price_toman)}
-        {!!game.discount_pct && game.price_toman !== null && <span style={{ color: "var(--danger)", background: "var(--danger-bg)", borderRadius: 6, padding: "1px 6px", marginInlineStart: 8, fontSize: ".8rem" }}>-{percent(game.discount_pct)}</span>}
-      </div>
-      {native && <div className="muted" style={{ fontSize: ".85rem" }}>{native}</div>}
-      <div role="group" aria-label={t("card.actions")} style={{ display: "flex", gap: 6, marginTop: 10 }}>
+      <div className="gc-body">
+        {game.reason && <p className="muted gc-reason">{reason(game.reason)}</p>}
+        <div className="price" style={{ fontSize: "1.05rem" }}>{toman(game.price_toman)}</div>
+        {native && <div className="muted" style={{ fontSize: ".85rem" }}>{native} {t("card.yourRegion")}</div>}
+      <div role="group" aria-label={t("card.actions")} style={{ display: "flex", justifyContent: "space-between", marginTop: 10 }}>
         {CARD_ACTIONS.map(({ action, labelKey, icon }) => {
           const label = t(labelKey);
           const on = (action === "wishlist" && wishlisted) || (action === "like" && liked);
           return (
             <button key={action} title={label} aria-label={label} aria-pressed={on} disabled={busy}
               onClick={() => act(action)}
-              style={{ flex: 1, padding: "8px 0", borderRadius: 10, border: "1px solid var(--border)", display: "inline-flex", alignItems: "center", justifyContent: "center", minHeight: 40, background: on ? "var(--surface-2)" : "transparent", color: on ? "var(--mint)" : "var(--text)", cursor: "pointer" }}>
+              className="icon-btn" style={{ color: on ? "var(--mint)" : undefined }}>
               <Icon name={icon} />
             </button>
           );
         })}
       </div>
       {error && <p className="error" style={{ fontSize: ".8rem" }}>{error}</p>}
+      </div>
     </article>
   );
 }

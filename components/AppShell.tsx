@@ -48,7 +48,7 @@ function Nav({ onBudgetChange }: { onBudgetChange?: () => void }) {
         <Link className="wordmark" href="/discover" aria-label="PlayNext">PlayNext</Link>
         <span className="spacer" />
         <Link className="item" href="/library" aria-label={t("nav.library")}><Icon name="library" /><span className="label">{t("nav.library")}</span></Link>
-        <Link className="item" href="/wishlist" aria-label={t("nav.wishlist")}><Icon name="star" /><span className="label">{t("nav.wishlist")}</span></Link>
+        <Link className="item" href="/wishlist" aria-label={t("nav.wishlist")}><Icon name="bookmark" /><span className="label">{t("nav.wishlist")}</span></Link>
         <Link className="item" href="/dna" aria-label={t("nav.dna")}><Icon name="dna" /><span className="label">{t("nav.dna")}</span></Link>
         <Link className="item" href="/cart" aria-label={t("nav.cart")}><Icon name="cart" /><span className="label">{t("nav.cart")}</span>{cartCount > 0 && <span className="badge">{num(cartCount)}</span>}</Link>
         <button className="item budget-chip" aria-expanded={open} aria-controls="filters-menu" aria-label={t("nav.filters")} onClick={() => setOpen((o) => !o)}>

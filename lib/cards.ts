@@ -3,11 +3,11 @@ import type { FeedbackAction } from "./types.ts";
 /** The four feed-card actions (final design; "dislike" exists on the detail page only). */
 export type CardAction = "like" | "not_interested" | "already_own" | "wishlist";
 
-export const CARD_ACTIONS: { action: CardAction; labelKey: "card.like" | "card.notInterested" | "card.alreadyOwn" | "card.wishlist"; icon: "heart" | "x" | "check" | "star" }[] = [
+export const CARD_ACTIONS: { action: CardAction; labelKey: "card.like" | "card.notInterested" | "card.alreadyOwn" | "card.wishlist"; icon: "heart" | "x" | "check" | "bookmark" }[] = [
   { action: "like", labelKey: "card.like", icon: "heart" },
   { action: "not_interested", labelKey: "card.notInterested", icon: "x" },
   { action: "already_own", labelKey: "card.alreadyOwn", icon: "check" },
-  { action: "wishlist", labelKey: "card.wishlist", icon: "star" },
+  { action: "wishlist", labelKey: "card.wishlist", icon: "bookmark" },
 ];
 
 /** Which feedback value the backend expects for a card action; wishlist is not feedback. */

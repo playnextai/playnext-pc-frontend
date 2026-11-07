@@ -226,6 +226,7 @@ export const en = {
   "card.alreadyOwn": "I already own this",
   "card.wishlist": "Add to wishlist",
   "card.undo": "Undo",
+  "card.yourRegion": "(your region)",
   "card.removed": "Removed from your feed",
 
   // connect steam
@@ -517,6 +518,7 @@ export const fa: Record<Key, string> = {
   "card.alreadyOwn": "این را دارم",
   "card.wishlist": "افزودن به علاقه‌مندی‌ها",
   "card.undo": "بازگرداندن",
+  "card.yourRegion": "(منطقه‌ی تو)",
   "card.removed": "از فیدت برداشته شد",
 
   "steam.bannerText": "استیم را وصل کن تا علاقه‌مندی‌هایت خودکار وارد شوند.",
