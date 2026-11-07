@@ -267,6 +267,15 @@ for (const vp of VIEWPORTS) for (const lang of ["en", "fa"]) {
   await page.screenshot({ path: `shots/region-${lang}-${vp.id}.png`, fullPage: true });
   await ctx.close();
 }
+for (const [name, path] of [["discover", "/discover"], ["library-page", "/library"], ["wishlist", "/wishlist"], ["cart", "/cart"], ["settings", "/settings"], ["dna", "/dna"], ["game", "/game/1"]]) for (const vp of VIEWPORTS) for (const lang of ["en", "fa"]) {
+  const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
+  await ctx.addInitScript((l) => { try { localStorage.setItem("playnext:lang", l); } catch {} }, lang);
+  const page = await ctx.newPage();
+  await page.goto(BASE + path, { waitUntil: "networkidle" });
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: `shots/${name}-${lang}-${vp.id}.png`, fullPage: true });
+  await ctx.close();
+}
 await setScenario("empty");
 for (const vp of VIEWPORTS) for (const lang of ["en", "fa"]) {
   const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
