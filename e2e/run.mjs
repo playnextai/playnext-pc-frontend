@@ -153,6 +153,8 @@ await flow("quiz counter and region radio", async (page) => {
   expect((await page.getByText("Step 2 of 3").count()) === 1, "step label missing");
   await page.goto(BASE + "/onboarding/region", { waitUntil: "networkidle" });
   expect((await page.getByRole("radio").count()) === 6, "should list six regions");
+  await page.getByRole("radio").nth(1).click();
+  expect((await page.locator(".region-opt.on").count()) === 1 && (await page.getByRole("radio").nth(1).getAttribute("aria-checked")) === "true", "selected region not marked");
 });
 await flow("signed-out game page shows every region and a sign-in prompt, no action buttons", async (page) => {
   await setScenario("out");
@@ -254,6 +256,15 @@ for (const vp of VIEWPORTS) for (const lang of ["en", "fa"]) {
   for (let i = 0; i < 3; i++) await tiles.nth(i).click();
   await page.waitForTimeout(300);
   await page.screenshot({ path: `shots/quiz-${lang}-${vp.id}.png` });
+  await ctx.close();
+}
+for (const vp of VIEWPORTS) for (const lang of ["en", "fa"]) {
+  const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
+  await ctx.addInitScript((l) => { try { localStorage.setItem("playnext:lang", l); } catch {} }, lang);
+  const page = await ctx.newPage();
+  await page.goto(BASE + "/onboarding/region", { waitUntil: "networkidle" });
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: `shots/region-${lang}-${vp.id}.png`, fullPage: true });
   await ctx.close();
 }
 await setScenario("empty");

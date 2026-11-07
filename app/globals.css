@@ -140,3 +140,10 @@ html[lang="fa"] .lp-hero h1 { line-height: 1.4; }
 .gauge i { display: block; width: 5px; border-radius: 2px; background: #3a3a38; }
 .gauge i:nth-child(1) { height: 8px; } .gauge i:nth-child(2) { height: 13px; } .gauge i:nth-child(3) { height: 18px; }
 .gauge.l1 i:nth-child(1), .gauge.l2 i:nth-child(-n+2), .gauge.l3 i { background: var(--mint); }
+
+/* ---- region step ---- */
+.region-opt { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 14px 18px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); color: inherit; font-size: 1rem; cursor: pointer; text-align: start; }
+.region-opt.on { border: 2px solid var(--mint); padding: 13px 17px; }
+.region-opt > .muted { font-size: .9rem; }
+.region-dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #4a4a47; flex: none; }
+.region-opt.on .region-dot { border-color: var(--mint); background: radial-gradient(var(--mint) 45%, transparent 50%); }

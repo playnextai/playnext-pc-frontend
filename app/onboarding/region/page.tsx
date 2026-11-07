@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Gate from "@/components/Gate";
+import SkeletonRows from "@/components/Skeleton";
 import { useI18n } from "@/components/I18nProvider";
 import { api, ApiError } from "@/lib/api";
 import type { Region, SettingsView } from "@/lib/types";
@@ -39,18 +40,18 @@ export default function RegionStep() {
 
   return (
     <Gate>
-      <main className="container" style={{ maxWidth: 560, paddingTop: 48 }}>
-        <div className="muted" style={{ marginBottom: 8 }}>{t("region.step", { n: 1 })}</div>
-        <h1 style={{ margin: "0 0 8px", fontWeight: 600 }}>{t("region.title")}</h1>
-        <p className="muted">{t("region.sub")}</p>
+      <main className="container" style={{ maxWidth: 600, paddingTop: 36, paddingBottom: 40 }}>
+        <div className="muted">{t("region.step", { n: 1 })}</div>
+        <h1 style={{ textAlign: "center", margin: "20px 0 8px", fontWeight: 600 }}>{t("region.title")}</h1>
+        <p className="muted" style={{ textAlign: "center", margin: "0 0 28px", lineHeight: 1.7 }}>{t("region.sub")}</p>
+        {!settings && !error && <SkeletonRows n={6} />}
         <div role="radiogroup" aria-label={t("nav.region")} className="stack">
           {settings?.region_options.map((o) => {
             const on = region === o.code;
             return (
-              <button key={o.code} role="radio" aria-checked={on} onClick={() => setRegion(o.code)} className="card"
-                style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", color: "inherit", textAlign: "start", borderColor: on ? "var(--mint)" : "var(--border)", minHeight: 52 }}>
+              <button key={o.code} role="radio" aria-checked={on} onClick={() => setRegion(o.code)} className={`region-opt${on ? " on" : ""}`}>
                 <span style={{ display: "flex", gap: 14, alignItems: "center" }}>
-                  <span aria-hidden="true" style={{ width: 18, height: 18, borderRadius: "50%", border: `2px solid ${on ? "var(--mint)" : "#3a3a38"}`, background: on ? "var(--mint)" : "transparent", boxShadow: on ? "inset 0 0 0 3px var(--surface)" : "none" }} />
+                  <span aria-hidden="true" className="region-dot" />
                   {regionName(o.code, o.label)}
                 </span>
                 <span className="muted" style={{ fontSize: ".9rem" }}>{CURRENCY[o.code]}</span>
@@ -58,9 +59,9 @@ export default function RegionStep() {
             );
           })}
         </div>
-        <p className="muted" style={{ fontSize: ".9rem" }}>{t("region.note")}</p>
+        <p className="muted" style={{ fontSize: ".9rem", lineHeight: 1.6, margin: "20px 0 0" }}>{t("region.note")}</p>
         {error && <p className="error" role="alert">{error}</p>}
-        <p style={{ display: "flex", justifyContent: "flex-end" }}><button className="btn" disabled={!region || busy} onClick={save}>{t("common.continue")}</button></p>
+        <p style={{ display: "flex", justifyContent: "flex-end", marginTop: 20 }}><button className="btn" disabled={!region || busy} onClick={save}>{t("common.continue")}</button></p>
       </main>
     </Gate>
   );
