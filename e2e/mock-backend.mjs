@@ -56,7 +56,11 @@ function route(method, path) {
     { game_id: 3, title: "Baldur's Gate 3", cover_url: cover, source: "steam_sync", removable: false, added_at: null, game_edition_id: 31, ...price(3317470, 1249.5, "TRY", 20) },
     { game_id: 4, title: "Balatro", cover_url: cover, source: "manual", removable: true, added_at: null, game_edition_id: null, ...price(null, null, null, 20) }] };
   if (path.startsWith("/games/search")) return { results: [{ game_id: 5, title: "Hollow Knight", developer: "Team Cherry", release_year: 2017, cover_url: cover }] };
-  if (path.startsWith("/onboarding/quiz-options")) return { options: CARDS.map((c, i) => ({ game_id: c.game_id, title: c.title, genres: [["Action RPG", "Roguelike"], ["Roguelike"], ["RPG"], ["Card Game"]][i], cover_url: cover })) };
+  if (path.startsWith("/onboarding/quiz-options")) {
+    const extra = [["Stardew Valley", "Simulation"], ["Civilization VI", "Strategy"], ["DOOM Eternal", "Shooter"], ["Hollow Knight", "Metroidvania"], ["Portal 2", "Puzzle"], ["Forza Horizon 5", "Racing"], ["Disco Elysium", "Adventure"], ["Resident Evil 4", "Horror"]];
+    const base = CARDS.map((c, i) => ({ game_id: c.game_id, title: c.title, genres: [["Action RPG", "Roguelike"], ["Roguelike"], ["RPG"], ["Card Game"]][i], cover_url: cover }));
+    return { options: [...base, ...extra.map(([title, g], i) => ({ game_id: 900 + i, title, genres: [g], cover_url: cover }))] };
+  }
   if (path === "/games/1") return detail(authed);
   if (path.startsWith("/games/")) return [404, { detail: "game_not_found" }];
   if (path === "/gamer-dna") return empty ? [403, { detail: "steam_required" }] : {
