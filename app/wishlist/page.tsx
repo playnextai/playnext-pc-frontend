@@ -67,7 +67,7 @@ export default function WishlistPage() {
               <li key={g.game_id} className="card wl-row">
                 <Thumb url={g.cover_url} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <Link href={`/game/${g.game_id}`} className="link-title" dir="auto" style={{ minHeight: 28 }}>{g.title}</Link>
+                  <Link href={`/game/${g.game_id}`} className="link-title" dir="auto">{g.title}</Link>
                   <div className="price" style={{ fontSize: "1rem" }}>
                     {toman(g.price_toman)}
                     {!!g.discount_pct && g.price_toman !== null && <span className="gc-badge" style={{ position: "static", marginInlineStart: 8, padding: "1px 6px" }}>-{percent(g.discount_pct)}</span>}
