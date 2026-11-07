@@ -195,7 +195,7 @@ await flow("undo bar brings a removed card back", async (page) => {
 await flow("wishlist: Steam item labelled From Steam, add to cart works, no stray discount badge", async (page) => {
   await page.goto(BASE + "/wishlist", { waitUntil: "networkidle" });
   const t = await page.locator("main").innerText();
-  expect(t.includes("From Steam"), "synced item should say From Steam");
+  expect(t.includes("Synced") && t.includes("2 games · 1 synced from Steam, 1 added by you"), "synced chip / summary line missing");
   expect(!/—\s*-20%/.test(t), "discount badge shown with no price");
   await page.getByRole("button", { name: "Add to cart" }).first().click();
   await page.getByRole("button", { name: "In cart" }).waitFor({ timeout: 3000 });

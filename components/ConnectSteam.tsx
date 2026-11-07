@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { steamSignInUrl } from "@/lib/auth";
 import { dismiss, isDismissed } from "@/lib/dismiss";
+import Icon from "@/components/Icon";
 import { useI18n } from "@/components/I18nProvider";
 
 /** Reusable "Connect Steam" prompt. `card` is used in Settings > Connected Accounts;
@@ -16,12 +17,11 @@ export default function ConnectSteam({ variant, returnPath = "/settings" }: { va
 
   if (variant === "banner") {
     return (
-      <div className="card" role="note" style={{ display: "flex", gap: 12, alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}>
-        <span>{t("steam.bannerText")}</span>
-        <span style={{ display: "flex", gap: 8 }}>
-          <a className="btn" href={href}>{t("steam.connect")}</a>
-          <button className="btn secondary" onClick={() => { dismiss("connect-steam-banner"); setHidden(true); }}>{t("steam.notNow")}</button>
-        </span>
+      <div className="card steam-banner" role="note">
+        <span style={{ color: "var(--mint)", display: "inline-flex" }}><Icon name="gamepad" /></span>
+        <span style={{ flex: 1, minWidth: 0, lineHeight: 1.5 }}>{t("steam.bannerText")}</span>
+        <a className="btn secondary small" href={href}>{t("steam.connectShort")}</a>
+        <button className="icon-btn" aria-label={t("steam.notNow")} onClick={() => { dismiss("connect-steam-banner"); setHidden(true); }}><Icon name="x" /></button>
       </div>
     );
   }
