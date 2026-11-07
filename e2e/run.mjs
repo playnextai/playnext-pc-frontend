@@ -203,9 +203,16 @@ await flow("onboarding add-games shows the playtime gauge", async (page) => {
   await page.goto(BASE + "/onboarding/library", { waitUntil: "networkidle" });
   await page.getByLabel("Search games").fill("Hollow");
   await page.getByText("Hollow Knight").click();
-  await page.getByRole("radiogroup", { name: "How much did you play it?" }).waitFor({ timeout: 3000 });
-  await page.getByRole("radio", { name: "50+ hours" }).click();
-  await page.locator('[role=radio][aria-checked=true]').filter({ hasText: "50+ hours" }).waitFor({ timeout: 3000 });
+  const gauge = page.getByRole("button", { name: /^Playtime:/ });
+  await gauge.waitFor({ timeout: 3000 });
+  expect((await gauge.getAttribute("aria-label")) === "Playtime: not set", "gauge should start not set");
+  for (const label of ["barely touched", "some hours", "50+ hours"]) {
+    await gauge.click();
+    await page.getByRole("button", { name: new RegExp(`^Playtime: ${label.replace("+", "\\+")}`, "i") }).waitFor({ timeout: 3000 });
+  }
+  expect((await page.getByText("1 added, solid start!").count()) === 1, "added counter missing");
+  await gauge.click();
+  await page.getByRole("button", { name: "Playtime: not set" }).waitFor({ timeout: 3000 });
   await setScenario("full");
 });
 
@@ -249,6 +256,21 @@ for (const vp of VIEWPORTS) for (const lang of ["en", "fa"]) {
   await page.screenshot({ path: `shots/quiz-${lang}-${vp.id}.png` });
   await ctx.close();
 }
+await setScenario("empty");
+for (const vp of VIEWPORTS) for (const lang of ["en", "fa"]) {
+  const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
+  await ctx.addInitScript((l) => { try { localStorage.setItem("playnext:lang", l); } catch {} }, lang);
+  const page = await ctx.newPage();
+  await page.goto(BASE + "/onboarding/library", { waitUntil: "networkidle" });
+  await page.getByRole("searchbox").or(page.locator("input").first()).fill("Hollow");
+  await page.locator("[role=listbox] >> text=Hollow Knight").or(page.getByText("Hollow Knight").first()).first().click();
+  await page.locator(".gauge-btn").first().click();
+  await page.locator(".gauge-btn").first().click();
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: `shots/library-${lang}-${vp.id}.png` });
+  await ctx.close();
+}
+await setScenario("full");
 
 await browser.close();
 

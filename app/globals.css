@@ -133,3 +133,10 @@ html[lang="fa"] .lp-hero h1 { line-height: 1.4; }
 .quiz-check { position: absolute; top: 10px; inset-inline-end: 10px; width: 26px; height: 26px; border-radius: 50%; background: var(--mint); color: #0c1a12; display: flex; align-items: center; justify-content: center; }
 .quiz-bar { position: fixed; inset-inline: 0; bottom: 0; z-index: 20; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px max(20px, calc((100vw - 860px) / 2 + 20px)); background: rgba(20,20,20,.96); border-top: 1px solid var(--border); backdrop-filter: blur(8px); }
 @media (max-width: 640px) { .quiz-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .quiz-bar { flex-wrap: wrap; } }
+.icon-btn { width: 40px; height: 40px; border-radius: 10px; border: 0; background: none; color: #b8b8b3; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex: none; }
+.icon-btn:hover { background: var(--surface-2); }
+.gauge-btn { min-width: 44px; min-height: 40px; border: 0; background: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.gauge { display: inline-flex; align-items: flex-end; gap: 3px; height: 18px; }
+.gauge i { display: block; width: 5px; border-radius: 2px; background: #3a3a38; }
+.gauge i:nth-child(1) { height: 8px; } .gauge i:nth-child(2) { height: 13px; } .gauge i:nth-child(3) { height: 18px; }
+.gauge.l1 i:nth-child(1), .gauge.l2 i:nth-child(-n+2), .gauge.l3 i { background: var(--mint); }

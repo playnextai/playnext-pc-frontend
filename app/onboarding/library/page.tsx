@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Gate from "@/components/Gate";
 import SearchAndAdd from "@/components/SearchAndAdd";
+import Playtime from "@/components/Playtime";
 import { api } from "@/lib/api";
 import type { PlaytimeBucket, SearchResult } from "@/lib/types";
 import { useI18n } from "@/components/I18nProvider";
@@ -10,14 +11,15 @@ import Icon from "@/components/Icon";
 
 const HEART_RATING = 5; // stored with the game; the recommender does not use ratings yet
 
-// Manual entry: search-and-add, an added list with remove and an optional heart, skip link.
-// Copy differs for Steam-linked people (a Steam library is synced separately) and email-only people.
+// Library step (3 of 3): search-and-add for games on stores we can't read. Each added game has a one-tap
+// playtime gauge (not set -> barely touched -> some hours -> 50+ hours -> not set), an optional heart and a
+// remove button. Skip link at the top; a bottom bar counts what was added.
 export default function LibraryStep() {
   const { t } = useI18n();
   const router = useRouter();
   const [steamLinked, setSteamLinked] = useState<boolean | null>(null);
   const [added, setAdded] = useState<SearchResult[]>([]);
-  const [bucket, setBucket] = useState<Record<number, PlaytimeBucket>>({});
+  const [bucket, setBucket] = useState<Record<number, PlaytimeBucket | null>>({});
   const [hearted, setHearted] = useState<Set<number>>(new Set());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,9 +36,11 @@ export default function LibraryStep() {
     } catch { setError(t("add.removeFailed")); }
   }
 
-  async function setPlaytime(id: number, b: PlaytimeBucket) {
-    try { await api.addToLibrary(id, b); setBucket((m) => ({ ...m, [id]: b })); }
-    catch { setError(t("common.saveFailed")); }
+  async function cycle(id: number) {
+    try {
+      const r = (await api.cyclePlaytime(id)) as { playtime_bucket: PlaytimeBucket | null };
+      setBucket((m) => ({ ...m, [id]: r.playtime_bucket }));
+    } catch { setError(t("library.cycleFailed")); }
   }
 
   async function heart(id: number) {
@@ -57,39 +61,36 @@ export default function LibraryStep() {
 
   return (
     <Gate>
-      <main className="container" style={{ maxWidth: 640, paddingTop: 32 }}>
-        <div className="muted" style={{ marginBottom: 8 }}>{t("region.step", { n: 3 })}</div>
-        <h1 style={{ fontWeight: 600 }}>{t("add.title")}</h1>
-        <p className="muted">
-          {steamLinked ? t("add.subSteam") : t("add.subEmail")}
-        </p>
+      <main className="container" style={{ maxWidth: 860, paddingTop: 28, paddingBottom: 112 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }} className="muted">
+          <span>{t("region.step", { n: 3 })}</span>
+          <button disabled={busy} onClick={finish} className="link-btn">{t("quiz.skip")}</button>
+        </div>
+        <h1 style={{ textAlign: "center", fontWeight: 600, margin: "20px 0 8px" }}>{steamLinked ? t("add.titleSteam") : t("add.title")}</h1>
+        <p className="muted" style={{ textAlign: "center", margin: "0 0 28px", lineHeight: 1.7 }}>{steamLinked ? t("add.subSteam") : t("add.subEmail")}</p>
         <SearchAndAdd target="library" alreadyAddedIds={ids} onAdded={(g) => setAdded((a) => [...a, g])} />
-        {error && <p className="error">{error}</p>}
-        <ul style={{ listStyle: "none", padding: 0, marginTop: 24, display: "grid", gap: 8 }}>
+        {error && <p className="error" role="alert">{error}</p>}
+        <ul style={{ listStyle: "none", padding: 0, margin: "20px 0", display: "grid", gap: 10 }}>
           {added.map((g) => (
-            <li key={g.game_id} className="card" style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-              {g.cover_url ? <img src={g.cover_url} alt="" width={36} height={50} style={{ borderRadius: 6 }} /> : <span style={{ width: 36, height: 50, borderRadius: 6, background: "var(--cover)", flex: "none" }} />}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <strong>{g.title}</strong>
-                <div role="radiogroup" aria-label={t("add.gauge")} style={{ display: "flex", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
-                  {(["barely_touched", "some_hours", "sunk_50plus"] as const).map((b) => (
-                    <button key={b} role="radio" aria-checked={bucket[g.game_id] === b} onClick={() => setPlaytime(g.game_id, b)} className="tab"
-                      style={{ minHeight: 32, padding: "0 12px", fontSize: ".85rem", ...(bucket[g.game_id] === b ? { background: "var(--surface-2)", color: "var(--text)", borderColor: "var(--mint)" } : {}) }}>
-                      {t(`library.bucket.${b}`)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <button aria-label={t("add.loved")} aria-pressed={hearted.has(g.game_id)} onClick={() => heart(g.game_id)}
-                style={{ background: "none", border: 0, cursor: "pointer", color: hearted.has(g.game_id) ? "var(--mint)" : "var(--muted)", display: "inline-flex" }}><Icon name="heart" /></button>
-              <button className="btn secondary" onClick={() => remove(g.game_id)}>{t("common.remove")}</button>
+            <li key={g.game_id} className="card" style={{ display: "flex", gap: 14, alignItems: "center", padding: "12px 16px", borderRadius: 14 }}>
+              {g.cover_url ? <img src={g.cover_url} alt="" width={44} height={56} style={{ borderRadius: 8, objectFit: "cover" }} /> : <span style={{ width: 44, height: 56, borderRadius: 8, background: "var(--cover)", flex: "none" }} />}
+              <span style={{ flex: 1, minWidth: 0 }} dir="auto">{g.title}</span>
+              <Playtime bucket={bucket[g.game_id] ?? null} onCycle={() => cycle(g.game_id)} />
+              <button className="icon-btn" aria-label={t("add.loved")} aria-pressed={hearted.has(g.game_id)} onClick={() => heart(g.game_id)}
+                style={{ color: hearted.has(g.game_id) ? "var(--mint)" : undefined }}><Icon name="heart" /></button>
+              <button className="icon-btn" aria-label={t("common.remove")} onClick={() => remove(g.game_id)}><Icon name="trash" /></button>
             </li>
           ))}
         </ul>
-        <p style={{ display: "flex", gap: 12, marginTop: 24 }}>
-          <button className="btn" disabled={busy} onClick={finish}>{added.length ? t("add.done") : t("common.continue")}</button>
-          {added.length === 0 && <button className="btn secondary" disabled={busy} onClick={finish}>{t("add.skipNow")}</button>}
-        </p>
+        <p className="muted" style={{ textAlign: "center", fontSize: ".9rem" }}>{t("add.hint")}</p>
+
+        <div className="quiz-bar">
+          <span aria-live="polite" style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            {added.length > 0 && <span style={{ color: "var(--mint)", display: "inline-flex" }}><Icon name="check" /></span>}
+            {added.length > 0 ? t("add.count", { n: added.length }) : t("add.countNone")}
+          </span>
+          <button className="btn" disabled={busy} onClick={finish}>{t("common.continue")}</button>
+        </div>
       </main>
     </Gate>
   );
