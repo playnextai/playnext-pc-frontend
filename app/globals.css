@@ -171,3 +171,4 @@ html[lang="fa"] .lp-hero h1 { line-height: 1.4; }
 .tab { min-height: 40px; padding: 0 20px; }
 .lib-tag { font-size: .9rem; white-space: nowrap; }
 .lib-chip { background: #202020; border-color: transparent; color: var(--muted); font-size: .85rem; }
+@media (max-width: 640px) { .lib-tag { display: none; } .lib-chip { padding: 0 8px; } }
