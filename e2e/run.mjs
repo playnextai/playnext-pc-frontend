@@ -171,6 +171,17 @@ await flow("search-and-add shows result and no-results copy", async (page) => {
   await page.getByText("Hollow Knight").waitFor({ timeout: 3000 });
 });
 
+await flow("library: summary line, synced chip, gauge cycles, note shown", async (page) => {
+  await page.goto(BASE + "/library", { waitUntil: "networkidle" });
+  const t = await page.locator("main").innerText();
+  expect(t.includes("3 games · 1 synced from Steam, 2 added by you"), "summary line missing/wrong");
+  expect(t.includes("Synced") && t.includes("Added by you") && t.includes("Playtime shows only"), "chip/tag/note missing");
+  expect((await page.getByRole("button", { name: /^Playtime:/ }).count()) === 2, "gauge only on added-by-you rows");
+  expect((await page.getByRole("button", { name: /^Remove: Hades/ }).count()) === 1, "remove button for added game missing");
+  await page.getByRole("button", { name: /^Playtime:/ }).first().click();
+  await page.getByRole("button", { name: /^Playtime: 50\+ hours/ }).first().waitFor({ timeout: 3000 });
+});
+
 await flow("undo bar brings a removed card back", async (page) => {
   await page.goto(BASE + "/discover", { waitUntil: "networkidle" });
   const before = await page.getByRole("button", { name: "Not interested" }).count();

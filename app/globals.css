@@ -166,3 +166,8 @@ html[lang="fa"] .lp-hero h1 { line-height: 1.4; }
 /* nav items as outlined pills, as designed */
 .nav a.item, .nav button.item { border: 1px solid var(--border); }
 .nav a.item:has(.avatar) { border: 0; padding: 0; }
+
+/* ---- library rows ---- */
+.tab { min-height: 40px; padding: 0 20px; }
+.lib-tag { font-size: .9rem; white-space: nowrap; }
+.lib-chip { background: #202020; border-color: transparent; color: var(--muted); font-size: .85rem; }
