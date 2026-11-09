@@ -173,6 +173,7 @@ await flow("game detail (signed in): reason banner, actions, editions with regio
   expect(t.includes("Toman is a currency conversion") && t.includes("More like this"), "disclaimer / similar heading missing");
   for (const n of ["Like", "Dislike", "Not interested", "I already own this", "Add to wishlist"]) expect((await page.getByRole("button", { name: n, exact: true }).count()) === 1, `action ${n} missing`);
   expect((await page.locator(".sim-tile").count()) === 1, "similar tile missing");
+  expect((await page.locator(".hero-cover").count()) === 1 && (await page.locator(".hero-bg").count()) === 1, "cover box / blurred backdrop missing");
 });
 await flow("search-and-add shows result and no-results copy", async (page) => {
   await page.goto(BASE + "/library", { waitUntil: "networkidle" });

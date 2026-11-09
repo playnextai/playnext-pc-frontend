@@ -94,13 +94,17 @@ function GameBody({ authed }: { authed: boolean }) {
         {!g && !missing && !error && <p className="muted">{t("common.loading")}</p>}
         {g && (
           <>
-            <div className="hero" style={g.cover_url ? { backgroundImage: `linear-gradient(180deg, rgba(20,20,20,.35), rgba(20,20,20,.96)), url(${g.cover_url})` } : undefined}>
+            <div className="hero">
+              {g.cover_url && <span className="hero-bg" aria-hidden="true" style={{ backgroundImage: `url(${g.cover_url})` }} />}
               <Link href={authed ? "/discover" : "/"} className="hero-x" aria-label={t("detail.back")}><Icon name="x" /></Link>
-              <h1 dir="auto">{g.title}</h1>
-              <div className="muted" dir="auto">
-                {[g.developer, g.release_year, g.genres.slice(0, 3).map(genre).join(", ")].filter(Boolean).join(" · ")}
-                {g.review_score !== null && <> · {t("detail.reviews", { n: Math.round(g.review_score) })}</>}
+              <div className="hero-text">
+                <h1 dir="auto">{g.title}</h1>
+                <div className="muted" dir="auto">
+                  {[g.developer, g.release_year, g.genres.slice(0, 3).map(genre).join(", ")].filter(Boolean).join(" · ")}
+                  {g.review_score !== null && <> · {t("detail.reviews", { n: Math.round(g.review_score) })}</>}
+                </div>
               </div>
+              {g.cover_url && <img className="hero-cover" src={g.cover_url} alt="" />}
             </div>
 
             {g.recommendation?.reason && <p className="reco"><span style={{ color: "var(--mint)", display: "inline-flex" }}><Icon name="heart" /></span>{reason(g.recommendation.reason)}</p>}
