@@ -37,7 +37,7 @@ export default function GamePage() {
 }
 
 function GameBody({ authed }: { authed: boolean }) {
-  const { t, toman, native, percent, reason, genre } = useI18n();
+  const { t, toman, native, percent, reason, genre, region } = useI18n();
   const params = useParams<{ id: string }>();
   const id = Number(params?.id);
   const [g, setG] = useState<GameDetail | null>(null);
@@ -74,12 +74,18 @@ function GameBody({ authed }: { authed: boolean }) {
 
   const actions: { key: string; label: string; icon: IconName; on: boolean; run: () => void }[] = g ? [
     { key: "like", label: t("detail.like"), icon: "heart", on: g.user_state.feedback === "liked", run: () => feedback("liked") },
-    { key: "dislike", label: t("detail.dislike"), icon: "x", on: g.user_state.feedback === "disliked", run: () => feedback("disliked") },
+    { key: "dislike", label: t("detail.dislike"), icon: "thumbsDown", on: g.user_state.feedback === "disliked", run: () => feedback("disliked") },
     { key: "ni", label: t("detail.notInterested"), icon: "x", on: g.user_state.feedback === "not_interested", run: () => feedback("not_interested") },
     { key: "own", label: t("detail.alreadyOwn"), icon: "check", on: g.user_state.owned || g.user_state.feedback === "already_own", run: () => feedback("already_own") },
-    { key: "wl", label: g.user_state.wishlisted ? t("detail.inWishlist") : t("detail.wishlist"), icon: "star", on: g.user_state.wishlisted, run: wishlist },
+    { key: "wl", label: g.user_state.wishlisted ? t("detail.inWishlist") : t("detail.wishlist"), icon: "bookmark", on: g.user_state.wishlisted, run: wishlist },
   ] : [];
 
+  const userRegion = g?.editions.flatMap((e) => e.prices).find((p) => p.is_user_region)?.region;
+  const chipBtn = (a: (typeof actions)[number]) => (
+    <button key={a.key} aria-pressed={a.on} disabled={busy} onClick={a.run} className="act-btn" data-on={a.on}>
+      <Icon name={a.icon} /> {a.label}
+    </button>
+  );
   return (
     <>
       <main className="container" style={{ paddingBottom: 64, maxWidth: 860 }}>
@@ -88,42 +94,33 @@ function GameBody({ authed }: { authed: boolean }) {
         {!g && !missing && !error && <p className="muted">{t("common.loading")}</p>}
         {g && (
           <>
-            <Link href="/discover" style={{ display: "inline-flex", gap: 6, alignItems: "center", margin: "12px 0 0", minHeight: 40, textDecoration: "none" }}>
-              <Icon name="arrow" className="icon flip" /> {t("detail.back")}
-            </Link>
-            <div style={{ display: "flex", gap: 24, margin: "16px 0", flexWrap: "wrap" }}>
-              {g.cover_url ? <img src={g.cover_url} alt="" style={{ width: 220, borderRadius: 14 }} /> : <span className="cover" style={{ width: 220 }} />}
-              <div style={{ flex: 1, minWidth: 240 }}>
-                <h1 style={{ margin: "0 0 6px", fontWeight: 600 }} dir="auto">{g.title}</h1>
-                <div className="muted" style={{ marginBottom: 10 }} dir="auto">
-                  {[g.developer ? t("detail.by", { name: g.developer }) : null, g.release_year, g.genres.slice(0, 3).map(genre).join(" · ")].filter(Boolean).join(" · ")}
-                  {g.review_score !== null && <> · {t("detail.reviews", { n: Math.round(g.review_score) })}</>}
-                </div>
-                {g.recommendation?.reason && <p style={{ margin: "0 0 10px" }}><strong>{t("detail.whyPicked")}:</strong> <span className="muted">{reason(g.recommendation.reason)}</span></p>}
-                {!authed && <p className="muted" style={{ margin: "0 0 8px" }}>{t("detail.signInPrompt")}</p>}
-                {authed && <div role="group" aria-label={t("card.actions")} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {actions.map((a) => (
-                    <button key={a.key} aria-pressed={a.on} disabled={busy} onClick={a.run} className="chip"
-                      style={{ minHeight: 40, cursor: "pointer", color: a.on ? "var(--mint)" : "var(--text)", borderColor: a.on ? "var(--mint)" : "#3a3a38" }}>
-                      <Icon name={a.icon} /> {a.label}
-                    </button>
-                  ))}
-                </div>}
+            <div className="hero" style={g.cover_url ? { backgroundImage: `linear-gradient(180deg, rgba(20,20,20,.35), rgba(20,20,20,.96)), url(${g.cover_url})` } : undefined}>
+              <Link href={authed ? "/discover" : "/"} className="hero-x" aria-label={t("detail.back")}><Icon name="x" /></Link>
+              <h1 dir="auto">{g.title}</h1>
+              <div className="muted" dir="auto">
+                {[g.developer, g.release_year, g.genres.slice(0, 3).map(genre).join(", ")].filter(Boolean).join(" · ")}
+                {g.review_score !== null && <> · {t("detail.reviews", { n: Math.round(g.review_score) })}</>}
               </div>
             </div>
 
-            {g.description && <section className="stack"><h2 style={{ fontSize: "1.1rem", fontWeight: 600, margin: "16px 0 0" }}>{t("detail.about")}</h2>
-              <p className="muted" lang="en" dir="ltr" style={{ margin: 0, lineHeight: 1.7 }}>{g.description}</p></section>}
+            {g.recommendation?.reason && <p className="reco"><span style={{ color: "var(--mint)", display: "inline-flex" }}><Icon name="heart" /></span>{reason(g.recommendation.reason)}</p>}
+            {!authed && <p className="muted" style={{ margin: "16px 0 0" }}>{t("detail.signInPrompt")}</p>}
+            {authed && <div role="group" aria-label={t("card.actions")} className="act-row">
+              <div className="act-main">{actions.filter((a) => a.key !== "wl").map(chipBtn)}</div>
+              {actions.filter((a) => a.key === "wl").map(chipBtn)}
+            </div>}
 
-            <section className="stack" style={{ marginTop: 24 }}>
-              <h2 style={{ fontSize: "1.1rem", fontWeight: 600, margin: 0 }}>{t("detail.editions")}</h2>
+            {g.description && <p className="muted" lang="en" dir="ltr" style={{ margin: "20px 0 0", lineHeight: 1.7 }}>{g.description}</p>}
+
+            <h2 className="sec-h">{t("detail.editions")}{authed && userRegion && <span className="muted sec-note"> · {t("detail.regionNote", { region: region(userRegion) })}</span>}</h2>
+            <div className="ed-card">
               {g.editions.map((ed) => {
                 const shown = authed ? [ed.prices.find((x) => x.is_user_region) ?? ed.prices[0]].filter(Boolean) : ed.prices;
                 return (
-                  <div key={ed.game_edition_id} className="card" style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
-                    <div style={{ flex: 1, minWidth: 160 }}>
-                      <strong dir="auto">{ed.edition_name ?? g.title}</strong>
-                      <div className="muted" style={{ fontSize: ".85rem" }}>{ed.platforms.map((x) => PLATFORM_NAME[x] ?? x).join(" · ")}</div>
+                  <div key={ed.game_edition_id} className="ed-row">
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <strong dir="auto">{ed.edition_name ?? g.title}</strong>{" "}
+                      {ed.platforms.map((x) => <span key={x} className="chip plat-chip">{PLATFORM_NAME[x] ?? x}</span>)}
                     </div>
                     <div style={{ textAlign: "end", display: "grid", gap: 6 }}>
                       {shown.map((p) => {
@@ -132,32 +129,34 @@ function GameBody({ authed }: { authed: boolean }) {
                         return (
                           <div key={p.region}>
                             {!authed && <span className="muted" style={{ fontSize: ".85rem", marginInlineEnd: 8 }}>{t(`detail.region.${p.region as Region}`)}</span>}
-                            <span className="price">{p.is_free ? t("detail.free") : toman(p.price_toman)}</span>
-                            {!!p.discount_pct && p.price_toman !== null && <span style={{ color: "var(--danger)", background: "var(--danger-bg)", borderRadius: 6, padding: "1px 6px", marginInlineStart: 8, fontSize: ".8rem" }}>-{percent(p.discount_pct)}</span>}
-                            {nat && <div className="muted" style={{ fontSize: ".85rem" }}>{nat}</div>}
+                            <span className="price" style={{ fontWeight: 700, fontSize: "1.05rem" }}>{p.is_free ? t("detail.free") : toman(p.price_toman)}</span>
+                            {!!p.discount_pct && p.price_toman !== null && <span className="gc-badge" style={{ position: "static", marginInlineStart: 8, padding: "1px 6px" }}>-{percent(p.discount_pct)}</span>}
+                            {nat && <div className="muted" style={{ fontSize: ".82rem" }}>{nat} {authed ? t("card.yourRegion") : t("detail.estimate")}</div>}
                           </div>
                         );
                       })}
                     </div>
                     {authed && (
-                      <button className="btn small" disabled={busy || g.user_state.in_cart} onClick={() => addToCart(ed.game_edition_id)}>
-                        {g.user_state.in_cart ? t("detail.inCart") : t("detail.addToCart")}
+                      <button className="btn secondary small" disabled={busy || g.user_state.in_cart} onClick={() => addToCart(ed.game_edition_id)}>
+                        <Icon name="cart" className="icon-sm" /> {g.user_state.in_cart ? t("detail.inCart") : t("detail.addToCart")}
                       </button>
                     )}
                     {ed.buy_url && <a className="btn secondary small" href={ed.buy_url} target="_blank" rel="noopener noreferrer">{t("detail.buy")}</a>}
                   </div>
                 );
               })}
-            </section>
+            </div>
+            <p className="muted" style={{ fontSize: ".85rem", lineHeight: 1.7, margin: "12px 0 0" }}>{t("detail.disclaimer")}</p>
 
-            {g.tags.length > 0 && <section className="stack" style={{ marginTop: 24 }}><h2 style={{ fontSize: "1.1rem", fontWeight: 600, margin: 0 }}>{t("detail.tags")}</h2>
-              <div className="row" lang="en" dir="ltr">{g.tags.slice(0, 14).map((x) => <span key={x} className="chip">{x}</span>)}</div></section>}
+            {g.tags.length > 0 && <><h2 className="sec-h">{t("detail.tags")}</h2>
+              <div className="row" lang="en" dir="ltr">{g.tags.slice(0, 14).map((x) => <span key={x} className="chip" style={{ minHeight: 34 }}>{x}</span>)}</div></>}
 
-            {g.similar.length > 0 && <section className="stack" style={{ marginTop: 24 }}><h2 style={{ fontSize: "1.1rem", fontWeight: 600, margin: 0 }}>{t("detail.similar")}</h2>
-              <div className="grid">{g.similar.slice(0, 6).map((s) => (
-                <Link key={s.game_id} href={`/game/${s.game_id}`} className="card" style={{ color: "var(--text)", textDecoration: "none", display: "flex", gap: 12, alignItems: "center" }}>
-                  <Thumb url={s.cover_url} /><span><strong dir="auto" style={{ display: "block" }}>{s.title}</strong><span className="price" style={{ fontSize: ".9rem" }}>{toman(s.price_toman)}</span></span>
-                </Link>))}</div></section>}
+            {g.similar.length > 0 && <><h2 className="sec-h">{t("detail.similar")}</h2>
+              <div className="sim-grid">{g.similar.slice(0, 4).map((s) => (
+                <Link key={s.game_id} href={`/game/${s.game_id}`} className="sim-tile">
+                  <span className="sim-name" dir="auto">{s.title}</span>
+                  <span className="price" style={{ fontSize: ".85rem" }}>{toman(s.price_toman)}</span>
+                </Link>))}</div></>}
           </>
         )}
       </main>

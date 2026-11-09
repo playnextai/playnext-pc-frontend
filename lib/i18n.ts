@@ -305,8 +305,11 @@ export const en = {
 
   // game detail
   "detail.back": "Back",
+  "detail.regionNote": "your region: {region}",
+  "detail.disclaimer": "Toman is a currency conversion for reference, not a price quoted by the store. \"Add to cart\" saves this game to your list; you'll complete the purchase on the store directly.",
+  "detail.estimate": "(est., sign in for your region)",
   "detail.about": "About",
-  "detail.editions": "Editions and pricing",
+  "detail.editions": "Editions & pricing",
   "detail.priceIn": "Price in {region}",
   "detail.free": "Free",
   "detail.addToCart": "Add to cart",
@@ -320,7 +323,7 @@ export const en = {
   "detail.wishlist": "Add to wishlist",
   "detail.inWishlist": "In your wishlist",
   "detail.tags": "Tags",
-  "detail.similar": "Similar games",
+  "detail.similar": "More like this",
   "detail.whyPicked": "Why we picked this",
   "detail.signInPrompt": "Sign in to see prices for your region and add this game to your lists.",
   "detail.signIn": "Sign in",
@@ -605,6 +608,9 @@ export const fa: Record<Key, string> = {
   "settings.saved": "ذخیره شد",
 
   "detail.back": "بازگشت",
+  "detail.regionNote": "منطقه‌ی تو: {region}",
+  "detail.disclaimer": "تومانِ نمایش‌داده‌شده فقط تبدیل ارز برای مرجع است و قیمتِ اعلام‌شده توسط فروشگاه نیست. «افزودن به سبد» این بازی را در فهرست ذخیره می‌کند؛ خرید را مستقیماً در فروشگاه انجام می‌دهی.",
+  "detail.estimate": "(تخمینی؛ برای قیمت منطقه‌ات وارد شو)",
   "detail.about": "درباره‌ی بازی",
   "detail.editions": "نسخه‌ها و قیمت",
   "detail.priceIn": "قیمت در {region}",

@@ -165,6 +165,15 @@ await flow("signed-out game page shows every region and a sign-in prompt, no act
   expect((await page.getByRole("button", { name: "Add to cart" }).count()) === 0, "action buttons visible while signed out");
   await setScenario("full");
 });
+await flow("game detail (signed in): reason banner, actions, editions with region note, disclaimer, more like this", async (page) => {
+  await page.goto(BASE + "/game/1", { waitUntil: "networkidle" });
+  const t = await page.locator("main").innerText();
+  expect(t.includes("Because you liked Dark Souls III"), "reason banner missing");
+  expect(t.includes("Editions & pricing") && t.includes("your region: Turkey"), "editions heading/region note missing");
+  expect(t.includes("Toman is a currency conversion") && t.includes("More like this"), "disclaimer / similar heading missing");
+  for (const n of ["Like", "Dislike", "Not interested", "I already own this", "Add to wishlist"]) expect((await page.getByRole("button", { name: n, exact: true }).count()) === 1, `action ${n} missing`);
+  expect((await page.locator(".sim-tile").count()) === 1, "similar tile missing");
+});
 await flow("search-and-add shows result and no-results copy", async (page) => {
   await page.goto(BASE + "/library", { waitUntil: "networkidle" });
   await page.getByLabel("Search games").fill("Hollow");

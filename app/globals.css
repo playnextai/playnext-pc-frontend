@@ -183,3 +183,24 @@ html[lang="fa"] .lp-hero h1 { line-height: 1.4; }
 .cart-h { display: flex; align-items: center; gap: 8px; font-size: 1.05rem; font-weight: 600; margin: 0 0 10px; }
 .warn-chip { background: #3a2f10; color: #f0c05a; border-radius: 6px; padding: 1px 8px; font-size: .78rem; font-weight: 600; }
 .cart-total { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--border); padding-top: 20px; margin-top: 8px; }
+
+/* ---- game detail ---- */
+.hero { position: relative; margin-top: 16px; min-height: 190px; border-radius: 18px; border: 1px solid var(--border); background: linear-gradient(180deg, #232322, #171716); background-size: cover; background-position: center; padding: 22px 24px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; }
+.hero h1 { margin: 0; font-size: clamp(1.7rem, 4vw, 2.4rem); font-weight: 600; }
+.hero-x { position: absolute; top: 16px; inset-inline-end: 16px; width: 40px; height: 40px; border-radius: 10px; background: rgba(40,40,39,.85); color: var(--text); display: inline-flex; align-items: center; justify-content: center; }
+.reco { display: flex; align-items: center; gap: 12px; margin: 16px 0 0; padding: 12px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.act-row { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.act-main { display: flex; gap: 10px; flex-wrap: wrap; }
+.act-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid #3a3a38; background: transparent; color: var(--text); font-size: .95rem; cursor: pointer; }
+.act-btn[data-on="true"] { color: var(--mint); border-color: var(--mint); }
+.act-btn[disabled] { opacity: .6; cursor: wait; }
+.sec-h { font-size: 1.15rem; font-weight: 600; margin: 28px 0 12px; }
+.sec-note { font-size: .9rem; font-weight: 400; }
+.ed-card { border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+.ed-row { display: flex; align-items: center; gap: 14px; padding: 16px 18px; flex-wrap: wrap; }
+.ed-row + .ed-row { border-top: 1px solid var(--border); }
+.plat-chip { min-height: 22px; padding: 0 8px; font-size: .75rem; color: var(--muted); margin-inline-start: 4px; }
+.sim-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.sim-tile { display: flex; flex-direction: column; justify-content: flex-end; gap: 2px; min-height: 110px; padding: 12px; border-radius: 14px; border: 1px solid var(--border); background: linear-gradient(160deg, #272726, #191918); color: var(--text); text-decoration: none; }
+.sim-name { font-weight: 600; font-size: .95rem; }
+@media (max-width: 640px) { .sim-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .hero { min-height: 160px; padding: 18px; } }
