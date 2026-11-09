@@ -188,7 +188,7 @@ await flow("cart: locked price is primary, changed price flagged, total matches"
   expect(t.includes("2 games · checkout happens on each platform separately"), "subtitle missing");
   expect(t.includes("3,000,000 Toman") && t.includes("Price changed") && t.includes("now charges about 3,317,470 Toman"), "locked price / price-changed note wrong");
   expect(t.includes("Total (locked-in prices)") && t.includes("4,517,470"), "total wrong");
-  expect(t.includes("No direct buy link for Steam yet"), "no-link note missing");
+  expect(!t.includes("No direct buy link") && !t.includes("This total is for planning"), "removed lines are back");
 });
 
 await flow("undo bar brings a removed card back", async (page) => {

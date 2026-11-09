@@ -67,7 +67,6 @@ export default function CartPage() {
                             <div className="muted" style={{ fontSize: ".82rem" }} role={it.price_changed ? "status" : undefined}>
                               {it.price_changed ? t("cart.changedNote", { platform: name, price: toman(it.price_toman_now) }) : nat ? t("cart.lockedNative", { price: nat }) : t("cart.lockedOnly")}
                             </div>
-                            {!it.buy_url && <div className="muted" style={{ fontSize: ".82rem", marginTop: 4 }}>{t("cart.noLink", { platform: name })}</div>}
                           </div>
                           {it.buy_url
                             ? <a className="btn secondary small" href={it.buy_url} target="_blank" rel="noopener noreferrer">{t("cart.buy", { platform: name })}</a>
@@ -84,7 +83,6 @@ export default function CartPage() {
               <span style={{ fontSize: "1.1rem" }}>{t("cart.total")}</span>
               <span className="price" style={{ fontSize: "1.6rem" }}>{toman(cart.total_toman)}</span>
             </div>
-            <p className="muted" style={{ fontSize: ".9rem", lineHeight: 1.7, maxWidth: 560 }}>{t("cart.disclaimer")}</p>
           </>
         )}
       </main>

@@ -280,7 +280,6 @@ export const en = {
   "cart.browse": "Browse recommendations",
   "cart.total": "Total (locked-in prices)",
   "cart.buy": "Buy on {platform}",
-  "cart.noLink": "No direct buy link for {platform} yet. Open the game on {platform} to buy.",
   "cart.priceChanged": "Price changed",
   "cart.changedNote": "Locked in when added. {platform} now charges about {price}.",
   "cart.lockedNative": "{price} · locked in when added",
@@ -289,7 +288,6 @@ export const en = {
   "cart.gamesOne": "1 game",
   "cart.gamesMany": "{n} games",
   "cart.removeFailed": "Could not remove that item.",
-  "cart.disclaimer": "Actual charge happens on each platform, in its own currency. This total is for planning, not a payment.",
 
   // settings
   "settings.title": "Settings",
@@ -584,7 +582,6 @@ export const fa: Record<Key, string> = {
   "cart.browse": "دیدن پیشنهادها",
   "cart.total": "جمع (قیمت‌های قفل‌شده)",
   "cart.buy": "خرید در {platform}",
-  "cart.noLink": "هنوز لینک خرید مستقیم {platform} نداریم. بازی را در {platform} باز کن و بخر.",
   "cart.priceChanged": "قیمت تغییر کرده",
   "cart.changedNote": "هنگام افزودن قفل شد. {platform} الان حدود {price} می‌گیرد.",
   "cart.lockedNative": "{price} · هنگام افزودن قفل شد",
@@ -593,7 +590,6 @@ export const fa: Record<Key, string> = {
   "cart.gamesOne": "۱ بازی",
   "cart.gamesMany": "{n} بازی",
   "cart.removeFailed": "این مورد حذف نشد.",
-  "cart.disclaimer": "پرداخت واقعی روی هر پلتفرم و با ارز خودش انجام می‌شود. این مبلغ برای برنامه‌ریزی است، نه پرداخت.",
 
   "settings.title": "تنظیمات",
   "settings.accounts": "حساب‌های متصل",
