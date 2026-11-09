@@ -17,10 +17,12 @@ const settings = () => ({
   display_name: "Arash", email: "arash@example.com", steam_linked: scenario === "full", region: "TR",
   budget_ceiling_toman: null, region_options: regionOptions, budget_max_toman: 8500000,
 });
+// A coloured 3:4 "cover" so the detail hero (cover box + blurred colour backdrop) is exercised.
+const demoCover = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b8862b"/><stop offset="1" stop-color="#5a1d12"/></linearGradient></defs><rect width="300" height="400" fill="url(#g)"/><circle cx="150" cy="170" r="70" fill="#f2d28a" opacity=".85"/></svg>');
 const detail = (signedIn) => ({
   game_id: 1, title: "Elden Ring", description: "A vast open world action RPG from FromSoftware and George R. R. Martin.",
   developer: "FromSoftware", publisher: "Bandai Namco", genres: ["Action RPG", "Open World"], tags: ["Souls-like", "Difficult", "Fantasy"],
-  platforms: ["pc"], release_year: 2022, review_score: 92, cover_url: cover,
+  platforms: ["pc"], release_year: 2022, review_score: 92, cover_url: demoCover,
   editions: [{ game_edition_id: 11, edition_name: "Standard Edition", is_primary: true, platforms: ["steam"], buy_url: "https://store.steampowered.com/app/1245620",
     prices: ["US:USD:59.99", "UK:GBP:49.99", "EU:EUR:59.99", "UA:UAH:1999", "TR:TRY:1249.5", "AR:USD:30"].map((x, i) => { const [region, cur, p] = x.split(":"); return { region, is_user_region: signedIn && region === "TR", is_free: false, ...price(3317470 - i * 100000, Number(p), cur, i === 4 ? 20 : null) }; }) }],
   user_state: { owned: false, wishlisted: false, in_cart: false, feedback: null },
