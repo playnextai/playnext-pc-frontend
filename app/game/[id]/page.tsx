@@ -10,6 +10,7 @@ import Icon, { type IconName } from "@/components/Icon";
 import Thumb from "@/components/Thumb";
 import { useI18n } from "@/components/I18nProvider";
 import { api, ApiError } from "@/lib/api";
+import { toPersianNumerals } from "@/lib/i18n";
 import type { FeedbackAction, GameDetail, Region } from "@/lib/types";
 
 const PLATFORM_NAME: Record<string, string> = { steam: "Steam", gog: "GOG", epic: "Epic" };
@@ -37,7 +38,7 @@ export default function GamePage() {
 }
 
 function GameBody({ authed }: { authed: boolean }) {
-  const { t, toman, native, percent, reason, genre, region } = useI18n();
+  const { t, toman, native, percent, reason, genre, region, lang } = useI18n();
   const params = useParams<{ id: string }>();
   const id = Number(params?.id);
   const [g, setG] = useState<GameDetail | null>(null);
@@ -100,7 +101,7 @@ function GameBody({ authed }: { authed: boolean }) {
               <div className="hero-text">
                 <h1 dir="auto">{g.title}</h1>
                 <div className="muted" dir="auto">
-                  {[g.developer, g.release_year, g.genres.slice(0, 3).map(genre).join(", ")].filter(Boolean).join(" · ")}
+                  {[g.developer, g.release_year ? (lang === "fa" ? toPersianNumerals(String(g.release_year)) : String(g.release_year)) : null, g.genres.slice(0, 3).map(genre).join(", ")].filter(Boolean).join(" · ")}
                   {g.review_score !== null && <> · {t("detail.reviews", { n: Math.round(g.review_score) })}</>}
                 </div>
               </div>
