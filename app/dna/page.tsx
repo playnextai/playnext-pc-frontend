@@ -77,8 +77,8 @@ function Stats({ dna, hours, percent }: { dna: GamerDna; hours: (n: number) => s
       <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
         {tiles.map(([v, l]) => (
           <div key={l} className="card">
-            <div className="price" style={{ fontSize: "1.9rem", fontWeight: 600 }} dir="auto">{v}</div>
-            <div className="muted" style={{ fontSize: ".9rem" }}>{l}</div>
+            <div className="price dna-val" dir="auto">{v}</div>
+            <div className="muted" style={{ fontSize: ".9rem", overflowWrap: "anywhere" }}>{l}</div>
           </div>
         ))}
       </div>
@@ -102,7 +102,7 @@ function Stats({ dna, hours, percent }: { dna: GamerDna; hours: (n: number) => s
             <strong dir="auto">{dna.most_played_game.title}</strong> · {hours(Math.round(dna.most_played_game.hours))}</div>
         </div>
       )}
-      <p className="muted" style={{ fontSize: ".85rem" }}>{t("dna.typeNote")}</p>
+      <p className="muted" style={{ fontSize: ".85rem", lineHeight: 1.7 }}>{t("dna.typeNote")}</p>
     </div>
   );
 }

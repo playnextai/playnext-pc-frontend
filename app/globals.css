@@ -217,3 +217,5 @@ html[dir="rtl"] .hero::after { background: linear-gradient(270deg, rgba(20,20,20
 .spinner { width: 44px; height: 44px; border-radius: 50%; border: 3px solid #2d2d2c; border-top-color: var(--mint); animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+.dna-val { font-size: 1.9rem; font-weight: 600; overflow-wrap: anywhere; }
+@media (max-width: 640px) { .dna-val { font-size: 1.4rem; } }
