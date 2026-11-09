@@ -187,9 +187,9 @@ html[lang="fa"] .lp-hero h1 { line-height: 1.4; }
 /* ---- game detail ---- */
 .hero { position: relative; overflow: hidden; margin-top: 16px; min-height: 250px; border-radius: 18px; border: 1px solid var(--border); background: linear-gradient(180deg, #232322, #171716); padding: 22px 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
 /* The cover, blurred and darkened, gives the colour gradient "inspired by the game"; the sharp cover sits at the end side. */
-.hero-bg { position: absolute; inset: -40px; background-size: cover; background-position: center; filter: blur(36px) saturate(1.3); opacity: .55; }
-.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(20,20,20,.88), rgba(20,20,20,.35)); }
-html[dir="rtl"] .hero::after { background: linear-gradient(270deg, rgba(20,20,20,.88), rgba(20,20,20,.35)); }
+.hero-bg { position: absolute; inset: -40px; background-size: cover; background-position: center; filter: blur(36px) saturate(1.3); opacity: .75; }
+.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(20,20,20,.85), rgba(20,20,20,.2)); }
+html[dir="rtl"] .hero::after { background: linear-gradient(270deg, rgba(20,20,20,.85), rgba(20,20,20,.2)); }
 .hero-text, .hero-cover { position: relative; z-index: 1; }
 .hero-text { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 4px; }
 .hero-cover { width: 128px; height: 170px; object-fit: cover; border-radius: 12px; border: 1px solid rgba(255,255,255,.12); box-shadow: 0 8px 24px rgba(0,0,0,.45); flex: none; }

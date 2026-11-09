@@ -95,7 +95,7 @@ function GameBody({ authed }: { authed: boolean }) {
         {g && (
           <>
             <div className="hero">
-              {g.cover_url && <span className="hero-bg" aria-hidden="true" style={{ backgroundImage: `url(${g.cover_url})` }} />}
+              {g.cover_url && <span className="hero-bg" aria-hidden="true" style={{ backgroundImage: `url("${g.cover_url.replace(/"/g, "%22")}")` }} />}
               <Link href={authed ? "/discover" : "/"} className="hero-x" aria-label={t("detail.back")}><Icon name="x" /></Link>
               <div className="hero-text">
                 <h1 dir="auto">{g.title}</h1>
