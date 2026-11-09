@@ -177,3 +177,8 @@ html[lang="fa"] .lp-hero h1 { line-height: 1.4; }
 .wl-row { display: flex; gap: 14px; align-items: center; padding: 12px 16px; border-radius: 14px; }
 .steam-banner { display: flex; gap: 12px; align-items: center; border-color: var(--mint); border-radius: 14px; padding: 14px 16px; }
 @media (max-width: 640px) { .wl-row { flex-wrap: wrap; } .wl-row .lib-tag { display: none; } }
+
+/* ---- cart ---- */
+.cart-h { display: flex; align-items: center; gap: 8px; font-size: 1.05rem; font-weight: 600; margin: 0 0 10px; }
+.warn-chip { background: #3a2f10; color: #f0c05a; border-radius: 6px; padding: 1px 8px; font-size: .78rem; font-weight: 600; }
+.cart-total { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--border); padding-top: 20px; margin-top: 8px; }
