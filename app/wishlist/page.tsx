@@ -66,7 +66,7 @@ export default function WishlistPage() {
             return (
               <li key={g.game_id} className="card wl-row">
                 <Thumb url={g.cover_url} />
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="wl-info">
                   <Link href={`/game/${g.game_id}`} className="link-title" dir="auto">{g.title}</Link>
                   <div className="price" style={{ fontSize: "1rem" }}>
                     {toman(g.price_toman)}

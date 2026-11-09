@@ -57,7 +57,7 @@ export default function CartPage() {
                       return (
                         <li key={it.item_id} className="card wl-row" style={{ alignItems: "center" }}>
                           <Thumb url={it.cover_url} />
-                          <div style={{ flex: 1, minWidth: 0 }}>
+                          <div className="wl-info">
                             <div style={{ display: "flex", gap: 8, alignItems: "baseline", flexWrap: "wrap" }}>
                               <Link href={`/game/${it.game_id}`} className="link-title" dir="auto">{it.title}</Link>
                               {it.edition_name && <span className="muted" style={{ fontSize: ".85rem" }}>{it.edition_name}</span>}
