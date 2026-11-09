@@ -6,7 +6,7 @@ import Thumb from "@/components/Thumb";
 import { useI18n } from "@/components/I18nProvider";
 import { api, ApiError } from "@/lib/api";
 import { steamSignInUrl } from "@/lib/auth";
-import { DNA_TYPE_KEYS } from "@/lib/i18n";
+import { DNA_DESC_KEYS, DNA_TYPE_KEYS } from "@/lib/i18n";
 import type { GamerDna } from "@/lib/types";
 
 type State = { kind: "loading" } | { kind: "ok"; dna: GamerDna } | { kind: "needs_steam" } | { kind: "error" };
@@ -26,21 +26,22 @@ export default function DnaPage() {
   return (
     <AppShell>
       <main className="container" style={{ paddingBottom: 64, maxWidth: 680 }}>
-        <h1 className="page-title">{t("dna.title")}</h1>
+        <h1 className="page-title" style={{ fontSize: "2rem", margin: "28px 0 4px" }}>{t("dna.title")}</h1>
         <p className="muted" style={{ margin: "0 0 20px" }}>{t("dna.sub")}</p>
         {st.kind === "loading" && <p className="muted">{t("common.loading")}</p>}
         {st.kind === "error" && <p className="error" role="alert">{t("common.refresh")}</p>}
         {st.kind === "needs_steam" && (
           <div className="card stack" style={{ alignItems: "center", textAlign: "center", padding: 28 }}>
-            <Icon name="gamepad" className="icon" />
+            <span className="dna-ic"><Icon name="gamepad" /></span>
             <strong style={{ fontSize: "1.2rem" }}>{t("dna.needsSteamTitle")}</strong>
             <span className="muted">{t("dna.needsSteamText")}</span>
-            <a className="btn" href={steamSignInUrl("/dna")}>{t("dna.needsSteamButton")}</a>
+            <a className="btn" style={{ width: "100%" }} href={steamSignInUrl("/dna")}>{t("dna.needsSteamButton")}</a>
             <span className="muted" style={{ fontSize: ".85rem" }}>{t("dna.needsSteamNote")}</span>
           </div>
         )}
         {st.kind === "ok" && !st.dna.has_data && (
           <div className="card stack" style={{ alignItems: "center", textAlign: "center", padding: 28 }}>
+            <span className="spinner" aria-hidden="true" />
             <strong style={{ fontSize: "1.2rem" }}>{t("dna.syncingTitle")}</strong>
             <span className="muted">{t("dna.syncingText")}</span>
           </div>
@@ -55,6 +56,7 @@ function Stats({ dna, hours, percent }: { dna: GamerDna; hours: (n: number) => s
   const { t, lang, genre } = useI18n();
   const nf = new Intl.NumberFormat(lang === "fa" ? "fa-IR" : "en-US");
   const tk = dna.type_label ? DNA_TYPE_KEYS[dna.type_label] ?? null : null;
+  const dk = dna.type_label ? DNA_DESC_KEYS[dna.type_label] ?? null : null;
   const top = dna.top_genres.slice(0, 3);
   const maxH = Math.max(1, ...top.map((g) => g.hours));
   const tiles: [string, string][] = [
@@ -69,12 +71,13 @@ function Stats({ dna, hours, percent }: { dna: GamerDna; hours: (n: number) => s
         <div className="card" style={{ textAlign: "center", padding: "30px 20px" }}>
           <div className="muted">{t("dna.yourType")}</div>
           <div style={{ fontSize: "1.9rem", fontWeight: 600, color: "var(--mint)", margin: "6px 0" }}>{tk ? t(tk) : dna.type_label}</div>
+          {dk && <div className="muted">{t(dk)}</div>}
         </div>
       )}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
         {tiles.map(([v, l]) => (
           <div key={l} className="card">
-            <div className="price" style={{ fontSize: "1.6rem" }} dir="auto">{v}</div>
+            <div className="price" style={{ fontSize: "1.9rem", fontWeight: 600 }} dir="auto">{v}</div>
             <div className="muted" style={{ fontSize: ".9rem" }}>{l}</div>
           </div>
         ))}

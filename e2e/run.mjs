@@ -230,6 +230,11 @@ await flow("Farsi: regions, reasons and genres are translated", async (page) => 
   await page.goto(BASE + "/dna", { waitUntil: "networkidle" });
   expect((await page.locator("main").innerText()).includes("اکشن RPG"), "genre not translated");
 });
+await flow("gamer DNA: type description and Six types note", async (page) => {
+  await page.goto(BASE + "/dna", { waitUntil: "networkidle" });
+  const t = await page.locator("main").innerText();
+  expect(t.includes("You spread your hours across more genres than most.") && t.includes("Six types:"), "type description / note missing");
+});
 await flow("onboarding add-games shows the playtime gauge", async (page) => {
   await setScenario("empty");
   await page.goto(BASE + "/onboarding/library", { waitUntil: "networkidle" });

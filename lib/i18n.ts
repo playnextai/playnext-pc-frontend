@@ -347,7 +347,7 @@ export const en = {
   "dna.studio": "most-played studio",
   "dna.topGenres": "Top genres by hours played",
   "dna.mostPlayed": "Most played",
-  "dna.typeNote": "The type is a light-hearted label worked out from clear behaviour (hours, backlog, spread of genres). It is not a psychological profile.",
+  "dna.typeNote": "The type is a light-hearted label worked out from clear behaviour (hours, backlog, spread of genres). It is not a psychological profile. Six types: Completionist, Backlog Collector, Genre Explorer, Loyalist, Genre Specialist, Balanced.",
   "dna.needsSteamTitle": "Gamer DNA needs Steam",
   "dna.needsSteamText": "It's built from real playtime, which we can only read from a Steam account.",
   "dna.needsSteamButton": "Sign in with Steam",
@@ -360,6 +360,12 @@ export const en = {
   "dna.type.loyalist": "The Loyalist",
   "dna.type.genre_specialist": "The Genre Specialist",
   "dna.type.balanced": "The Balanced Gamer",
+  "dna.desc.completionist": "You finish what you start, with high achievement completion across your games.",
+  "dna.desc.backlog_collector": "Your library grows faster than your playtime, and that's fine.",
+  "dna.desc.genre_explorer": "You spread your hours across more genres than most.",
+  "dna.desc.loyalist": "You sink most of your hours into a handful of favourite games.",
+  "dna.desc.genre_specialist": "One genre gets most of your time, and you know it well.",
+  "dna.desc.balanced": "Your time is spread evenly, with no single habit standing out.",
 
   // states
   "wishlist.view": "View game",
@@ -375,6 +381,15 @@ export const en = {
 export type Key = keyof typeof en;
 
 /** The backend sends Gamer DNA types as English labels (gamer_dna_router.derive_label). Map them to keys. */
+export const DNA_DESC_KEYS: Record<string, Key> = {
+  "The Completionist": "dna.desc.completionist",
+  "The Backlog Collector": "dna.desc.backlog_collector",
+  "The Genre Explorer": "dna.desc.genre_explorer",
+  "The Loyalist": "dna.desc.loyalist",
+  "The Genre Specialist": "dna.desc.genre_specialist",
+  "The Balanced Gamer": "dna.desc.balanced",
+};
+
 export const DNA_TYPE_KEYS: Record<string, Key> = {
   "The Completionist": "dna.type.completionist",
   "The Backlog Collector": "dna.type.backlog_collector",
@@ -649,7 +664,7 @@ export const fa: Record<Key, string> = {
   "dna.studio": "پربازی‌ترین استودیو",
   "dna.topGenres": "ژانرهای برتر بر اساس ساعت بازی",
   "dna.mostPlayed": "پربازی‌ترین",
-  "dna.typeNote": "«نوع» یک برچسب سرگرم‌کننده است که از رفتار روشن (ساعت، بک‌لاگ، تنوع ژانر) به دست می‌آید؛ تحلیل روان‌شناختی نیست.",
+  "dna.typeNote": "«نوع» یک برچسب سرگرم‌کننده است که از رفتار روشن (ساعت، بک‌لاگ، تنوع ژانر) به دست می‌آید؛ تحلیل روان‌شناختی نیست. شش نوع: کامل‌کننده، جمع‌کننده‌ی بک‌لاگ، کاوشگر ژانر، وفادار، متخصص ژانر، متعادل.",
   "dna.needsSteamTitle": "دی‌ان‌ای گیمر به استیم نیاز دارد",
   "dna.needsSteamText": "از ساعت بازی واقعی ساخته می‌شود و فقط از حساب استیم قابل خواندن است.",
   "dna.needsSteamButton": "ورود با استیم",
@@ -662,6 +677,12 @@ export const fa: Record<Key, string> = {
   "dna.type.loyalist": "وفادار",
   "dna.type.genre_specialist": "متخصص ژانر",
   "dna.type.balanced": "گیمر متعادل",
+  "dna.desc.completionist": "هر بازی را که شروع می‌کنی تمام می‌کنی و درصد تکمیل دستاوردهایت بالاست.",
+  "dna.desc.backlog_collector": "کتابخانه‌ات سریع‌تر از ساعت بازی‌ات بزرگ می‌شود، و اشکالی ندارد.",
+  "dna.desc.genre_explorer": "ساعت‌های بازی‌ات را بین ژانرهای بیشتری از بیشتر آدم‌ها پخش می‌کنی.",
+  "dna.desc.loyalist": "بیشتر ساعت‌هایت را روی چند بازی موردعلاقه می‌گذاری.",
+  "dna.desc.genre_specialist": "یک ژانر بیشتر وقتت را می‌گیرد و خوب می‌شناسیش.",
+  "dna.desc.balanced": "وقتت به‌طور مساوی پخش است و هیچ عادتی بیش از بقیه خودنمایی نمی‌کند.",
 
   "wishlist.view": "دیدن بازی",
   "state.notFoundTitle": "این صفحه وجود ندارد",
