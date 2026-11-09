@@ -186,8 +186,8 @@ await flow("cart: locked price is primary, changed price flagged, total matches"
   await page.goto(BASE + "/cart", { waitUntil: "networkidle" });
   const t = await page.locator("main").innerText();
   expect(t.includes("2 games · checkout happens on each platform separately"), "subtitle missing");
-  expect(t.includes("3,000,000 Toman") && t.includes("Price changed") && t.includes("now charges about 3,317,470 Toman"), "locked price / price-changed note wrong");
-  expect(t.includes("Total (locked-in prices)") && t.includes("4,517,470"), "total wrong");
+  expect(t.includes("3,317,470 Toman") && t.includes("Price changed") && t.includes("Was 3,000,000 Toman when you added it."), "new price / was-note wrong");
+  expect(t.includes("Total") && t.includes("4,517,470"), "total wrong");
   expect(!t.includes("No direct buy link") && !t.includes("This total is for planning"), "removed lines are back");
 });
 

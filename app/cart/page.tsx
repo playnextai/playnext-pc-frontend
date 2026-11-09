@@ -8,7 +8,12 @@ import Icon from "@/components/Icon";
 import SkeletonRows from "@/components/Skeleton";
 import { useI18n } from "@/components/I18nProvider";
 import { api } from "@/lib/api";
-import type { CartView } from "@/lib/types";
+import type { CartItemView, CartView } from "@/lib/types";
+
+// The price shown for a row: today's price when it changed since the game was added, otherwise the price
+// locked in when added. The total adds up exactly what the rows show.
+const shown = (it: CartItemView): number | null => (it.price_changed && it.price_toman_now !== null ? it.price_toman_now : it.price_toman_locked);
+const total = (c: CartView): number => c.platforms.reduce((sum, p) => sum + p.items.reduce((s, it) => s + (shown(it) ?? 0), 0), 0);
 
 const PLATFORM_NAME: Record<string, string> = { steam: "Steam", gog: "GOG", epic: "Epic", other: "Other" };
 
@@ -63,9 +68,9 @@ export default function CartPage() {
                               {it.edition_name && <span className="muted" style={{ fontSize: ".85rem" }}>{it.edition_name}</span>}
                               {it.price_changed && <span className="warn-chip">{t("cart.priceChanged")}</span>}
                             </div>
-                            <div className="price" style={{ fontSize: "1.05rem" }}>{toman(it.price_toman_locked)}</div>
+                            <div className="price" style={{ fontSize: "1.05rem", fontWeight: 700 }}>{toman(shown(it))}</div>
                             <div className="muted" style={{ fontSize: ".82rem" }} role={it.price_changed ? "status" : undefined}>
-                              {it.price_changed ? t("cart.changedNote", { platform: name, price: toman(it.price_toman_now) }) : nat ? t("cart.lockedNative", { price: nat }) : t("cart.lockedOnly")}
+                              {it.price_changed ? t("cart.changedNote", { price: toman(it.price_toman_locked) }) : nat ? t("cart.lockedNative", { price: nat }) : t("cart.lockedOnly")}
                             </div>
                           </div>
                           {it.buy_url
@@ -81,7 +86,7 @@ export default function CartPage() {
             })}
             <div className="cart-total">
               <span style={{ fontSize: "1.1rem" }}>{t("cart.total")}</span>
-              <span className="price" style={{ fontSize: "1.6rem" }}>{toman(cart.total_toman)}</span>
+              <span className="price" style={{ fontSize: "1.6rem" }}>{toman(total(cart))}</span>
             </div>
           </>
         )}
