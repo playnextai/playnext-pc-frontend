@@ -232,3 +232,4 @@ html[lang="fa"] .set-label { letter-spacing: 0; text-transform: none; font-size:
 .set-select { width: auto; min-width: 130px; max-width: 48%; }
 .set-note { font-size: .9rem; color: var(--muted); margin: 12px 0 0; line-height: 1.6; }
 @media (max-width: 640px) { .set-row { flex-wrap: wrap; } .set-select { max-width: 100%; flex: 1 1 100%; } }
+input[type="range"] { accent-color: var(--mint); }
