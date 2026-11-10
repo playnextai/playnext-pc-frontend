@@ -21,6 +21,7 @@ export default function SettingsPage() {
   const [methods, setMethods] = useState<SignInMethods | null>(null); // from Global Auth; null = unknown
 
   useEffect(() => { api.settings().then(setS).catch(() => setError(t("common.refresh"))); // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useEffect(() => { api.signInMethods().then(setMethods).catch(() => setMethods(null)); }, []);
 
   const steamIn = methods?.steam ?? s?.steam_linked ?? false; // Auth says which methods are linked; fall back to PC data
