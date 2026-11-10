@@ -247,6 +247,7 @@ await flow("settings: grouped sections, language select switches direction, sign
 });
 await flow("callback: validates session, honors a safe next, ignores an unsafe one, fails without a session", async (page) => {
   await setScenario("full");
+  try {
   await page.goto(BASE + "/auth/sso/callback?next=%2Flibrary", { waitUntil: "networkidle" });
   await page.waitForURL("**/library", { timeout: 5000 });
   await page.goto(BASE + "/auth/sso/callback?next=https%3A%2F%2Fevil.example", { waitUntil: "networkidle" });
@@ -258,8 +259,8 @@ await flow("callback: validates session, honors a safe next, ignores an unsafe o
   const t = await page.locator("main").innerText();
   expect(t.includes("couldn't confirm your sign-in"), "failed state missing");
   const href = await page.getByRole("link", { name: "Continue to PlayNext Account" }).getAttribute("href");
-  expect(href === "https://auth.playnextai.com/login?return_url=https%3A%2F%2Fpc.playnextai.com%2Fauth%2Fsso%2Fcallback%3Fnext%3D%252Fcart", `retry link wrong: ${href}`);
-  await setScenario("full");
+  expect(href === `https://auth.playnextai.com/login?return_url=${encodeURIComponent(BASE + "/auth/sso/callback?next=%2Fcart")}`, `retry link wrong: ${href}`);
+  } finally { await setScenario("full"); }
 });
 await flow("gamer DNA: type description and Six types note", async (page) => {
   await page.goto(BASE + "/dna", { waitUntil: "networkidle" });
@@ -290,7 +291,7 @@ await flow("landing: sign-in links go to the auth site with a return_url, sectio
   const hrefs = await page.locator("a.btn").evaluateAll((els) => els.map((e) => e.getAttribute("href")));
   expect(hrefs.length >= 3, "expected sign-in buttons (nav, hero, final)");
   for (const h of hrefs) expect(/^https:\/\/auth\.playnextai\.com\/.+return_url=/.test(h), `bad sign-in link: ${h}`);
-  const cb = "https%3A%2F%2Fpc.playnextai.com%2Fauth%2Fsso%2Fcallback";
+  const cb = encodeURIComponent(BASE + "/auth/sso/callback"); // CI builds with SITE_URL = the local server
   for (const h of hrefs) expect(h === `https://auth.playnextai.com/login?return_url=${cb}`, `sign-in link is not the bare central login + PC callback: ${h}`);
   expect((await page.locator('a[href="https://auth.playnextai.com"]').count()) >= 1, "no visible link to auth.playnextai.com");
   expect((await page.locator("body").innerText()).includes("Continue to PlayNext Account"), "primary action copy missing");
