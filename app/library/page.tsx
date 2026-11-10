@@ -8,7 +8,7 @@ import SyncBanner from "@/components/SyncBanner";
 import Thumb from "@/components/Thumb";
 import Playtime from "@/components/Playtime";
 import Icon from "@/components/Icon";
-import { steamSignInUrl } from "@/lib/auth";
+import { steamLinkUrl } from "@/lib/auth";
 import SkeletonRows from "@/components/Skeleton";
 import { useI18n } from "@/components/I18nProvider";
 import { api } from "@/lib/api";
@@ -77,7 +77,7 @@ export default function LibraryPage() {
         {items && items.length === 0 && (
           <div style={{ marginTop: 24 }}>
             <Empty icon="library" title={t("library.empty")} text={t("library.emptySub")}>
-              {steamLinked === false && <a className="btn" href={steamSignInUrl("/library")}>{t("steam.connect")}</a>}
+              {steamLinked === false && <a className="btn" href={steamLinkUrl("/library")}>{t("steam.connect")}</a>}
             </Empty>
           </div>
         )}

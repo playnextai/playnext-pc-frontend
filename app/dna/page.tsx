@@ -5,7 +5,7 @@ import Icon from "@/components/Icon";
 import Thumb from "@/components/Thumb";
 import { useI18n } from "@/components/I18nProvider";
 import { api, ApiError } from "@/lib/api";
-import { steamSignInUrl } from "@/lib/auth";
+import { steamLinkUrl } from "@/lib/auth";
 import { DNA_DESC_KEYS, DNA_TYPE_KEYS } from "@/lib/i18n";
 import type { GamerDna } from "@/lib/types";
 
@@ -35,7 +35,7 @@ export default function DnaPage() {
             <span className="dna-ic"><Icon name="gamepad" /></span>
             <strong style={{ fontSize: "1.2rem" }}>{t("dna.needsSteamTitle")}</strong>
             <span className="muted">{t("dna.needsSteamText")}</span>
-            <a className="btn" style={{ width: "100%" }} href={steamSignInUrl("/dna")}>{t("dna.needsSteamButton")}</a>
+            <a className="btn" style={{ width: "100%" }} href={steamLinkUrl("/dna")}>{t("dna.needsSteamButton")}</a>
             <span className="muted" style={{ fontSize: ".85rem" }}>{t("dna.needsSteamNote")}</span>
           </div>
         )}

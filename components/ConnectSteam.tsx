@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { steamSignInUrl } from "@/lib/auth";
+import { steamLinkUrl } from "@/lib/auth";
 import { dismiss, isDismissed } from "@/lib/dismiss";
 import Icon from "@/components/Icon";
 import { useI18n } from "@/components/I18nProvider";
@@ -13,7 +13,7 @@ export default function ConnectSteam({ variant, returnPath = "/settings" }: { va
   const [hidden, setHidden] = useState(false);
   useEffect(() => { if (variant === "banner" && isDismissed("connect-steam-banner")) setHidden(true); }, [variant]);
   if (hidden) return null;
-  const href = steamSignInUrl(returnPath);
+  const href = steamLinkUrl(returnPath);
 
   if (variant === "banner") {
     return (

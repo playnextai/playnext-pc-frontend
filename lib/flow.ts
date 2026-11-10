@@ -1,3 +1,4 @@
+import { safeDestination } from "./auth.ts";
 import type { Me, OnboardingStatus } from "./types.ts";
 
 export type Gate =
@@ -20,4 +21,18 @@ export function decideGate(me: Me, onboarding: OnboardingStatus | null): Gate {
 /** Paths a not-yet-onboarded person may visit without being bounced. */
 export function isOnboardingPath(path: string): boolean {
   return path === "/onboarding" || path.startsWith("/onboarding/");
+}
+
+export type CallbackResult =
+  | { kind: "failed" }
+  | { kind: "go"; to: string };
+
+/** What the /auth/sso/callback page does once the backend has validated the session with Auth.
+ *  Not signed in -> failed (show a retry, never auto-redirect: that could loop). Consent, then PC
+ *  onboarding, then the requested destination (validated; /discover by default). */
+export function decideCallback(me: Me, onboarding: OnboardingStatus | null, next: string | null | undefined): CallbackResult {
+  if (!me.authenticated) return { kind: "failed" };
+  if (me.consent_required) return { kind: "go", to: "/consent" };
+  if (onboarding && !onboarding.complete && onboarding.next_route) return { kind: "go", to: onboarding.next_route };
+  return { kind: "go", to: safeDestination(next) };
 }

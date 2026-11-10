@@ -5,14 +5,14 @@ import BudgetControl from "@/components/BudgetControl";
 import Icon from "@/components/Icon";
 import { useI18n } from "@/components/I18nProvider";
 import { api } from "@/lib/api";
-import { steamSignInUrl } from "@/lib/auth";
+import { accountUrl, logoutUrl, steamLinkUrl } from "@/lib/auth";
 import type { Lang } from "@/lib/i18n";
 import type { Region, SettingsView } from "@/lib/types";
 
-const PRIVACY_EMAIL = "playnextai@gmail.com";
-
-// Settings: connected accounts, pricing region, budget (same value as the nav chip), language
-// (this browser only) and the privacy note. Account deletion is by email during the beta.
+// Two visibly separate areas with separate owners (Global Auth hand-off):
+//  - PlayNext:PC Settings: pricing region, budget, Steam library sync, language. Owned and saved by PC.
+//  - PlayNext Account: sign-in methods, sessions, security. Owned by Global Auth; PC only links to it,
+//    sends people to Auth to connect Steam, and signs out through Auth's logout.
 export default function SettingsPage() {
   const { t, region: regionName, lang, setLang } = useI18n();
   const [s, setS] = useState<SettingsView | null>(null);
@@ -21,11 +21,6 @@ export default function SettingsPage() {
 
   useEffect(() => { api.settings().then(setS).catch(() => setError(t("common.refresh"))); // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  async function signOut() {
-    try { await api.logout(); } catch { /* the cookie may already be gone; leave either way */ }
-    window.location.href = "/";
-  }
 
   async function setRegion(region: Region) {
     setError(null);
@@ -41,23 +36,8 @@ export default function SettingsPage() {
         {!s && !error && <p className="muted">{t("common.loading")}</p>}
         {s && (
           <>
-            <h2 className="set-label">{t("settings.accounts")}</h2>
-            <section className="set-group" aria-label={t("settings.accounts")}>
-              <div className="set-row">
-                <span className="dna-ic set-ic"><Icon name="gamepad" /></span>
-                <div className="set-text"><strong>Steam</strong><span className="muted">{s.steam_linked ? t("settings.connected") : t("settings.notConnected")}</span></div>
-                {s.steam_linked
-                  ? <span style={{ color: "var(--mint)", display: "inline-flex" }}><Icon name="check" /></span>
-                  : <a className="btn secondary small" href={steamSignInUrl("/settings")}>{t("steam.connect")}</a>}
-              </div>
-              {s.email && (
-                <div className="set-row">
-                  <span className="dna-ic set-ic"><Icon name="mail" /></span>
-                  <div className="set-text"><strong>{t("settings.emailAccount")}</strong><span className="muted" dir="ltr" style={{ textAlign: "start" }}>{s.email}</span></div>
-                </div>
-              )}
-            </section>
-            <p className="set-note" style={s.steam_linked ? { color: "var(--mint)" } : undefined}>{s.steam_linked ? t("settings.steamSynced") : t("settings.steamNote")}</p>
+            <h2 className="set-title">{t("settings.pcTitle")}</h2>
+            <p className="set-note" style={{ marginTop: 0 }}>{t("settings.pcNote")}</p>
 
             <h2 className="set-label">{t("settings.pricing")}</h2>
             <section className="set-group" aria-label={t("settings.pricing")}>
@@ -75,6 +55,15 @@ export default function SettingsPage() {
               </div>
             </section>
 
+            <h3 className="set-label">{t("settings.library")}</h3>
+            <section className="set-group" aria-label={t("settings.library")}>
+              <div className="set-row">
+                <span className="dna-ic set-ic"><Icon name="refresh" /></span>
+                <div className="set-text"><strong>{s.steam_linked ? t("settings.connected") : t("settings.notConnected")}</strong>
+                  <span className="muted">{s.steam_linked ? t("settings.steamSynced") : t("settings.steamNote")}</span></div>
+              </div>
+            </section>
+
             <h2 className="set-label">{t("settings.language")}</h2>
             <section className="set-group" aria-label={t("settings.language")}>
               <div className="set-row">
@@ -86,12 +75,28 @@ export default function SettingsPage() {
               </div>
             </section>
 
-            <h2 className="set-label">{t("settings.privacy")}</h2>
-            <section className="set-group" aria-label={t("settings.privacy")}>
-              <div className="set-row"><div className="set-text"><strong>{t("settings.yourData")}</strong><span className="muted">{t("settings.privacyNote", { email: PRIVACY_EMAIL })}</span></div></div>
+            <h2 className="set-title" style={{ marginTop: 40 }}>{t("settings.accountTitle")}</h2>
+            <p className="set-note" style={{ marginTop: 0 }}>{t("settings.accountText")}</p>
+            <section className="set-group" aria-label={t("settings.accountTitle")}>
+              <div className="set-row">
+                <span className="dna-ic set-ic"><Icon name="gamepad" /></span>
+                <div className="set-text"><strong>{t("settings.signInMethod")}</strong><span className="muted">{s.steam_linked ? t("settings.connected") : t("settings.notConnected")}</span></div>
+                {s.steam_linked
+                  ? <span style={{ color: "var(--mint)", display: "inline-flex" }}><Icon name="check" /></span>
+                  : <a className="btn secondary small" href={steamLinkUrl("/settings")}>{t("steam.connect")}</a>}
+              </div>
+              {s.email && (
+                <div className="set-row">
+                  <span className="dna-ic set-ic"><Icon name="mail" /></span>
+                  <div className="set-text"><strong>{t("settings.signInEmail")}</strong><span className="muted" dir="ltr" style={{ textAlign: "start" }}>{s.email}</span></div>
+                </div>
+              )}
             </section>
-
-            <button className="btn secondary" style={{ width: "100%", marginTop: 24 }} onClick={signOut}>{t("settings.signOut")}</button>
+            <a className="btn secondary" style={{ width: "100%", marginTop: 16 }} href={accountUrl()}>{t("settings.manageAccount")}</a>
+            {/* Central logout must be a top-level form POST so Auth revokes the session and clears the shared cookie. */}
+            <form method="post" action={logoutUrl()}>
+              <button type="submit" className="btn secondary" style={{ width: "100%", marginTop: 12 }}>{t("settings.signOut")}</button>
+            </form>
           </>
         )}
       </main>

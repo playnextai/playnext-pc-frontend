@@ -12,6 +12,7 @@ const PAGES = [
   { path: "/", scenario: "out", name: "landing" },
   { path: "/game/1", scenario: "out", name: "game(signed-out)" },
   { path: "/consent", scenario: "consent", name: "consent" },
+  { path: "/auth/sso/callback", scenario: "out", name: "callback(failed)" },
   { path: "/onboarding/region", scenario: "full", name: "onboarding-region" },
   { path: "/onboarding/quiz", scenario: "full", name: "onboarding-quiz" },
   { path: "/onboarding/library", scenario: "empty", name: "onboarding-library" },
@@ -233,11 +234,32 @@ await flow("Farsi: regions, reasons and genres are translated", async (page) => 
 await flow("settings: grouped sections, language select switches direction, sign-out present", async (page) => {
   await page.goto(BASE + "/settings", { waitUntil: "networkidle" });
   const t = await page.locator("main").innerText();
-  expect(/connected accounts/i.test(t) && /pricing/i.test(t) && t.includes("Default budget filter") && t.includes("Your data"), "sections missing");
+  expect(t.includes("PlayNext:PC Settings") && t.includes("PlayNext Account") && /pricing/i.test(t) && t.includes("Default budget filter"), "two settings sections missing");
+  expect(!t.includes("Your data"), "Your data box should be gone (Auth owns it)");
+  const manage = await page.getByRole("link", { name: "Manage PlayNext Account" }).getAttribute("href");
+  expect(manage === "https://auth.playnextai.com/", `manage link wrong: ${manage}`);
+  const logout = await page.locator("form").evaluate((f) => ({ m: f.method, a: f.action }));
+  expect(logout.m === "post" && logout.a === "https://auth.playnextai.com/auth/logout", `sign-out is not a form POST to Auth: ${JSON.stringify(logout)}`);
   expect((await page.getByRole("button", { name: "Sign out" }).count()) === 1, "sign-out button missing");
   await page.selectOption("#ui-lang", "fa");
   await page.waitForFunction(() => document.documentElement.dir === "rtl", null, { timeout: 3000 });
   expect((await page.getByRole("button", { name: "خروج از حساب" }).count()) === 1, "Farsi sign-out label missing");
+});
+await flow("callback: validates session, honors a safe next, ignores an unsafe one, fails without a session", async (page) => {
+  await setScenario("full");
+  await page.goto(BASE + "/auth/sso/callback?next=%2Flibrary", { waitUntil: "networkidle" });
+  await page.waitForURL("**/library", { timeout: 5000 });
+  await page.goto(BASE + "/auth/sso/callback?next=https%3A%2F%2Fevil.example", { waitUntil: "networkidle" });
+  await page.waitForURL("**/discover", { timeout: 5000 });
+  await page.goto(BASE + "/auth/sso/callback", { waitUntil: "networkidle" });
+  await page.waitForURL("**/discover", { timeout: 5000 });
+  await setScenario("out");
+  await page.goto(BASE + "/auth/sso/callback?next=%2Fcart", { waitUntil: "networkidle" });
+  const t = await page.locator("main").innerText();
+  expect(t.includes("couldn't confirm your sign-in"), "failed state missing");
+  const href = await page.getByRole("link", { name: "Continue to PlayNext Account" }).getAttribute("href");
+  expect(href === "https://auth.playnextai.com/login?return_url=https%3A%2F%2Fpc.playnextai.com%2Fauth%2Fsso%2Fcallback%3Fnext%3D%252Fcart", `retry link wrong: ${href}`);
+  await setScenario("full");
 });
 await flow("gamer DNA: type description and Six types note", async (page) => {
   await page.goto(BASE + "/dna", { waitUntil: "networkidle" });
@@ -268,7 +290,10 @@ await flow("landing: sign-in links go to the auth site with a return_url, sectio
   const hrefs = await page.locator("a.btn").evaluateAll((els) => els.map((e) => e.getAttribute("href")));
   expect(hrefs.length >= 3, "expected sign-in buttons (nav, hero, final)");
   for (const h of hrefs) expect(/^https:\/\/auth\.playnextai\.com\/.+return_url=/.test(h), `bad sign-in link: ${h}`);
-  expect(hrefs.some((h) => h.includes("/steam/")), "no Steam sign-in link");
+  const cb = "https%3A%2F%2Fpc.playnextai.com%2Fauth%2Fsso%2Fcallback";
+  for (const h of hrefs) expect(h === `https://auth.playnextai.com/login?return_url=${cb}`, `sign-in link is not the bare central login + PC callback: ${h}`);
+  expect((await page.locator('a[href="https://auth.playnextai.com"]').count()) >= 1, "no visible link to auth.playnextai.com");
+  expect((await page.locator("body").innerText()).includes("Continue to PlayNext Account"), "primary action copy missing");
   const t = await page.locator("body").innerText();
   for (const s of ["How it works", "Real regional pricing", "Every edition, one place", "Contact"]) expect(t.includes(s), `missing: ${s}`);
   expect((await page.locator("#how").count()) === 1 && (await page.locator("#feat").count()) === 1, "anchor targets missing");

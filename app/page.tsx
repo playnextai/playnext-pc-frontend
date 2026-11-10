@@ -5,7 +5,7 @@ import Icon, { type IconName } from "@/components/Icon";
 import LangToggle from "@/components/LangToggle";
 import { useI18n } from "@/components/I18nProvider";
 import { api } from "@/lib/api";
-import { signInUrl, steamSignInUrl } from "@/lib/auth";
+import { AUTH_URL, signInUrl } from "@/lib/auth";
 import type { Key } from "@/lib/i18n";
 
 const HOW: { icon: IconName; t: Key; d: Key }[] = [
@@ -30,8 +30,7 @@ export default function Landing() {
     api.me().then((me) => { if (me.authenticated) router.replace("/discover"); }).catch(() => {});
   }, [router]);
 
-  const steam = steamSignInUrl("/discover");
-  const email = signInUrl("/discover");
+  const login = signInUrl(); // central Auth login; Google, Steam and email are chosen there
 
   return (
     <div className="container landing">
@@ -41,7 +40,7 @@ export default function Landing() {
           <a className="lp-link" href="#how">{t("lp.navHow")}</a>
           <a className="lp-link" href="#feat">{t("lp.navFeatures")}</a>
           <LangToggle />
-          <a className="btn secondary small" href={email}>{t("lp.signIn")}</a>
+          <a className="btn secondary small" href={login}>{t("lp.signIn")}</a>
         </nav>
       </header>
 
@@ -49,12 +48,10 @@ export default function Landing() {
         <section className="lp-hero">
           <h1>{t("lp.h1a")}<span className="accent">{t("lp.h1b")}</span>{t("lp.h1c")}</h1>
           <p className="muted lp-sub">{t("lp.sub")}</p>
-          <a className="btn lp-cta" href={steam}><Icon name="gamepad" />{t("landing.steam")}</a>
-          <div className="muted" style={{ fontSize: ".9rem" }}>{t("lp.note")}</div>
-          <div className="muted lp-or"><span />{t("lp.or")}<span /></div>
-          <div className="muted" style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "center", flexWrap: "wrap" }}>
-            <Icon name="mail" />
-            <span>{t("lp.noSteamA")}<a href={email} className="lp-inline" style={{ color: "var(--text)" }}>{t("lp.noSteamLink")}</a>{t("lp.noSteamB")}</span>
+          <a className="btn lp-cta" href={login}>{t("auth.continue")}</a>
+          <div className="muted" style={{ fontSize: ".9rem" }}>{t("auth.sub")}</div>
+          <div className="muted" style={{ fontSize: ".9rem" }}>
+            <a href={AUTH_URL} className="lp-inline" style={{ color: "var(--text)" }} dir="ltr">{AUTH_URL.replace(/^https?:\/\//, "")}</a>
           </div>
         </section>
 
@@ -92,7 +89,7 @@ export default function Landing() {
         <section className="card lp-final">
           <h2>{t("brand.tagline")}</h2>
           <div className="muted">{t("lp.ctaSub")}</div>
-          <a className="btn lp-cta" href={steam}>{t("landing.steam")}</a>
+          <a className="btn lp-cta" href={login}>{t("auth.continue")}</a>
         </section>
       </main>
 
