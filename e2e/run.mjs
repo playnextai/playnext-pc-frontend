@@ -230,6 +230,15 @@ await flow("Farsi: regions, reasons and genres are translated", async (page) => 
   await page.goto(BASE + "/dna", { waitUntil: "networkidle" });
   expect((await page.locator("main").innerText()).includes("اکشن RPG"), "genre not translated");
 });
+await flow("settings: grouped sections, language select switches direction, sign-out present", async (page) => {
+  await page.goto(BASE + "/settings", { waitUntil: "networkidle" });
+  const t = await page.locator("main").innerText();
+  expect(/connected accounts/i.test(t) && /pricing/i.test(t) && t.includes("Default budget filter") && t.includes("Your data"), "sections missing");
+  expect((await page.getByRole("button", { name: "Sign out" }).count()) === 1, "sign-out button missing");
+  await page.selectOption("#ui-lang", "fa");
+  await page.waitForFunction(() => document.documentElement.dir === "rtl", null, { timeout: 3000 });
+  expect((await page.getByRole("button", { name: "خروج از حساب" }).count()) === 1, "Farsi sign-out label missing");
+});
 await flow("gamer DNA: type description and Six types note", async (page) => {
   await page.goto(BASE + "/dna", { waitUntil: "networkidle" });
   const t = await page.locator("main").innerText();
