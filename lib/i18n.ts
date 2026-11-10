@@ -314,6 +314,9 @@ export const en = {
   "settings.signInMethod": "Steam sign-in",
   "settings.signInEmail": "Email sign-in",
   "settings.manageAccount": "Manage PlayNext Account",
+  "settings.googleSignIn": "Google sign-in",
+  "settings.connectGoogle": "Connect Google",
+  "settings.statusUnknown": "Status unavailable right now",
 
   // game detail
   "detail.back": "Back",
@@ -645,6 +648,9 @@ export const fa: Record<Key, string> = {
   "settings.signInMethod": "ورود با استیم",
   "settings.signInEmail": "ورود با ایمیل",
   "settings.manageAccount": "مدیریت حساب پلی‌نکست",
+  "settings.googleSignIn": "ورود با گوگل",
+  "settings.connectGoogle": "اتصال گوگل",
+  "settings.statusUnknown": "وضعیت فعلاً در دسترس نیست",
 
   "detail.back": "بازگشت",
   "detail.regionNote": "منطقه‌ی تو: {region}",

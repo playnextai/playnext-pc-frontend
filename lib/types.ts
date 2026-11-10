@@ -31,6 +31,9 @@ export interface SettingsView {
   budget_max_toman?: number;
 }
 
+/** Linked PlayNext sign-in methods, read from Global Auth by the PC backend. null = Auth couldn't say. */
+export interface SignInMethods { google: boolean | null; steam: boolean | null }
+
 export interface PriceFields {
   price_native: number | null;
   price_currency: string | null;

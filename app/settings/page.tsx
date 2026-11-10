@@ -5,9 +5,9 @@ import BudgetControl from "@/components/BudgetControl";
 import Icon from "@/components/Icon";
 import { useI18n } from "@/components/I18nProvider";
 import { api } from "@/lib/api";
-import { accountUrl, logoutUrl, steamLinkUrl } from "@/lib/auth";
+import { accountUrl, googleLinkUrl, logoutUrl, steamLinkUrl } from "@/lib/auth";
 import type { Lang } from "@/lib/i18n";
-import type { Region, SettingsView } from "@/lib/types";
+import type { Region, SettingsView, SignInMethods } from "@/lib/types";
 
 // Two visibly separate areas with separate owners (Global Auth hand-off):
 //  - PlayNext:PC Settings: pricing region, budget, Steam library sync, language. Owned and saved by PC.
@@ -18,9 +18,12 @@ export default function SettingsPage() {
   const [s, setS] = useState<SettingsView | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [methods, setMethods] = useState<SignInMethods | null>(null); // from Global Auth; null = unknown
 
   useEffect(() => { api.settings().then(setS).catch(() => setError(t("common.refresh"))); // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useEffect(() => { api.signInMethods().then(setMethods).catch(() => setMethods(null)); }, []);
+
+  const steamIn = methods?.steam ?? s?.steam_linked ?? false; // Auth says which methods are linked; fall back to PC data
 
   async function setRegion(region: Region) {
     setError(null);
@@ -79,9 +82,16 @@ export default function SettingsPage() {
             <p className="set-note" style={{ marginTop: 0 }}>{t("settings.accountText")}</p>
             <section className="set-group" aria-label={t("settings.accountTitle")}>
               <div className="set-row">
+                <span className="dna-ic set-ic"><Icon name="globe" /></span>
+                <div className="set-text"><strong>{t("settings.googleSignIn")}</strong>
+                  <span className="muted">{methods?.google == null ? t("settings.statusUnknown") : methods.google ? t("settings.connected") : t("settings.notConnected")}</span></div>
+                {methods?.google === true && <span style={{ color: "var(--mint)", display: "inline-flex" }}><Icon name="check" /></span>}
+                {methods?.google === false && <a className="btn secondary small" href={googleLinkUrl("/settings")}>{t("settings.connectGoogle")}</a>}
+              </div>
+              <div className="set-row">
                 <span className="dna-ic set-ic"><Icon name="gamepad" /></span>
-                <div className="set-text"><strong>{t("settings.signInMethod")}</strong><span className="muted">{s.steam_linked ? t("settings.connected") : t("settings.notConnected")}</span></div>
-                {s.steam_linked
+                <div className="set-text"><strong>{t("settings.signInMethod")}</strong><span className="muted">{steamIn ? t("settings.connected") : t("settings.notConnected")}</span></div>
+                {steamIn
                   ? <span style={{ color: "var(--mint)", display: "inline-flex" }}><Icon name="check" /></span>
                   : <a className="btn secondary small" href={steamLinkUrl("/settings")}>{t("steam.connect")}</a>}
               </div>

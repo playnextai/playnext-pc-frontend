@@ -1,6 +1,6 @@
 import type {
   CartView, FeedbackAction, GameCard, GameDetail, GamerDna, LibraryItem, Me, OnboardingStatus,
-  OnboardingStep, QuizOption, Region, SearchResult, SettingsView, SyncStatus, WishlistItem,
+  OnboardingStep, QuizOption, Region, SearchResult, SettingsView, SignInMethods, SyncStatus, WishlistItem,
 } from "./types.ts";
 
 // All calls go to same-origin /api/* (rewritten to the backend by next.config.mjs).
@@ -71,6 +71,7 @@ export const api = {
   submitQuiz: (gameIds: number[]) =>
     request<{ status: string; count: number }>("POST", "/onboarding/quiz-submit", { game_ids: gameIds }),
   settings: () => request<SettingsView>("GET", "/settings"),
+  signInMethods: () => request<SignInMethods>("GET", "/settings/identities"),
   updateSettings: (patch: { region?: Region | null; budget_ceiling_toman?: number | null }) =>
     request<SettingsView>("PATCH", "/settings", patch),
 

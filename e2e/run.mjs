@@ -235,6 +235,7 @@ await flow("settings: grouped sections, language select switches direction, sign
   await page.goto(BASE + "/settings", { waitUntil: "networkidle" });
   const t = await page.locator("main").innerText();
   expect(t.includes("PlayNext:PC Settings") && t.includes("PlayNext Account") && /pricing/i.test(t) && t.includes("Default budget filter"), "two settings sections missing");
+  expect(t.includes("Google sign-in") && t.includes("Connected"), "Google sign-in status row missing");
   expect(!t.includes("Your data"), "Your data box should be gone (Auth owns it)");
   const manage = await page.getByRole("link", { name: "Manage PlayNext Account" }).getAttribute("href");
   expect(manage === "https://auth.playnextai.com/", `manage link wrong: ${manage}`);
@@ -260,6 +261,16 @@ await flow("callback: validates session, honors a safe next, ignores an unsafe o
   expect(t.includes("couldn't confirm your sign-in"), "failed state missing");
   const href = await page.getByRole("link", { name: "Continue to PlayNext Account" }).getAttribute("href");
   expect(href === `https://auth.playnextai.com/login?return_url=${encodeURIComponent(BASE + "/auth/sso/callback?next=%2Fcart")}`, `retry link wrong: ${href}`);
+  } finally { await setScenario("full"); }
+});
+await flow("settings (email-only): Google and Steam offer Auth link routes", async (page) => {
+  await setScenario("empty");
+  try {
+    await page.goto(BASE + "/settings", { waitUntil: "networkidle" });
+    const g = await page.getByRole("link", { name: "Connect Google" }).getAttribute("href");
+    expect(g.startsWith("https://auth.playnextai.com/auth/google/link?return_url="), `google link wrong: ${g}`);
+    const st = await page.getByRole("link", { name: "Connect Steam" }).first().getAttribute("href");
+    expect(st.startsWith("https://auth.playnextai.com/auth/steam/link?return_url="), `steam link wrong: ${st}`);
   } finally { await setScenario("full"); }
 });
 await flow("gamer DNA: type description and Six types note", async (page) => {
