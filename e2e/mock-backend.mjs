@@ -38,7 +38,7 @@ function route(method, path) {
   if (path === "/auth/me") return authed ? { authenticated: true, user: { id: 1, display_name: "Arash" }, consent_required: s === "consent" } : { authenticated: false };
   if (!authed && path !== "/games/1") return [401, { detail: "not_authenticated" }];
   if (path === "/onboarding/status") return { complete: true, next_step: null, next_route: null, steps: { region: true, quiz: true, library: true } };
-  if (path === "/settings/identities") return { google: full, steam: full };
+  if (path === "/settings/identities") return { google: { linked: full, verified: full }, steam: { linked: full, verified: full }, email: { linked: true, verified: true } };
   if (path === "/settings") return settings();
   if (path === "/cart") return empty ? { platforms: [], count: 0, total_toman: 0, region: "TR", disclaimer: "" } : {
     platforms: [{ platform: "steam", items: [

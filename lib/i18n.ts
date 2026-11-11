@@ -317,6 +317,7 @@ export const en = {
   "settings.googleSignIn": "Google sign-in",
   "settings.connectGoogle": "Connect Google",
   "settings.statusUnknown": "Status unavailable right now",
+  "settings.unverified": "Unverified",
 
   // game detail
   "detail.back": "Back",
@@ -651,6 +652,7 @@ export const fa: Record<Key, string> = {
   "settings.googleSignIn": "ورود با گوگل",
   "settings.connectGoogle": "اتصال گوگل",
   "settings.statusUnknown": "وضعیت فعلاً در دسترس نیست",
+  "settings.unverified": "تأییدنشده",
 
   "detail.back": "بازگشت",
   "detail.regionNote": "منطقه‌ی تو: {region}",

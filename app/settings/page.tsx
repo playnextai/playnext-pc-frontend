@@ -7,7 +7,7 @@ import { useI18n } from "@/components/I18nProvider";
 import { api } from "@/lib/api";
 import { accountUrl, googleLinkUrl, logoutUrl, steamLinkUrl } from "@/lib/auth";
 import type { Lang } from "@/lib/i18n";
-import type { Region, SettingsView, SignInMethods } from "@/lib/types";
+import type { Region, SettingsView, SignInMethod, SignInMethods } from "@/lib/types";
 
 // Two visibly separate areas with separate owners (Global Auth hand-off):
 //  - PlayNext:PC Settings: pricing region, budget, Steam library sync, language. Owned and saved by PC.
@@ -24,7 +24,10 @@ export default function SettingsPage() {
   }, []);
   useEffect(() => { api.signInMethods().then(setMethods).catch(() => setMethods(null)); }, []);
 
-  const steamIn = methods?.steam ?? s?.steam_linked ?? false; // Auth says which methods are linked; fall back to PC data
+  // Auth says which methods are linked (and whether each is verified); Steam falls back to PC data if Auth is unreachable
+  const steamIn = methods?.steam ? methods.steam.linked : (s?.steam_linked ?? false);
+  const statusText = (m: SignInMethod | null | undefined) =>
+    !m ? t("settings.statusUnknown") : !m.linked ? t("settings.notConnected") : m.verified ? t("settings.connected") : t("settings.unverified");
 
   async function setRegion(region: Region) {
     setError(null);
@@ -84,22 +87,23 @@ export default function SettingsPage() {
             <section className="set-group" aria-label={t("settings.accountTitle")}>
               <div className="set-row">
                 <span className="dna-ic set-ic"><Icon name="globe" /></span>
-                <div className="set-text"><strong>{t("settings.googleSignIn")}</strong>
-                  <span className="muted">{methods?.google == null ? t("settings.statusUnknown") : methods.google ? t("settings.connected") : t("settings.notConnected")}</span></div>
-                {methods?.google === true && <span style={{ color: "var(--mint)", display: "inline-flex" }}><Icon name="check" /></span>}
-                {methods?.google === false && <a className="btn secondary small" href={googleLinkUrl("/settings")}>{t("settings.connectGoogle")}</a>}
+                <div className="set-text"><strong>{t("settings.googleSignIn")}</strong><span className="muted">{statusText(methods?.google)}</span></div>
+                {methods?.google?.linked && methods.google.verified && <span style={{ color: "var(--mint)", display: "inline-flex" }}><Icon name="check" /></span>}
+                {methods?.google && !methods.google.linked && <a className="btn secondary small" href={googleLinkUrl("/settings")}>{t("settings.connectGoogle")}</a>}
               </div>
               <div className="set-row">
                 <span className="dna-ic set-ic"><Icon name="gamepad" /></span>
-                <div className="set-text"><strong>{t("settings.signInMethod")}</strong><span className="muted">{steamIn ? t("settings.connected") : t("settings.notConnected")}</span></div>
-                {steamIn
+                <div className="set-text"><strong>{t("settings.signInMethod")}</strong><span className="muted">{methods?.steam ? statusText(methods.steam) : steamIn ? t("settings.connected") : t("settings.notConnected")}</span></div>
+                {steamIn && (methods?.steam?.verified ?? true)
                   ? <span style={{ color: "var(--mint)", display: "inline-flex" }}><Icon name="check" /></span>
-                  : <a className="btn secondary small" href={steamLinkUrl("/settings")}>{t("steam.connect")}</a>}
+                  : !steamIn && <a className="btn secondary small" href={steamLinkUrl("/settings")}>{t("steam.connect")}</a>}
               </div>
               {s.email && (
                 <div className="set-row">
                   <span className="dna-ic set-ic"><Icon name="mail" /></span>
-                  <div className="set-text"><strong>{t("settings.signInEmail")}</strong><span className="muted" dir="ltr" style={{ textAlign: "start" }}>{s.email}</span></div>
+                  <div className="set-text"><strong>{t("settings.signInEmail")}</strong>
+                    <span className="muted" dir="ltr" style={{ textAlign: "start" }}>{s.email}</span>
+                    {methods?.email?.linked && !methods.email.verified && <span className="muted">{t("settings.unverified")}</span>}</div>
                 </div>
               )}
             </section>

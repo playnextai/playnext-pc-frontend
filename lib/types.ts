@@ -32,7 +32,8 @@ export interface SettingsView {
 }
 
 /** Linked PlayNext sign-in methods, read from Global Auth by the PC backend. null = Auth couldn't say. */
-export interface SignInMethods { google: boolean | null; steam: boolean | null }
+export interface SignInMethod { linked: boolean; verified: boolean }
+export interface SignInMethods { google: SignInMethod | null; steam: SignInMethod | null; email: SignInMethod | null }
 
 export interface PriceFields {
   price_native: number | null;
