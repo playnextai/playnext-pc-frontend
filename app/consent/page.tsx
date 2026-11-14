@@ -18,6 +18,9 @@ export default function ConsentPage() {
     setError(null);
     try {
       await api.acceptConsent();
+      // Re-check with the backend (which asks Global Auth) before moving on; never assume the write worked.
+      const me = await api.me();
+      if (me.authenticated && me.consent_required) throw new Error("consent_not_recorded");
       router.replace("/discover");
     } catch (e) {
       setError(e instanceof ApiError && e.isRateLimited ? t("consent.rateLimited") : t("consent.failed"));
