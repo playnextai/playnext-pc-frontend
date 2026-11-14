@@ -25,8 +25,11 @@ function Callback() {
         const onboarding = me.authenticated && !me.consent_required ? await api.onboardingStatus() : null;
         if (cancelled) return;
         const r = decideCallback(me, onboarding, next);
-        if (r.kind === "failed") setFailed(true);
-        else router.replace(r.to);
+        if (r.kind === "failed") { setFailed(true); return; }
+        // PC-owned: ask the backend to queue the Steam library sync if its own sync state says it is needed.
+        // Fire and forget; a failure here must never block sign-in.
+        api.syncIfNeeded().catch(() => {});
+        router.replace(r.to);
       } catch {
         if (!cancelled) setFailed(true);
       }

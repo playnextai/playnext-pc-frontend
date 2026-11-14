@@ -52,6 +52,7 @@ function route(method, path) {
   if (path.startsWith("/popular")) return { items: [CARDS[2], CARDS[3]] };
   const cyc = path.match(/^\/library\/(\d+)\/cycle-playtime/);
   if (cyc) { const order = [null, "barely_touched", "some_hours", "sunk_50plus"]; const cur = order.indexOf(globalThis.__bucket?.[cyc[1]] ?? null); (globalThis.__bucket ??= {})[cyc[1]] = order[(cur + 1) % 4]; return { playtime_bucket: globalThis.__bucket[cyc[1]] }; }
+  if (path === "/library/sync-if-needed") return { queued: false, status: full ? "done" : "not_applicable" };
   if (path.startsWith("/library/sync-status")) return { status: full ? "done" : "not_applicable", last_synced: null };
   if (path.startsWith("/library")) return empty ? { items: [], count: 0 } : { count: 3, items: [
     { game_id: 1, title: "Elden Ring", cover_url: cover, source: "steam_sync", removable: false, playtime_hours: 89.4, playtime_bucket: null, user_rating: null },

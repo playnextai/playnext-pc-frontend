@@ -95,6 +95,8 @@ export const api = {
     request<unknown>("POST", "/library/add", { game_id: gameId, playtime_bucket: playtimeBucket, user_rating: userRating }),
   removeFromLibrary: (gameId: number) => request<unknown>("DELETE", `/library/${gameId}`),
   cyclePlaytime: (gameId: number) => request<unknown>("POST", `/library/${gameId}/cycle-playtime`),
+  /** Called by the sign-in callback: queues the Steam library sync if PC's own sync state says it is missing or stale. */
+  syncIfNeeded: () => request<{ queued: boolean; status: SyncStatus }>("POST", "/library/sync-if-needed"),
   syncStatus: () => request<{ status: SyncStatus; last_synced: string | null }>("GET", "/library/sync-status"),
   wishlist: () => request<{ items: WishlistItem[]; count: number; region: Region | null }>("GET", "/wishlist"),
   addToWishlist: (gameId: number) => request<unknown>("POST", "/wishlist/add", { game_id: gameId }),
