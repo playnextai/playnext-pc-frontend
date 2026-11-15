@@ -61,6 +61,7 @@ function route(method, path) {
   if (path.startsWith("/wishlist")) return empty ? { items: [], count: 0, region: "TR" } : { count: 2, region: "TR", items: [
     { game_id: 3, title: "Baldur's Gate 3", cover_url: cover, source: "steam_sync", removable: false, added_at: null, game_edition_id: 31, ...price(3317470, 1249.5, "TRY", 20) },
     { game_id: 4, title: "Balatro", cover_url: cover, source: "manual", removable: true, added_at: null, game_edition_id: null, ...price(null, null, null, 20) }] };
+  if (path.startsWith("/games/search") && /q=zzz/.test(path)) return { results: [] };
   if (path.startsWith("/games/search")) return { results: [{ game_id: 5, title: "Hollow Knight", developer: "Team Cherry", release_year: 2017, cover_url: cover }] };
   if (path.startsWith("/onboarding/quiz-options")) {
     const extra = [["Stardew Valley", "Simulation"], ["Civilization VI", "Strategy"], ["DOOM Eternal", "Shooter"], ["Hollow Knight", "Metroidvania"], ["Portal 2", "Puzzle"], ["Forza Horizon 5", "Racing"], ["Disco Elysium", "Adventure"], ["Resident Evil 4", "Horror"]];
