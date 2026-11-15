@@ -81,6 +81,14 @@ http.createServer((req, res) => {
   const m = url.pathname.match(/^\/__scenario\/(\w+)$/);
   let status = 200, body;
   if (m) { scenario = m[1]; body = { scenario }; }
+  else if (req.method === "GET" && url.pathname === "/auth/logout/complete") {
+    res.writeHead(303, {
+      Location: "/",
+      "Set-Cookie": "playnext_session=; Path=/; Max-Age=0; HttpOnly",
+      "Cache-Control": "no-store",
+    });
+    return res.end();
+  }
   else { const r = route(req.method, url.pathname + url.search); if (Array.isArray(r)) [status, body] = r; else body = r; }
   res.writeHead(status, { "content-type": "application/json" });
   res.end(JSON.stringify(body));
