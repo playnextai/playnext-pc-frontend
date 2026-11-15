@@ -9,7 +9,7 @@
 | Verified automatically on every push (GitHub Actions, `frontend-ci`) | Never verified |
 |---|---|
 | `npm run typecheck`, `npm test` (43 tests), `npm run build` on a clean machine (job `check`). | Anything against the **real backend**: real Postgres data, Steam, Redis, Celery, IGDB covers, Bonbast rates. |
-| A real Chromium browser drives every page against a **mock backend** in English and Farsi, at desktop (1280 px) and phone (390 px) width, and checks layout, direction, digits, clipped text, touch targets, unnamed controls, plus 18 named user flows (job `e2e`). It also saves screenshots. | The real **Global Auth** service: cross-subdomain cookie over HTTPS, real `/auth/me` and `/auth/identities` answers, central logout. Steps: backend guide 15.2. |
+| A real Chromium browser drives every page against a **mock backend** in English and Farsi, at desktop (1280 px) and phone (390 px) width, and checks layout, direction, digits, clipped text, touch targets, unnamed controls, plus 19 named user flows (job `e2e`). It also saves screenshots. | The real **Global Auth** service: cross-subdomain cookie over HTTPS, real `/auth/me` and `/auth/identities` answers, central logout. Steps: backend guide 15.2. |
 | | Real phones/browsers other than Chromium; a screen-reader and keyboard audit; performance. |
 
 So: the code compiles, builds and passes the mock-backend browser tests. Section 8 is your manual check against the real backend, which is the first time those two meet.
