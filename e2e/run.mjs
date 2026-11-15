@@ -251,7 +251,7 @@ await flow("settings: grouped sections, language select switches direction, sign
   const manage = await page.getByRole("link", { name: "Manage PlayNext Account" }).getAttribute("href");
   expect(manage === "https://auth.playnextai.com/", `manage link wrong: ${manage}`);
   const logout = await page.locator("form").evaluate((f) => ({ m: f.method, a: f.action }));
-  const logoutUrl = new URL(logout.a);
+  const logoutUrl = new URL(logout.a, BASE);
   expect(
     logout.m === "post" &&
     logoutUrl.origin === new URL(BASE).origin &&
