@@ -53,6 +53,8 @@ PlayNext:PC's web frontend: Next.js 15 (App Router) + React 19 + TypeScript, ser
 
 **Request path:** `Browser → /api/foo (this site) → Next rewrite → BACKEND_URL/foo (FastAPI)`.
 
+The shared identity/session/consent/logout contract for PC, Boardgames, Plays (Events), and future ventures is maintained in the [Global Auth Venture Integration Contract](https://github.com/playnextai/playnext-global-auth/blob/b3/5-final-review-hardening/docs/VENTURE_INTEGRATION_CONTRACT.md). This frontend guide covers the PC-specific implementation only.
+
 **Pages that exist:** landing `/`; `/auth/sso/callback`; `/consent`; onboarding `/onboarding/region`, `/onboarding/quiz`, `/onboarding/library`; the feed `/discover`; `/library`; `/wishlist`; `/cart`; `/game/[id]` (public, signed-out visitors can read it); `/dna` (Gamer DNA); `/settings`; plus a 404 page and an error page. The top navigation (Library, Wishlist, Gamer DNA, Cart with badge, budget/filters chip, region chip, language toggle, avatar) is on every signed-in page.
 
 ---
