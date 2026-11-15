@@ -231,6 +231,13 @@ await flow("Farsi: regions, reasons and genres are translated", async (page) => 
   await page.goto(BASE + "/dna", { waitUntil: "networkidle" });
   expect((await page.locator("main").innerText()).includes("اکشن RPG"), "genre not translated");
 });
+await flow("PC post-logout callback clears host-only legacy cookie", async (page, ctx) => {
+  await ctx.addCookies([{ name: "playnext_session", value: "legacy-pc-cookie", url: BASE }]);
+  await page.goto(BASE + "/auth/logout/complete", { waitUntil: "networkidle" });
+  expect(new URL(page.url()).pathname === "/", "logout cleanup callback did not return to the PC root");
+  const cookies = await ctx.cookies(BASE);
+  expect(!cookies.some((cookie) => cookie.name === "playnext_session"), "PC host-only legacy cookie was not cleared");
+});
 await flow("settings: grouped sections, language select switches direction, sign-out present", async (page) => {
   await page.goto(BASE + "/settings", { waitUntil: "networkidle" });
   const t = await page.locator("main").innerText();
