@@ -109,7 +109,7 @@ export default function SettingsPage() {
             </section>
             <a className="btn secondary" style={{ width: "100%", marginTop: 16 }} href={accountUrl()}>{t("settings.manageAccount")}</a>
             {/* Central logout must be a top-level form POST so Auth revokes the session and clears the shared cookie. */}
-            <form method="post" action={logoutUrl()}>
+            <form method="post" action={logoutUrl({ logoutReturnPath: "/auth/logout/complete" })}>
               <button type="submit" className="btn secondary" style={{ width: "100%", marginTop: 12 }}>{t("settings.signOut")}</button>
             </form>
           </>
