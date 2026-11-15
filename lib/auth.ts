@@ -58,7 +58,9 @@ export function accountUrl(opts: Opts = {}): string {
   return `${trim(opts.authUrl ?? AUTH_URL)}/`;
 }
 
-/** Central logout. Must be a top-level form POST so the Auth host can revoke the session and clear the cookie. */
+/** Central logout. Must be a top-level form POST so Auth revokes the session and clears the shared cookie.
+ *  The validated return URL sends the person back to the venture that initiated sign-out. */
 export function logoutUrl(opts: Opts = {}): string {
-  return `${trim(opts.authUrl ?? AUTH_URL)}/auth/logout`;
+  const returnUrl = `${trim(opts.siteUrl ?? SITE_URL)}/`;
+  return `${trim(opts.authUrl ?? AUTH_URL)}/auth/logout?return_url=${encodeURIComponent(returnUrl)}`;
 }
