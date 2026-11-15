@@ -7,6 +7,7 @@
 import http from "node:http";
 
 let scenario = "full";
+let lastAuthLogout = null;
 const cover = null; // placeholders (the design's gradient box); real covers are IGDB URLs
 const price = (t, n, c, d = null) => ({ price_toman: t, price_native: n, price_currency: c, discount_pct: d });
 const card = (id, title, extra = {}) => ({ game_id: id, title, cover_url: cover, genres: ["Action RPG"], ...price(3317470, 1249.5, "TRY", id % 2 ? 20 : null), ...extra });
@@ -76,21 +77,44 @@ function route(method, path) {
   return { status: "ok" };
 }
 
-http.createServer((req, res) => {
+http.createServer(async (req, res) => {
   const url = new URL(req.url, "http://x");
-  const m = url.pathname.match(/^\/__scenario\/(\w+)$/);
+  const m = url.pathname.match(/^\\/__scenario\\/(\\w+)$/);
   let status = 200, body;
   if (m) { scenario = m[1]; body = { scenario }; }
+  else if (req.method === "GET" && url.pathname === "/__logout-state") {
+    res.writeHead(200, { "content-type": "application/json" });
+    return res.end(JSON.stringify(lastAuthLogout));
+  }
   else if (req.method === "POST" && url.pathname === "/auth/logout") {
+    // Simulate the PC backend relay: server-to-server POST to Auth with the
+    // original browser Origin and the incoming shared session cookie.
     const returnUrl = url.searchParams.get("return_url") || "http://localhost:3000/";
-    res.writeHead(307, {
-      Location: `http://localhost:8000/mock-auth/logout?return_url=${encodeURIComponent(returnUrl)}`,
-    });
+    const origin = req.headers.origin || "";
+    let upstream;
+    try {
+      upstream = await fetch("http://localhost:8000/mock-auth/logout", {
+        method: "POST",
+        headers: { Origin: origin, Cookie: req.headers.cookie || "" },
+        redirect: "manual",
+      });
+    } catch {
+      res.writeHead(503, { "content-type": "application/json" });
+      return res.end(JSON.stringify({ detail: "auth_unavailable" }));
+    }
+    const result = await upstream.json();
+    if (upstream.status !== 200 || result.method !== "POST" || result.origin !== origin || !origin || origin === "null") {
+      res.writeHead(403, { "content-type": "application/json" });
+      return res.end(JSON.stringify({ detail: "global_auth_rejected_logout" }));
+    }
+    lastAuthLogout = result;
+    res.writeHead(303, { Location: returnUrl, "Cache-Control": "no-store" });
     return res.end();
   }
   else if (req.method === "POST" && url.pathname === "/mock-auth/logout") {
+    const origin = req.headers.origin || null;
     res.writeHead(200, { "content-type": "application/json" });
-    return res.end(JSON.stringify({ method: req.method, origin: req.headers.origin || null }));
+    return res.end(JSON.stringify({ method: req.method, origin, cookie: req.headers.cookie || null }));
   }
   else { const r = route(req.method, url.pathname + url.search); if (Array.isArray(r)) [status, body] = r; else body = r; }
   res.writeHead(status, { "content-type": "application/json" });
