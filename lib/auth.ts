@@ -58,12 +58,12 @@ export function accountUrl(opts: Opts = {}): string {
   return `${trim(opts.authUrl ?? AUTH_URL)}/`;
 }
 
-/** Central logout. Must be a top-level form POST so Auth revokes the session and clears the shared cookie.
- *  The validated return URL sends the person back to the venture that initiated sign-out. */
+/** Top-level form POST to the same-origin PC relay. The backend invalidates its
+ *  local Auth cache and 307-forwards the POST to central Auth; Auth owns revocation. */
 export function logoutUrl(opts: Opts = {}): string {
   // PC uses a post-logout cleanup callback for pre-SSO host-only cookies.
   // Other ventures can use their own callback or keep the default public root.
   const returnPath = isSafeReturnPath(opts.logoutReturnPath) ? opts.logoutReturnPath : "/";
   const returnUrl = `${trim(opts.siteUrl ?? SITE_URL)}${returnPath}`;
-  return `${trim(opts.authUrl ?? AUTH_URL)}/auth/logout?return_url=${encodeURIComponent(returnUrl)}`;
+  return `/api/auth/logout?return_url=${encodeURIComponent(returnUrl)}`;
 }
