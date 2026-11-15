@@ -248,7 +248,7 @@ await flow("settings: grouped sections, language select switches direction, sign
     `sign-out is not a top-level form POST to Auth: ${JSON.stringify(logout)}`,
   );
   expect(
-    logoutUrl.searchParams.get("return_url") === "http://localhost:3000/",
+    logoutUrl.searchParams.get("return_url") === "http://localhost:3000/auth/logout/complete",
     `sign-out does not return to this venture: ${JSON.stringify(logout)}`,
   );
   expect((await page.getByRole("button", { name: "Sign out" }).count()) === 1, "sign-out button missing");
