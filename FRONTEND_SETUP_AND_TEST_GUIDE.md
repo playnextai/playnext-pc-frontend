@@ -281,7 +281,7 @@ The full end-to-end checklist (cross-subdomain cookie over HTTPS, revocation wit
 ### 9.1 `npm test` — 43 logic tests, no browser, no backend
 | File | Covers |
 |---|---|
-| `auth.test.ts` | sign-in is exactly `auth/login?return_url=<encoded PC callback>`; deep links ride as an encoded `next`; Steam/Google link URLs and account URLs point at the Auth host; logout uses the same-origin relay and includes the encoded PC cleanup callback (or a venture root for other clients); unsafe destinations (`//evil.com`, `javascript:`, backslashes, the callback itself) fall back to `/discover`; callback decisions (failed / consent / onboarding / destination) |
+| `auth.test.ts` | sign-in is exactly `auth/login?return_url=<encoded PC callback>`; deep links ride as an encoded `next`; Steam/Google link URLs and account URLs point at the Auth host; logout uses the PC-specific same-origin relay and includes the encoded PC cleanup callback; other ventures must implement the shared contract rather than reuse the PC route; unsafe destinations (`//evil.com`, `javascript:`, backslashes, the callback itself) fall back to `/discover`; callback decisions (failed / consent / onboarding / destination) |
 | `flow.test.ts` | gate decision order: sign-in → consent → onboarding → ok |
 | `api.test.ts` | same-origin `/api` calls, credentials, JSON bodies, query encoding, 401/429/validation error mapping, `retry_after_sec` |
 | `format.test.ts` | Toman/native formatting, missing price shows "—" |
