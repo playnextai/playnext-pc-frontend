@@ -28,22 +28,22 @@ test("provider links go to the Auth-owned link routes with the callback", () => 
 
 test("account and logout point at Auth and return to the calling venture", () => {
   assert.equal(accountUrl(o), "https://auth.playnextai.com/");
-  assert.equal(logoutUrl(o), "https://auth.playnextai.com/auth/logout?return_url=https%3A%2F%2Fpc.playnextai.com%2F");
+  assert.equal(logoutUrl(o), "/api/auth/logout?return_url=https%3A%2F%2Fpc.playnextai.com%2F");
 
   // The helper is reusable: a different venture origin is carried through without PC-specific hardcoding.
   assert.equal(
     logoutUrl({ authUrl: "https://auth.playnextai.com", siteUrl: "https://boardgame.playnextai.com" }),
-    "https://auth.playnextai.com/auth/logout?return_url=https%3A%2F%2Fboardgame.playnextai.com%2F",
+    "/api/auth/logout?return_url=https%3A%2F%2Fboardgame.playnextai.com%2F",
   );
   // PC cleans up only its pre-SSO host-only cookie after Auth has revoked the shared session.
   assert.equal(
     logoutUrl({ ...o, logoutReturnPath: "/auth/logout/complete" }),
-    "https://auth.playnextai.com/auth/logout?return_url=https%3A%2F%2Fpc.playnextai.com%2Fauth%2Flogout%2Fcomplete",
+    "/api/auth/logout?return_url=https%3A%2F%2Fpc.playnextai.com%2Fauth%2Flogout%2Fcomplete",
   );
   // Return paths are same-site only; protocol-relative destinations fall back to the venture root.
   assert.equal(
     logoutUrl({ ...o, logoutReturnPath: "//evil.example" }),
-    "https://auth.playnextai.com/auth/logout?return_url=https%3A%2F%2Fpc.playnextai.com%2F",
+    "/api/auth/logout?return_url=https%3A%2F%2Fpc.playnextai.com%2F",
   );
 });
 
