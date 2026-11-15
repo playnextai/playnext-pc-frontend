@@ -108,6 +108,7 @@ http.createServer(async (req, res) => {
       return res.end(JSON.stringify({ detail: "global_auth_rejected_logout" }));
     }
     lastAuthLogout = result;
+    scenario = "out";
     res.writeHead(303, { Location: returnUrl, "Cache-Control": "no-store" });
     return res.end();
   }
