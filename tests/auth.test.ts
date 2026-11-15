@@ -30,11 +30,7 @@ test("account links to Auth and logout uses the same-origin relay", () => {
   assert.equal(accountUrl(o), "https://auth.playnextai.com/");
   assert.equal(logoutUrl(o), "/api/auth/logout?return_url=https%3A%2F%2Fpc.playnextai.com%2F");
 
-  // The helper is reusable: a different venture origin is carried through without PC-specific hardcoding.
-  assert.equal(
-    logoutUrl({ authUrl: "https://auth.playnextai.com", siteUrl: "https://boardgame.playnextai.com" }),
-    "/api/auth/logout?return_url=https%3A%2F%2Fboardgame.playnextai.com%2F",
-  );
+  // This helper is the PC adapter; other ventures implement their own route or direct Auth form per the shared contract.
   // PC cleans up only its pre-SSO host-only cookie after Auth has revoked the shared session.
   assert.equal(
     logoutUrl({ ...o, logoutReturnPath: "/auth/logout/complete" }),
