@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { SITE_URL } from "@/lib/auth";
 
 const LEGACY_HOST_ONLY_COOKIES = [
   "playnext_session",
@@ -12,8 +13,9 @@ const LEGACY_HOST_ONLY_COOKIES = [
  * cookie because Auth has already handled that authority.
  */
 export function GET(request: NextRequest) {
-  const response = NextResponse.redirect(new URL("/", request.url), 303);
-  const secure = request.nextUrl.protocol === "https:";
+  // Use the configured venture origin, not the incoming Host header, for the redirect.
+  const response = NextResponse.redirect(new URL("/", SITE_URL), 303);
+  const secure = new URL(SITE_URL).protocol === "https:";
 
   for (const name of LEGACY_HOST_ONLY_COOKIES) {
     response.cookies.set(name, "", {
