@@ -26,7 +26,7 @@ test("provider links go to the Auth-owned link routes with the callback", () => 
   assert.equal(new URL(u.searchParams.get("return_url")!).searchParams.get("next"), "/settings");
 });
 
-test("account and logout point at Auth and return to the calling venture", () => {
+test("account links to Auth and logout uses the same-origin relay", () => {
   assert.equal(accountUrl(o), "https://auth.playnextai.com/");
   assert.equal(logoutUrl(o), "/api/auth/logout?return_url=https%3A%2F%2Fpc.playnextai.com%2F");
 
