@@ -88,7 +88,7 @@ Edit `.env.local`:
 | Variable | Default | Meaning | When it is read |
 |---|---|---|---|
 | `BACKEND_URL` | `http://localhost:8000` | Where `/api/*` is forwarded (the FastAPI server). Server-side only. | **At build time and server start** (rewrites are fixed when the build runs) |
-| `NEXT_PUBLIC_SITE_URL` | `https://pc.playnextai.com` | This site's public origin. Used to build the PC callback (`/auth/sso/callback`) that is sent to the auth site as `return_url`. | **Baked into the JavaScript at build time** |
+| `NEXT_PUBLIC_SITE_URL` | `https://pc.playnextai.com` | This site's public origin. Used for the Auth callback, logout return URL, and the PC post-logout cleanup redirect. It must match the exact origin Auth has allowlisted. | **Set consistently at build and runtime** |
 | `NEXT_PUBLIC_AUTH_URL` | `https://auth.playnextai.com` | The Global Auth site (sign-in `/login`, linking `/auth/steam/link` and `/auth/google/link`, account `/`, sign-out `/auth/logout?return_url=<encoded PC cleanup callback>`). The paths are fixed by the contract, not configurable. | Baked at build time |
 
 Important gotchas:
@@ -338,7 +338,7 @@ gh api "repos/playnextai/playnext-pc-frontend/contents/e2e-report.txt?ref=e2e-re
 
 Not a full runbook — that is Phase 10 in the backend repo's `ACTION_PLAN.md` — but decisions to make:
 
-- **Build with production values:** `NEXT_PUBLIC_SITE_URL=https://pc.playnextai.com`, `NEXT_PUBLIC_AUTH_URL=https://auth.playnextai.com`, and `BACKEND_URL` set to the backend's internal/public address **before** `npm run build`.
+- **Build and run with production values:** set `NEXT_PUBLIC_SITE_URL=https://pc.playnextai.com` and `NEXT_PUBLIC_AUTH_URL=https://auth.playnextai.com` before `npm run build`; also keep `NEXT_PUBLIC_SITE_URL` set in the running Next.js process because the post-logout cleanup route uses it to construct the redirect. Set `BACKEND_URL` to the backend's internal/public address.
 - **Run:** `npm run build && npm run start` (Node server, port 3000) behind a reverse proxy/TLS. Next also deploys to Vercel-style platforms; if you pick one, `BACKEND_URL` must be reachable from it.
 - **Cookies:** the shared session cookie `playnext_session` (`Domain=.playnextai.com`, Secure, HttpOnly, SameSite=Lax) is set by Global Auth. It flows through the proxy untouched; do not strip `Cookie` or `Set-Cookie` in front of the app.
 - **Backend `TRUSTED_PROXY_COUNT`:** with Next in front of the API, the client IP the backend sees is Next's unless forwarded headers are set correctly. Set `TRUSTED_PROXY_COUNT` to the real number of proxies, otherwise rate limiting treats all users as one. Verify with a test before launch.
