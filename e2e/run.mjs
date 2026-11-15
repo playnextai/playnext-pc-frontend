@@ -256,6 +256,7 @@ await flow("logout relay forwards POST and browser Origin server-to-server", asy
     expect(payload.method === "POST", `PC relay did not send POST to Auth: ${JSON.stringify(payload)}`);
     expect(payload.origin === new URL(BASE).origin, `PC relay did not forward the exact browser Origin: ${JSON.stringify(payload)}`);
     expect(page.url() === BASE + "/", `logout did not return through the PC cleanup callback: ${page.url()}`);
+    await setScenario("full"); // restore the signed-in fixture for subsequent independent flows
   }
 });
 await flow("settings: grouped sections, language select switches direction, sign-out present", async (page) => {
