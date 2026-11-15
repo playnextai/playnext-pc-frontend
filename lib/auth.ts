@@ -11,7 +11,7 @@ export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://pc.playnex
 export const CALLBACK_PATH = "/auth/sso/callback";
 export const DEFAULT_DESTINATION = "/discover";
 
-type Opts = { authUrl?: string; siteUrl?: string };
+type Opts = { authUrl?: string; siteUrl?: string; logoutReturnPath?: string };
 const trim = (s: string) => s.replace(/\/+$/, "");
 
 /** A same-site path we are willing to return to: starts with a single "/",
@@ -61,6 +61,9 @@ export function accountUrl(opts: Opts = {}): string {
 /** Central logout. Must be a top-level form POST so Auth revokes the session and clears the shared cookie.
  *  The validated return URL sends the person back to the venture that initiated sign-out. */
 export function logoutUrl(opts: Opts = {}): string {
-  const returnUrl = `${trim(opts.siteUrl ?? SITE_URL)}/`;
+  // PC uses a post-logout cleanup callback for pre-SSO host-only cookies.
+  // Other ventures can use their own callback or keep the default public root.
+  const returnPath = isSafeReturnPath(opts.logoutReturnPath) ? opts.logoutReturnPath : "/";
+  const returnUrl = `${trim(opts.siteUrl ?? SITE_URL)}${returnPath}`;
   return `${trim(opts.authUrl ?? AUTH_URL)}/auth/logout?return_url=${encodeURIComponent(returnUrl)}`;
 }
