@@ -407,4 +407,4 @@ emit("e2e warnings", chunk(findings.filter((f) => f.level === "warn")));
 emit("e2e info", chunk(findings.filter((f) => f.level === "info")));
 import { writeFileSync } from "node:fs";
 writeFileSync("e2e-report.txt", chunk(findings).join("\n"));
-process.exit(0); // findings are reported, not gated, until we've triaged them
+process.exit(errors > 0 ? 1 : 0); // E2E errors fail CI; warnings remain advisory.
