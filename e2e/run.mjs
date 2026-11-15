@@ -251,7 +251,7 @@ await flow("logout relay forwards POST and browser Origin server-to-server", asy
       page.waitForURL((url) => url.origin === new URL(BASE).origin && url.pathname === "/", { waitUntil: "domcontentloaded" }),
       form.evaluate((node) => node.submit()),
     ]);
-    const stateResponse = await page.request.get(MOCK + "/__logout-state");
+    const stateResponse = await fetch(MOCK + "/__logout-state");
     const payload = await stateResponse.json();
     expect(payload.method === "POST", `PC relay did not send POST to Auth: ${JSON.stringify(payload)}`);
     expect(payload.origin === new URL(BASE).origin, `PC relay did not forward the exact browser Origin: ${JSON.stringify(payload)}`);
