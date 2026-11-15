@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { SITE_URL } from "@/lib/auth";
 
 const LEGACY_HOST_ONLY_COOKIES = [
@@ -12,7 +12,7 @@ const LEGACY_HOST_ONLY_COOKIES = [
  * were scoped only to pc.playnextai.com; it must never delete the parent-domain
  * cookie because Auth has already handled that authority.
  */
-export function GET(request: NextRequest) {
+export function GET() {
   // Use the configured venture origin, not the incoming Host header, for the redirect.
   const response = NextResponse.redirect(new URL("/", SITE_URL), 303);
   const secure = new URL(SITE_URL).protocol === "https:";
