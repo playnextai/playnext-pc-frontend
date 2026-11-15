@@ -89,7 +89,7 @@ Edit `.env.local`:
 |---|---|---|---|
 | `BACKEND_URL` | `http://localhost:8000` | Where `/api/*` is forwarded (the FastAPI server). Server-side only. | **At build time and server start** (rewrites are fixed when the build runs) |
 | `NEXT_PUBLIC_SITE_URL` | `https://pc.playnextai.com` | This site's public origin. Used for the Auth callback, logout return URL, and the PC post-logout cleanup redirect. It must match the exact origin Auth has allowlisted. | **Set consistently at build and runtime** |
-| `NEXT_PUBLIC_AUTH_URL` | `https://auth.playnextai.com` | The Global Auth site (sign-in `/login`, linking `/auth/steam/link` and `/auth/google/link`, account `/`, sign-out `/auth/logout?return_url=<encoded PC cleanup callback>`). The paths are fixed by the contract, not configurable. | Baked at build time |
+| `NEXT_PUBLIC_AUTH_URL` | `https://auth.playnextai.com` | The Global Auth site (sign-in `/login`, linking `/auth/steam/link` and `/auth/google/link`, account `/`, sign-out via same-origin `/api/auth/logout?return_url=<encoded PC cleanup callback>`). The paths are fixed by the contract, not configurable. | Baked at build time |
 
 Important gotchas:
 - Anything starting with `NEXT_PUBLIC_` is compiled into the browser code. **Changing it requires a rebuild** (`npm run build`), or a restart of `npm run dev`.
@@ -250,7 +250,7 @@ Bump `PRIVACY_POLICY_VERSION` in the backend `.env` and restart it. Reload the a
 | Rows in PlayNext Account | Status from Auth: Connected (check mark), Unverified, Not connected (with **Connect Google** / **Connect Steam**), or "Status unavailable right now" if Auth cannot be reached. |
 | Click **Connect Google** / **Connect Steam** | Browser goes to `https://<auth>/auth/google/link?return_url=…` / `…/auth/steam/link?return_url=…`, the return URL being the encoded PC callback with `next=%2Fsettings`. After linking you return to Settings. |
 | **Manage PlayNext Account** | A plain link to `https://<auth>/` (top-level navigation, never an iframe). Until Auth ships its account page it lands on Auth's login. |
-| **Sign out** | DevTools → Network: a **top-level form POST to `https://<auth>/auth/logout?return_url=<encoded PC cleanup callback>`** (not a background request). Auth revokes the server-side session and clears the shared cookie, then redirects to the PC-owned Next route handler `app/auth/logout/complete/route.ts`; it clears any host-only legacy cookie before returning home. Replay the copied old cookie against Auth `/auth/me`; expected: `authenticated: false`. |
+| **Sign out** | DevTools → Network: a **top-level form POST to the same-origin `/api/auth/logout?return_url=<encoded PC cleanup callback>`** (not a background request). The PC backend invalidates its cached Auth identity and 307-forwards the POST to Auth. Auth revokes the server-side session and clears the shared cookie, then redirects to the PC-owned Next route handler `app/auth/logout/complete/route.ts`; it clears any host-only legacy cookie before returning home. Replay the copied old cookie against Auth `/auth/me`; expected: `authenticated: false`. |
 
 ### 8.13 `/auth/sso/callback` (PC-owned landing after Auth)
 The CI browser test already checks these against the mock; run them by hand on staging. Open each URL while signed in:
@@ -281,7 +281,7 @@ The full end-to-end checklist (cross-subdomain cookie over HTTPS, revocation wit
 ### 9.1 `npm test` — 43 logic tests, no browser, no backend
 | File | Covers |
 |---|---|
-| `auth.test.ts` | sign-in is exactly `auth/login?return_url=<encoded PC callback>`; deep links ride as an encoded `next`; Steam/Google link URLs and account/logout URLs point at the Auth host; logout includes the encoded PC cleanup callback (or a venture root for other clients) and supports another venture origin; unsafe destinations (`//evil.com`, `javascript:`, backslashes, the callback itself) fall back to `/discover`; callback decisions (failed / consent / onboarding / destination) |
+| `auth.test.ts` | sign-in is exactly `auth/login?return_url=<encoded PC callback>`; deep links ride as an encoded `next`; Steam/Google link URLs and account/logout URLs point at the Auth host; logout uses the same-origin relay and includes the encoded PC cleanup callback (or a venture root for other clients); unsafe destinations (`//evil.com`, `javascript:`, backslashes, the callback itself) fall back to `/discover`; callback decisions (failed / consent / onboarding / destination) |
 | `flow.test.ts` | gate decision order: sign-in → consent → onboarding → ok |
 | `api.test.ts` | same-origin `/api` calls, credentials, JSON bodies, query encoding, 401/429/validation error mapping, `retry_after_sec` |
 | `format.test.ts` | Toman/native formatting, missing price shows "—" |
