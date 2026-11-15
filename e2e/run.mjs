@@ -240,7 +240,17 @@ await flow("settings: grouped sections, language select switches direction, sign
   const manage = await page.getByRole("link", { name: "Manage PlayNext Account" }).getAttribute("href");
   expect(manage === "https://auth.playnextai.com/", `manage link wrong: ${manage}`);
   const logout = await page.locator("form").evaluate((f) => ({ m: f.method, a: f.action }));
-  expect(logout.m === "post" && logout.a === "https://auth.playnextai.com/auth/logout", `sign-out is not a form POST to Auth: ${JSON.stringify(logout)}`);
+  const logoutUrl = new URL(logout.a);
+  expect(
+    logout.m === "post" &&
+    logoutUrl.origin === "https://auth.playnextai.com" &&
+    logoutUrl.pathname === "/auth/logout",
+    `sign-out is not a top-level form POST to Auth: ${JSON.stringify(logout)}`,
+  );
+  expect(
+    logoutUrl.searchParams.get("return_url") === "http://localhost:3000/",
+    `sign-out does not return to this venture: ${JSON.stringify(logout)}`,
+  );
   expect((await page.getByRole("button", { name: "Sign out" }).count()) === 1, "sign-out button missing");
   await page.selectOption("#ui-lang", "fa");
   await page.waitForFunction(() => document.documentElement.dir === "rtl", null, { timeout: 3000 });
