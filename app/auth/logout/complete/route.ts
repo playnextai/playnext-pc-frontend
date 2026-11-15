@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { SITE_URL } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 const LEGACY_HOST_ONLY_COOKIES = [
   "playnext_session",
   "playnext_pending_steam",
