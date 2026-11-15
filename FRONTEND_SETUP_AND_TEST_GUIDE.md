@@ -9,7 +9,7 @@
 | Verified automatically on every push (GitHub Actions, `frontend-ci`) | Never verified |
 |---|---|
 | `npm run typecheck`, `npm test` (43 tests), `npm run build` on a clean machine (job `check`). | Anything against the **real backend**: real Postgres data, Steam, Redis, Celery, IGDB covers, Bonbast rates. |
-| A real Chromium browser drives every page against a **mock backend** in English and Farsi, at desktop (1280 px) and phone (390 px) width, and checks layout, direction, digits, clipped text, touch targets, unnamed controls, plus 18 named user flows (job `e2e`). It also saves screenshots. | The real **Global Auth** service: cross-subdomain cookie over HTTPS, real `/auth/me` and `/auth/identities` answers, central logout. Steps: backend guide 15.2. |
+| A real Chromium browser drives every page against a **mock backend** in English and Farsi, at desktop (1280 px) and phone (390 px) width, and checks layout, direction, digits, clipped text, touch targets, unnamed controls, plus 19 named user flows (job `e2e`). It also saves screenshots. | The real **Global Auth** service: cross-subdomain cookie over HTTPS, real `/auth/me` and `/auth/identities` answers, central logout. Steps: backend guide 15.2. |
 | | Real phones/browsers other than Chromium; a screen-reader and keyboard audit; performance. |
 
 So: the code compiles, builds and passes the mock-backend browser tests. Section 8 is your manual check against the real backend, which is the first time those two meet.
@@ -42,7 +42,7 @@ PlayNext:PC's web frontend: Next.js 15 (App Router) + React 19 + TypeScript, ser
 
 | Rule | Why | Where |
 |---|---|---|
-| **No sign-in UI here.** Every sign-in is a redirect to the central auth site: `https://auth.playnextai.com/login?return_url=<PC callback>`. The PC callback `/auth/sso/callback` asks the backend who the session belongs to and applies PC onboarding. Linking Steam/Google, account management and sign-out are also Auth's (links and a form POST). | Global Auth owns identity, sign-in methods, sessions and logout. Contract: "PlayNext:PC - Global Auth Integration Hand-off" v1.0 (Auth B2 0.3.0), summarized in the backend repo's `GLOBAL_AUTH_INTEGRATION.md`. | `lib/auth.ts` is the only file that knows Auth URLs; `app/auth/sso/callback/page.tsx` |
+| **No sign-in UI here.** Every sign-in is a redirect to the central auth site: `https://auth.playnextai.com/login?return_url=<PC callback>`. The PC callback `/auth/sso/callback` asks the backend who the session belongs to and applies PC onboarding. Linking Steam/Google and account management are Auth's; sign-out uses a same-origin PC relay; the backend sends a server-to-server POST to Auth with the original browser Origin and shared cookie, then relays Auth's 303 and Set-Cookie response. | Global Auth owns identity, sign-in methods, sessions and logout. Contract: "PlayNext:PC - Global Auth Integration Hand-off" v1.0 (Auth B2 0.3.0), summarized in the backend repo's `GLOBAL_AUTH_INTEGRATION.md`. | `lib/auth.ts` is the only file that knows Auth URLs; `app/auth/sso/callback/page.tsx` |
 | The browser only calls **same-origin `/api/*`**, which Next forwards to the backend. | No CORS, and the session cookie flows through untouched. | `next.config.mjs` |
 | The client **never sends a user id**. | The backend takes it from the session (it asks Global Auth). | `lib/api.ts` |
 | Every signed-in page is wrapped in the **gate**: signed out → auth site; consent needed → `/consent`; onboarding unfinished → the next step. | Onboarding is tracked by the backend (`GET /onboarding/status`), never guessed from "new account". | `components/Gate.tsx`, `lib/flow.ts` |
@@ -52,6 +52,8 @@ PlayNext:PC's web frontend: Next.js 15 (App Router) + React 19 + TypeScript, ser
 | Design tokens (dark theme, mint/lime/lilac accents, Inter + Vazirmatn fonts, logical CSS properties for RTL, inline SVG icons, no emoji). | Matches the approved design board. | `app/globals.css`, `components/Icon.tsx` |
 
 **Request path:** `Browser → /api/foo (this site) → Next rewrite → BACKEND_URL/foo (FastAPI)`.
+
+The shared identity/session/consent/logout contract for PC, Boardgames, Plays (Events), and future ventures is maintained in the [Global Auth Venture Integration Contract](https://github.com/playnextai/playnext-global-auth/blob/b3/5-final-review-hardening/docs/VENTURE_INTEGRATION_CONTRACT.md). This frontend guide covers the PC-specific implementation only.
 
 **Pages that exist:** landing `/`; `/auth/sso/callback`; `/consent`; onboarding `/onboarding/region`, `/onboarding/quiz`, `/onboarding/library`; the feed `/discover`; `/library`; `/wishlist`; `/cart`; `/game/[id]` (public, signed-out visitors can read it); `/dna` (Gamer DNA); `/settings`; plus a 404 page and an error page. The top navigation (Library, Wishlist, Gamer DNA, Cart with badge, budget/filters chip, region chip, language toggle, avatar) is on every signed-in page.
 
@@ -86,8 +88,8 @@ Edit `.env.local`:
 | Variable | Default | Meaning | When it is read |
 |---|---|---|---|
 | `BACKEND_URL` | `http://localhost:8000` | Where `/api/*` is forwarded (the FastAPI server). Server-side only. | **At build time and server start** (rewrites are fixed when the build runs) |
-| `NEXT_PUBLIC_SITE_URL` | `https://pc.playnextai.com` | This site's public origin. Used to build the PC callback (`/auth/sso/callback`) that is sent to the auth site as `return_url`. | **Baked into the JavaScript at build time** |
-| `NEXT_PUBLIC_AUTH_URL` | `https://auth.playnextai.com` | The Global Auth site (sign-in `/login`, linking `/auth/steam/link` and `/auth/google/link`, account `/`, sign-out `/auth/logout`). The paths are fixed by the contract, not configurable. | Baked at build time |
+| `NEXT_PUBLIC_SITE_URL` | `https://pc.playnextai.com` | This site's public origin. Used for the Auth callback, logout return URL, and the PC post-logout cleanup redirect. It must match the exact origin Auth has allowlisted. | **Set consistently at build and runtime** |
+| `NEXT_PUBLIC_AUTH_URL` | `https://auth.playnextai.com` | The Global Auth site (sign-in `/login`, linking `/auth/steam/link` and `/auth/google/link`, account `/`). Sign-out uses the PC same-origin relay, which forwards to this Auth host. | Baked at build time |
 
 Important gotchas:
 - Anything starting with `NEXT_PUBLIC_` is compiled into the browser code. **Changing it requires a rebuild** (`npm run build`), or a restart of `npm run dev`.
@@ -161,7 +163,7 @@ Real sign-in cannot return to `http://localhost:3000`. Use the mock backend (sec
 3. **Put it in your browser:** open http://localhost:3000, DevTools → Application (Chrome/Edge) or Storage (Firefox) → Cookies → `http://localhost:3000` → add a cookie: Name `playnext_session`, Value = the printed string, Path `/`. Leave Secure off.
 4. Reload. `http://localhost:3000/api/auth/me` should now show `authenticated: true`, and the gate lets you in.
 
-This only works while the backend runs with `AUTH_SESSION_VALIDATION=legacy` (the default). In `auth` mode the backend asks Global Auth about the cookie, and a hand-made one is rejected. The cookie lasts 30 days; delete it in DevTools to test the signed-out path. The app's **Sign out** button posts to the Auth site, which cannot clear a localhost cookie.
+This only works while the backend runs with `AUTH_SESSION_VALIDATION=legacy` (the default). In `auth` mode the backend asks Global Auth about the cookie, and a hand-made one is rejected. The cookie lasts 30 days; delete it in DevTools to test the signed-out path. The app's **Sign out** button posts to the same-origin PC relay; the backend validates the exact PC Origin, invalidates its positive Auth cache, and sends a server-to-server POST to Auth with the original Origin and shared cookie. It relays Auth's 303 and Set-Cookie response. After Auth revokes the global session, the browser returns to the PC-hosted `/auth/logout/complete` callback, which clears only the PC host-only legacy cookie (including localhost during local testing).
 
 The real sign-in is tested on staging: backend guide **15.2**.
 
@@ -248,7 +250,7 @@ Bump `PRIVACY_POLICY_VERSION` in the backend `.env` and restart it. Reload the a
 | Rows in PlayNext Account | Status from Auth: Connected (check mark), Unverified, Not connected (with **Connect Google** / **Connect Steam**), or "Status unavailable right now" if Auth cannot be reached. |
 | Click **Connect Google** / **Connect Steam** | Browser goes to `https://<auth>/auth/google/link?return_url=…` / `…/auth/steam/link?return_url=…`, the return URL being the encoded PC callback with `next=%2Fsettings`. After linking you return to Settings. |
 | **Manage PlayNext Account** | A plain link to `https://<auth>/` (top-level navigation, never an iframe). Until Auth ships its account page it lands on Auth's login. |
-| **Sign out** | DevTools → Network: a **form POST to `https://<auth>/auth/logout`** (a page navigation, not a background request). Afterwards the shared cookie is gone and PC treats you as signed out. |
+| **Sign out** | DevTools → Network: a **top-level form POST to the same-origin `/api/auth/logout?return_url=<encoded PC cleanup callback>`** (not a background request). The PC backend validates the exact PC Origin, invalidates its cached Auth identity, and sends a server-to-server POST to Auth with the original Origin and shared cookie. It relays Auth's 303 Location and parent-domain Set-Cookie response to the browser. Auth revokes the server-side session and clears the shared cookie, then the browser reaches the PC-owned Next route handler `app/auth/logout/complete/route.ts`; it clears any host-only legacy cookie before returning home. Replay the copied old cookie against Auth `/auth/me`; expected: `authenticated: false`. |
 
 ### 8.13 `/auth/sso/callback` (PC-owned landing after Auth)
 The CI browser test already checks these against the mock; run them by hand on staging. Open each URL while signed in:
@@ -279,7 +281,7 @@ The full end-to-end checklist (cross-subdomain cookie over HTTPS, revocation wit
 ### 9.1 `npm test` — 43 logic tests, no browser, no backend
 | File | Covers |
 |---|---|
-| `auth.test.ts` | sign-in is exactly `auth/login?return_url=<encoded PC callback>`; deep links ride as an encoded `next`; Steam/Google link URLs and account/logout URLs point at the Auth host; unsafe destinations (`//evil.com`, `javascript:`, backslashes, the callback itself) fall back to `/discover`; the return URL can never point at another host; callback decisions (failed / consent / onboarding / destination) |
+| `auth.test.ts` | sign-in is exactly `auth/login?return_url=<encoded PC callback>`; deep links ride as an encoded `next`; Steam/Google link URLs and account URLs point at the Auth host; logout uses the PC-specific same-origin relay and includes the encoded PC cleanup callback; other ventures must implement the shared contract rather than reuse the PC route; unsafe destinations (`//evil.com`, `javascript:`, backslashes, the callback itself) fall back to `/discover`; callback decisions (failed / consent / onboarding / destination) |
 | `flow.test.ts` | gate decision order: sign-in → consent → onboarding → ok |
 | `api.test.ts` | same-origin `/api` calls, credentials, JSON bodies, query encoding, 401/429/validation error mapping, `retry_after_sec` |
 | `format.test.ts` | Toman/native formatting, missing price shows "—" |
@@ -336,12 +338,12 @@ gh api "repos/playnextai/playnext-pc-frontend/contents/e2e-report.txt?ref=e2e-re
 
 Not a full runbook — that is Phase 10 in the backend repo's `ACTION_PLAN.md` — but decisions to make:
 
-- **Build with production values:** `NEXT_PUBLIC_SITE_URL=https://pc.playnextai.com`, `NEXT_PUBLIC_AUTH_URL=https://auth.playnextai.com`, and `BACKEND_URL` set to the backend's internal/public address **before** `npm run build`.
+- **Build and run with production values:** set `NEXT_PUBLIC_SITE_URL=https://pc.playnextai.com` and `NEXT_PUBLIC_AUTH_URL=https://auth.playnextai.com` before `npm run build`; also keep `NEXT_PUBLIC_SITE_URL` set in the running Next.js process because the post-logout cleanup route uses it to construct the redirect. Set `BACKEND_URL` to the backend's internal/public address.
 - **Run:** `npm run build && npm run start` (Node server, port 3000) behind a reverse proxy/TLS. Next also deploys to Vercel-style platforms; if you pick one, `BACKEND_URL` must be reachable from it.
 - **Cookies:** the shared session cookie `playnext_session` (`Domain=.playnextai.com`, Secure, HttpOnly, SameSite=Lax) is set by Global Auth. It flows through the proxy untouched; do not strip `Cookie` or `Set-Cookie` in front of the app.
 - **Backend `TRUSTED_PROXY_COUNT`:** with Next in front of the API, the client IP the backend sees is Next's unless forwarded headers are set correctly. Set `TRUSTED_PROXY_COUNT` to the real number of proxies, otherwise rate limiting treats all users as one. Verify with a test before launch.
 - **The auth site** must allow-list `https://pc.playnextai.com` as a return host (it keeps the callback's `?next=` query string; confirmed by the Auth team, not yet tested end to end).
-- **Sign-out** is a form POST to Auth, so it works only when the Auth host is reachable from the browser; Auth redirects to its own default return URL afterwards (not back to PC) until the Auth team adds a caller-provided logout return URL.
+- **Sign-out** is a top-level form POST to Auth and requires the Auth host to be reachable from the browser. The PC frontend sends its cleanup callback as `return_url`; Auth honors it after the matching Global Auth B3.5 change is merged and deployed. Until then, the Auth service on the deployed version may still use its default return URL.
 - **Who deploys and where** is an open Phase 10 decision.
 
 ---

@@ -26,9 +26,21 @@ test("provider links go to the Auth-owned link routes with the callback", () => 
   assert.equal(new URL(u.searchParams.get("return_url")!).searchParams.get("next"), "/settings");
 });
 
-test("account and logout point at the Auth host", () => {
+test("account links to Auth and logout uses the same-origin relay", () => {
   assert.equal(accountUrl(o), "https://auth.playnextai.com/");
-  assert.equal(logoutUrl(o), "https://auth.playnextai.com/auth/logout");
+  assert.equal(logoutUrl(o), "/api/auth/logout?return_url=https%3A%2F%2Fpc.playnextai.com%2F");
+
+  // This helper is the PC adapter; other ventures implement their own route or direct Auth form per the shared contract.
+  // PC cleans up only its pre-SSO host-only cookie after Auth has revoked the shared session.
+  assert.equal(
+    logoutUrl({ ...o, logoutReturnPath: "/auth/logout/complete" }),
+    "/api/auth/logout?return_url=https%3A%2F%2Fpc.playnextai.com%2Fauth%2Flogout%2Fcomplete",
+  );
+  // Return paths are same-site only; protocol-relative destinations fall back to the venture root.
+  assert.equal(
+    logoutUrl({ ...o, logoutReturnPath: "//evil.example" }),
+    "/api/auth/logout?return_url=https%3A%2F%2Fpc.playnextai.com%2F",
+  );
 });
 
 test("unsafe destinations fall back to /discover", () => {

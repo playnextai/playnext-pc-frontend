@@ -11,9 +11,9 @@ page-by-page manual tests, CI, troubleshooting.
   `https://auth.playnextai.com/login?return_url=<PC callback>`. The PC callback `/auth/sso/callback` asks the backend who the
   session belongs to (the backend validates it with Auth), then applies consent -> PC onboarding -> a validated destination
   (`/discover` by default). Linking Steam/Google goes to Auth's `/auth/steam/link` and `/auth/google/link`; sign-out is a
-  top-level form POST to Auth's `/auth/logout`; account management is a link to `https://auth.playnextai.com/`.
+  top-level form POST to the same-origin `/api/auth/logout?return_url=<encoded PC cleanup callback>`; the PC backend validates the PC Origin, invalidates its cache, sends a server-to-server POST to Auth with the original Origin and shared cookie, and relays Auth's 303 and Set-Cookie response. Auth revokes the global session and returns the browser to PC. Account management is a link to `https://auth.playnextai.com/`.
   `lib/auth.ts` is the only file that knows these URLs. Contract: "PlayNext:PC - Global Auth Integration Hand-off" v1.0 (see the
-  backend repo's `GLOBAL_AUTH_INTEGRATION.md`).
+  backend repo's `GLOBAL_AUTH_INTEGRATION.md`). The shared architecture standard for PC, Boardgames, Plays (Events), and future ventures is the [Global Auth Venture Integration Contract](https://github.com/playnextai/playnext-global-auth/blob/b3/5-final-review-hardening/docs/VENTURE_INTEGRATION_CONTRACT.md).
 - Settings shows two separate areas: **PlayNext:PC Settings** (owned here) and **PlayNext Account** (owned by Auth).
 - The browser talks only to same-origin `/api/*`; `next.config.mjs` forwards that to the backend (`BACKEND_URL`). The client never
   sends a user id.

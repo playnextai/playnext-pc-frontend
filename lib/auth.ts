@@ -1,5 +1,6 @@
-// Sign-in, account linking and sign-out are NOT implemented in this app. They belong to Global Auth
-// (auth.playnextai.com). Contract: "PlayNext:PC - Global Auth Integration Hand-off" v1.0 (Auth B2 0.3.0).
+// Sign-in and account linking belong to Global Auth (auth.playnextai.com).
+// PC sign-out uses a same-origin relay; Global Auth remains the authority that revokes the shared session.
+// Contract: "PlayNext:PC - Global Auth Integration Hand-off" v1.0 (Auth B2 0.3.0).
 //
 // PC owns only: the callback page (/auth/sso/callback), PC onboarding and PC settings.
 // PC never writes provider identities and never trusts a user id from the browser; identity comes from
@@ -11,7 +12,7 @@ export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://pc.playnex
 export const CALLBACK_PATH = "/auth/sso/callback";
 export const DEFAULT_DESTINATION = "/discover";
 
-type Opts = { authUrl?: string; siteUrl?: string };
+type Opts = { authUrl?: string; siteUrl?: string; logoutReturnPath?: string };
 const trim = (s: string) => s.replace(/\/+$/, "");
 
 /** A same-site path we are willing to return to: starts with a single "/",
@@ -58,7 +59,14 @@ export function accountUrl(opts: Opts = {}): string {
   return `${trim(opts.authUrl ?? AUTH_URL)}/`;
 }
 
-/** Central logout. Must be a top-level form POST so the Auth host can revoke the session and clear the cookie. */
+/** PC-specific top-level form POST to the same-origin backend relay. The relay
+ *  calls Auth server-to-server, forwarding the browser Origin and session cookie,
+ *  then relays Auth's cookie clearing and post-logout redirect. Other ventures
+ *  should implement the shared Venture Integration Contract, not reuse this PC route. */
 export function logoutUrl(opts: Opts = {}): string {
-  return `${trim(opts.authUrl ?? AUTH_URL)}/auth/logout`;
+  // PC uses a post-logout cleanup callback for pre-SSO host-only cookies.
+  // Other ventures can use their own callback or keep the default public root.
+  const returnPath = isSafeReturnPath(opts.logoutReturnPath) ? opts.logoutReturnPath : "/";
+  const returnUrl = `${trim(opts.siteUrl ?? SITE_URL)}${returnPath}`;
+  return `/api/auth/logout?return_url=${encodeURIComponent(returnUrl)}`;
 }

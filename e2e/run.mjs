@@ -231,6 +231,34 @@ await flow("Farsi: regions, reasons and genres are translated", async (page) => 
   await page.goto(BASE + "/dna", { waitUntil: "networkidle" });
   expect((await page.locator("main").innerText()).includes("اکشن RPG"), "genre not translated");
 });
+await flow("PC post-logout callback clears host-only legacy cookie", async (page, ctx) => {
+  await ctx.addCookies([{ name: "playnext_session", value: "legacy-pc-cookie", url: BASE }]);
+  const response = await page.goto(BASE + "/auth/logout/complete", { waitUntil: "domcontentloaded" });
+  const finalUrl = new URL(page.url());
+  expect(
+    finalUrl.origin === new URL(BASE).origin && finalUrl.pathname === "/",
+    `logout cleanup callback did not return to this PC origin: url=${page.url()} status=${response?.status()}`,
+  );
+  const cookies = await ctx.cookies(BASE);
+  expect(!cookies.some((cookie) => cookie.name === "playnext_session"), "PC host-only legacy cookie was not cleared");
+});
+await flow("logout relay forwards POST and browser Origin server-to-server", async (page) => {
+  await page.goto(BASE + "/settings", { waitUntil: "networkidle" });
+  const form = page.locator('form[method="post"][action*="/api/auth/logout"]');
+  expect(await form.count() > 0, "same-origin logout relay form is missing");
+  if (await form.count() > 0) {
+    await Promise.all([
+      page.waitForURL((url) => url.origin === new URL(BASE).origin && url.pathname === "/", { waitUntil: "domcontentloaded" }),
+      form.evaluate((node) => node.submit()),
+    ]);
+    const stateResponse = await fetch(MOCK + "/__logout-state");
+    const payload = await stateResponse.json();
+    expect(payload.method === "POST", `PC relay did not send POST to Auth: ${JSON.stringify(payload)}`);
+    expect(payload.origin === new URL(BASE).origin, `PC relay did not forward the exact browser Origin: ${JSON.stringify(payload)}`);
+    expect(page.url() === BASE + "/", `logout did not return through the PC cleanup callback: ${page.url()}`);
+    await setScenario("full"); // restore the signed-in fixture for subsequent independent flows
+  }
+});
 await flow("settings: grouped sections, language select switches direction, sign-out present", async (page) => {
   await page.goto(BASE + "/settings", { waitUntil: "networkidle" });
   const t = await page.locator("main").innerText();
@@ -240,7 +268,17 @@ await flow("settings: grouped sections, language select switches direction, sign
   const manage = await page.getByRole("link", { name: "Manage PlayNext Account" }).getAttribute("href");
   expect(manage === "https://auth.playnextai.com/", `manage link wrong: ${manage}`);
   const logout = await page.locator("form").evaluate((f) => ({ m: f.method, a: f.action }));
-  expect(logout.m === "post" && logout.a === "https://auth.playnextai.com/auth/logout", `sign-out is not a form POST to Auth: ${JSON.stringify(logout)}`);
+  const logoutUrl = new URL(logout.a, BASE);
+  expect(
+    logout.m === "post" &&
+    logoutUrl.origin === new URL(BASE).origin &&
+    logoutUrl.pathname === "/api/auth/logout",
+    `sign-out is not a top-level form POST to Auth: ${JSON.stringify(logout)}`,
+  );
+  expect(
+    logoutUrl.searchParams.get("return_url") === "http://localhost:3000/auth/logout/complete",
+    `sign-out does not return to this venture: ${JSON.stringify(logout)}`,
+  );
   expect((await page.getByRole("button", { name: "Sign out" }).count()) === 1, "sign-out button missing");
   await page.selectOption("#ui-lang", "fa");
   await page.waitForFunction(() => document.documentElement.dir === "rtl", null, { timeout: 3000 });
@@ -386,4 +424,4 @@ emit("e2e warnings", chunk(findings.filter((f) => f.level === "warn")));
 emit("e2e info", chunk(findings.filter((f) => f.level === "info")));
 import { writeFileSync } from "node:fs";
 writeFileSync("e2e-report.txt", chunk(findings).join("\n"));
-process.exit(0); // findings are reported, not gated, until we've triaged them
+process.exit(errors > 0 ? 1 : 0); // E2E errors fail CI; warnings remain advisory.
