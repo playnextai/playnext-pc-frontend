@@ -26,9 +26,15 @@ test("provider links go to the Auth-owned link routes with the callback", () => 
   assert.equal(new URL(u.searchParams.get("return_url")!).searchParams.get("next"), "/settings");
 });
 
-test("account and logout point at the Auth host", () => {
+test("account and logout point at Auth and return to the calling venture", () => {
   assert.equal(accountUrl(o), "https://auth.playnextai.com/");
-  assert.equal(logoutUrl(o), "https://auth.playnextai.com/auth/logout");
+  assert.equal(logoutUrl(o), "https://auth.playnextai.com/auth/logout?return_url=https%3A%2F%2Fpc.playnextai.com%2F");
+
+  // The helper is reusable: a different venture origin is carried through without PC-specific hardcoding.
+  assert.equal(
+    logoutUrl({ authUrl: "https://auth.playnextai.com", siteUrl: "https://boardgame.playnextai.com" }),
+    "https://auth.playnextai.com/auth/logout?return_url=https%3A%2F%2Fboardgame.playnextai.com%2F",
+  );
 });
 
 test("unsafe destinations fall back to /discover", () => {
