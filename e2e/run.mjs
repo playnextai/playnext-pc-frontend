@@ -373,6 +373,39 @@ for (const vp of VIEWPORTS) for (const lang of ["en", "fa"]) {
 }
 await setScenario("full");
 
+// ---- empty / error / system states: one screenshot each, compared by eye with the design board ----
+const fulfil = (status, body) => (r) => r.fulfill({ status, contentType: "application/json", body: JSON.stringify(body) });
+const STATES = [
+  { id: "cold", scenario: "empty", path: "/discover" },
+  { id: "cart-empty", scenario: "empty", path: "/cart" },
+  { id: "no-results", scenario: "empty", path: "/library", run: async (page) => { await page.locator("input").first().fill("zzzz"); await page.waitForTimeout(1200); } },
+  { id: "consent", scenario: "consent", path: "/consent" },
+  { id: "skeleton", scenario: "full", path: "/discover", noWait: true, routes: async (page) => { await page.route("**/api/recommendations*", async (r) => { await new Promise((x) => setTimeout(x, 6000)); await r.continue().catch(() => {}); }); }, after: async (page) => { await page.waitForTimeout(1200); } },
+  { id: "404", scenario: "full", path: "/no-such-page" },
+  { id: "error", scenario: "full", path: "/dna", routes: async (page) => { await page.route("**/api/gamer-dna", fulfil(200, {})); } },
+  { id: "rate", scenario: "full", path: "/discover", routes: async (page) => { await page.route("**/api/auth/me", fulfil(429, { detail: "rate_limited", retry_after_sec: 30 })); } },
+  { id: "load-failed", scenario: "full", path: "/discover", routes: async (page) => { await page.route("**/api/auth/me", fulfil(500, {})); } },
+];
+for (const st of STATES) for (const vp of VIEWPORTS) for (const lang of ["en", "fa"]) {
+  await setScenario(st.scenario);
+  const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
+  await ctx.addInitScript((l) => { try { localStorage.setItem("playnext:lang", l); } catch {} }, lang);
+  const page = await ctx.newPage();
+  try {
+    if (st.routes) await st.routes(page);
+    await page.goto(BASE + st.path, { waitUntil: st.noWait ? "domcontentloaded" : "networkidle" });
+    await page.waitForTimeout(500);
+    if (st.run) await st.run(page);
+    if (st.after) await st.after(page);
+    await page.screenshot({ path: `shots/state-${st.id}-${lang}-${vp.id}.png`, fullPage: true });
+    if (vp.id === "desktop" && lang === "en") note("info", `state ${st.id}`, (await page.locator("body").innerText()).replace(/\s+/g, " ").slice(0, 200));
+  } catch (e) {
+    note("warn", `state ${st.id} ${lang} ${vp.id}`, `could not capture: ${String(e).slice(0, 140)}`);
+  }
+  await ctx.close();
+}
+await setScenario("full");
+
 await browser.close();
 
 const order = { error: 0, warn: 1, info: 2 };
