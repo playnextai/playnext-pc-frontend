@@ -1,38 +1,54 @@
-# playnext-web — PlayNext:PC frontend (pc.playnextai.com)
+# PlayNext:PC frontend (pc.playnextai.com)
 
-Next.js (App Router, TypeScript). Separate repo from the Python backend (`playnext/`).
+Next.js 15 (App Router) + React 19 + TypeScript. A separate repository from the Python backend
+(`playnextai/playnext-pc-backend`). Bilingual: English (LTR) and Farsi (RTL, Persian digits).
+
+**Start here:** `FRONTEND_SETUP_AND_TEST_GUIDE.md` — install, run (with a mock backend or the real one),
+page-by-page manual tests, CI, troubleshooting.
 
 ## Rules this repo follows
-- **No sign-in here.** (Contract status: PROVISIONAL. The SSO team confirmed a shared `/login?return_url=` is their *target*, not something that exists yet; `lib/auth.ts` is the only place the paths live, so adopting their final contract is a one-file change. Don't add another redirect convention.) Every sign-in request is a redirect to `https://auth.playnextai.com/login?return_url=<absolute URL on this site>` (Steam: `/steam/login`). See `lib/auth.ts`. `return_url` is always built on this site's own origin from a validated path; the auth site must also allowlist it.
-- The browser talks only to same-origin `/api/*`; `next.config.mjs` forwards that to the backend (`BACKEND_URL`). Identity always comes from the session cookie; the client never sends a user id.
-- Every signed-in page is wrapped in `components/Gate.tsx`: signed out -> auth site; `consent_required` -> `/consent`; onboarding incomplete -> the next step (`GET /onboarding/status`, never "is this a new account").
-- Endpoint shapes: `../playnext/PHASE_9_CONTRACT.md`, mirrored in `lib/types.ts` / `lib/api.ts`.
-- Prices: Toman primary, native regional price secondary (`lib/format.ts`). Missing price shows "—", never 0.
+- **No sign-in here; Global Auth owns identity.** Sign-in is a redirect to
+  `https://auth.playnextai.com/login?return_url=<PC callback>`. The PC callback `/auth/sso/callback` asks the backend who the
+  session belongs to (the backend validates it with Auth), then applies consent -> PC onboarding -> a validated destination
+  (`/discover` by default). Linking Steam/Google goes to Auth's `/auth/steam/link` and `/auth/google/link`; sign-out is a
+  top-level form POST to Auth's `/auth/logout`; account management is a link to `https://auth.playnextai.com/`.
+  `lib/auth.ts` is the only file that knows these URLs. Contract: "PlayNext:PC - Global Auth Integration Hand-off" v1.0 (see the
+  backend repo's `GLOBAL_AUTH_INTEGRATION.md`).
+- Settings shows two separate areas: **PlayNext:PC Settings** (owned here) and **PlayNext Account** (owned by Auth).
+- The browser talks only to same-origin `/api/*`; `next.config.mjs` forwards that to the backend (`BACKEND_URL`). The client never
+  sends a user id.
+- Every signed-in page is wrapped in `components/Gate.tsx`: signed out -> Auth; `consent_required` -> `/consent`; onboarding
+  incomplete -> the next step (`GET /onboarding/status`).
+- Endpoint shapes: the backend repo's `PHASE_9_CONTRACT.md`, mirrored in `lib/types.ts` / `lib/api.ts`.
+- Prices: Toman primary, native regional price secondary; a missing price shows "—", never 0.
+- Every visible string is in `lib/i18n.ts` in English and Farsi (checked by the type system and `tests/i18n.test.ts`).
 
 ## Setup
 ```bash
 cp .env.example .env.local
 npm install
-npm run dev            # http://localhost:3000, backend must run on BACKEND_URL
-npm test               # pure-logic tests (node's built-in runner, Node >= 22.6)
+npm run dev            # http://localhost:3000
+npm test               # 43 pure-logic tests (Node >= 22.6)
 npm run typecheck
 npm run build
 ```
+UI work with no backend: `node e2e/mock-backend.mjs` (port 8000) and `npm run dev`; switch scenarios at
+`http://localhost:8000/__scenario/full|empty|out|consent`.
 
 ## Local-development catch
-The auth site only returns people to allow-listed hosts (`*.playnextai.com`), so after signing in
-on auth.playnextai.com you cannot be sent back to `http://localhost:3000`. Options: (a) ask the SSO
-team to allow a dev host, (b) add a hosts-file alias such as `pc.dev.playnextai.com` -> 127.0.0.1 if
-they allow it, or (c) for UI work, sign in on the deployed site, copy the `playnext_session` cookie
-value into your dev browser for `localhost` (it only works if backend `SESSION_SECRET_KEY` matches).
+Auth only returns people to allow-listed hosts (`*.playnextai.com`), so real sign-in cannot return to
+`http://localhost:3000`. Use the mock backend, or (legacy backend mode only) a hand-made session cookie; see guide section 7.
 
 ## Status (honest)
-- Verified: `lib/` type-checks and its 29 tests pass (Node 22).
-- NOT verified: nothing in `app/` or `components/` has been compiled or run - the build sandbox could not
-  reach the npm registry, so `next build` and `tsc` against React/Next types have never run. Expect to fix
-  small type errors on first `npm run typecheck`. Dependency versions are caret ranges (`^15`, `^19`), unlocked.
-- Built: landing, `/consent`, the three onboarding steps (`/onboarding/region`, `/onboarding/quiz`, `/onboarding/library`), a skeleton `/discover` using the shared game card, the typed API client, the gate; shared components `SearchAndAdd`, `ConnectSteam` (card + dismissible banner), `GameCardView` (4 actions).
-- Built (unverified React): `AppShell` nav (Library, Wishlist, Cart badge, budget chip, region chip, avatar; icon-only on mobile), the real feed (5 deduplicated rows, sync banner with polling, cold-start fallback with buttons to the quiz and manual add).
-- To build:
-  `/game/[id]` (intercepting modal), `/library`, `/wishlist`, `/cart`, `/gamer-dna`, `/settings`.
-- Known limits: the onboarding heart sets a rating of 5 but cannot be un-set (backend can set, not clear, `user_rating`), and the recommender does not use ratings yet; the quiz page is only reachable-guarded by the gate, not by step order (a person can open it before choosing a region, and will be routed back from `/discover`).
+- **Built:** every page on the approved design board: landing, `/auth/sso/callback`, `/consent`, onboarding (region, taste quiz,
+  library), feed `/discover`, `/library`, `/wishlist`, `/cart`, `/game/[id]` (public), `/dna`, `/settings`, 404/error pages.
+- **Verified on every push (GitHub Actions `frontend-ci`):** typecheck, 43 tests, production build, and a real Chromium run
+  against a mock backend (every page x English/Farsi x desktop/phone, 18 named flows, screenshots). Results are readable on the
+  `e2e-report` branch (do not merge or delete it).
+- **Not verified:** the real backend (Postgres, Steam, Redis, Celery, IGDB, Bonbast), the real Global Auth service
+  (cross-subdomain cookie over HTTPS, `/auth/me`, `/auth/identities`, central logout), browsers other than Chromium,
+  accessibility beyond automated checks.
+- **Open:** Privacy and Terms pages (legal text needed), final pass on empty/error screens, optional "% match" on cards, Auth's
+  account-management page (Auth team; "Manage PlayNext Account" lands on Auth's login until it exists).
+- **Known limits:** the onboarding heart sets a rating of 5 but cannot be un-set and the recommender does not use ratings; the
+  quiz page is guarded by the gate, not by step order.
