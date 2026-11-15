@@ -254,8 +254,8 @@ await flow("settings: grouped sections, language select switches direction, sign
   const logoutUrl = new URL(logout.a);
   expect(
     logout.m === "post" &&
-    logoutUrl.origin === "https://auth.playnextai.com" &&
-    logoutUrl.pathname === "/auth/logout",
+    logoutUrl.origin === new URL(BASE).origin &&
+    logoutUrl.pathname === "/api/auth/logout",
     `sign-out is not a top-level form POST to Auth: ${JSON.stringify(logout)}`,
   );
   expect(
