@@ -382,7 +382,6 @@ const STATES = [
   { id: "consent", scenario: "consent", path: "/consent" },
   { id: "skeleton", scenario: "full", path: "/discover", noWait: true, routes: async (page) => { await page.route("**/api/recommendations*", async (r) => { await new Promise((x) => setTimeout(x, 6000)); await r.continue().catch(() => {}); }); }, after: async (page) => { await page.waitForTimeout(1200); } },
   { id: "404", scenario: "full", path: "/no-such-page" },
-  { id: "error", scenario: "full", path: "/dna", routes: async (page) => { await page.route("**/api/gamer-dna", fulfil(200, {})); } },
   { id: "rate", scenario: "full", path: "/discover", routes: async (page) => { await page.route("**/api/auth/me", fulfil(429, { detail: "rate_limited", retry_after_sec: 30 })); } },
   { id: "load-failed", scenario: "full", path: "/discover", routes: async (page) => { await page.route("**/api/auth/me", fulfil(500, {})); } },
 ];

@@ -4,7 +4,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { signInUrl } from "@/lib/auth";
 import { decideGate, isOnboardingPath } from "@/lib/flow";
+import Link from "next/link";
 import Empty from "@/components/Empty";
+import SkeletonRows from "@/components/Skeleton";
 import { useI18n } from "@/components/I18nProvider";
 
 /**
@@ -60,7 +62,16 @@ export default function Gate({ children, allowIncompleteOnboarding = false }: {
   }, [path, router, allowIncompleteOnboarding]);
 
   if (limited) return <main className="container" style={{ paddingTop: 64 }}><Empty icon="warn" asPage title={t("state.rateTitle")} text={t("state.rateText")} /></main>;
-  if (error) return <main className="container"><p className="error">{error}</p></main>;
-  if (!ready) return <main className="container"><p className="muted">{t("common.loading")}</p></main>;
+  if (error) return (
+    <main className="container" style={{ paddingTop: 64 }}>
+      <Empty icon="warn" asPage danger title={t("state.errorTitle")} text={t("state.errorText")}>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+          <button className="btn" onClick={() => window.location.reload()}>{t("common.tryAgain")}</button>
+          <Link className="btn secondary" href="/discover">{t("state.toFeed")}</Link>
+        </div>
+      </Empty>
+    </main>
+  );
+  if (!ready) return <main className="container"><SkeletonRows n={3} /></main>;
   return <>{children}</>;
 }
