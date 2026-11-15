@@ -1,5 +1,6 @@
-// Sign-in, account linking and sign-out are NOT implemented in this app. They belong to Global Auth
-// (auth.playnextai.com). Contract: "PlayNext:PC - Global Auth Integration Hand-off" v1.0 (Auth B2 0.3.0).
+// Sign-in and account linking belong to Global Auth (auth.playnextai.com).
+// PC sign-out uses a same-origin relay; Global Auth remains the authority that revokes the shared session.
+// Contract: "PlayNext:PC - Global Auth Integration Hand-off" v1.0 (Auth B2 0.3.0).
 //
 // PC owns only: the callback page (/auth/sso/callback), PC onboarding and PC settings.
 // PC never writes provider identities and never trusts a user id from the browser; identity comes from
@@ -58,8 +59,10 @@ export function accountUrl(opts: Opts = {}): string {
   return `${trim(opts.authUrl ?? AUTH_URL)}/`;
 }
 
-/** Top-level form POST to the same-origin PC relay. The backend invalidates its
- *  local Auth cache and 307-forwards the POST to central Auth; Auth owns revocation. */
+/** PC-specific top-level form POST to the same-origin backend relay. The relay
+ *  calls Auth server-to-server, forwarding the browser Origin and session cookie,
+ *  then relays Auth's cookie clearing and post-logout redirect. Other ventures
+ *  should implement the shared Venture Integration Contract, not reuse this PC route. */
 export function logoutUrl(opts: Opts = {}): string {
   // PC uses a post-logout cleanup callback for pre-SSO host-only cookies.
   // Other ventures can use their own callback or keep the default public root.
