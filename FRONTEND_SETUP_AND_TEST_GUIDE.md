@@ -42,7 +42,7 @@ PlayNext:PC's web frontend: Next.js 15 (App Router) + React 19 + TypeScript, ser
 
 | Rule | Why | Where |
 |---|---|---|
-| **No sign-in UI here.** Every sign-in is a redirect to the central auth site: `https://auth.playnextai.com/login?return_url=<PC callback>`. The PC callback `/auth/sso/callback` asks the backend who the session belongs to and applies PC onboarding. Linking Steam/Google, account management and sign-out are also Auth's (links and a form POST). | Global Auth owns identity, sign-in methods, sessions and logout. Contract: "PlayNext:PC - Global Auth Integration Hand-off" v1.0 (Auth B2 0.3.0), summarized in the backend repo's `GLOBAL_AUTH_INTEGRATION.md`. | `lib/auth.ts` is the only file that knows Auth URLs; `app/auth/sso/callback/page.tsx` |
+| **No sign-in UI here.** Every sign-in is a redirect to the central auth site: `https://auth.playnextai.com/login?return_url=<PC callback>`. The PC callback `/auth/sso/callback` asks the backend who the session belongs to and applies PC onboarding. Linking Steam/Google and account management are Auth's; sign-out uses a same-origin PC relay that forwards the top-level POST to Auth. | Global Auth owns identity, sign-in methods, sessions and logout. Contract: "PlayNext:PC - Global Auth Integration Hand-off" v1.0 (Auth B2 0.3.0), summarized in the backend repo's `GLOBAL_AUTH_INTEGRATION.md`. | `lib/auth.ts` is the only file that knows Auth URLs; `app/auth/sso/callback/page.tsx` |
 | The browser only calls **same-origin `/api/*`**, which Next forwards to the backend. | No CORS, and the session cookie flows through untouched. | `next.config.mjs` |
 | The client **never sends a user id**. | The backend takes it from the session (it asks Global Auth). | `lib/api.ts` |
 | Every signed-in page is wrapped in the **gate**: signed out → auth site; consent needed → `/consent`; onboarding unfinished → the next step. | Onboarding is tracked by the backend (`GET /onboarding/status`), never guessed from "new account". | `components/Gate.tsx`, `lib/flow.ts` |
@@ -89,7 +89,7 @@ Edit `.env.local`:
 |---|---|---|---|
 | `BACKEND_URL` | `http://localhost:8000` | Where `/api/*` is forwarded (the FastAPI server). Server-side only. | **At build time and server start** (rewrites are fixed when the build runs) |
 | `NEXT_PUBLIC_SITE_URL` | `https://pc.playnextai.com` | This site's public origin. Used for the Auth callback, logout return URL, and the PC post-logout cleanup redirect. It must match the exact origin Auth has allowlisted. | **Set consistently at build and runtime** |
-| `NEXT_PUBLIC_AUTH_URL` | `https://auth.playnextai.com` | The Global Auth site (sign-in `/login`, linking `/auth/steam/link` and `/auth/google/link`, account `/`, sign-out via same-origin `/api/auth/logout?return_url=<encoded PC cleanup callback>`). The paths are fixed by the contract, not configurable. | Baked at build time |
+| `NEXT_PUBLIC_AUTH_URL` | `https://auth.playnextai.com` | The Global Auth site (sign-in `/login`, linking `/auth/steam/link` and `/auth/google/link`, account `/`). Sign-out uses the PC same-origin relay, which forwards to this Auth host. | Baked at build time |
 
 Important gotchas:
 - Anything starting with `NEXT_PUBLIC_` is compiled into the browser code. **Changing it requires a rebuild** (`npm run build`), or a restart of `npm run dev`.
@@ -163,7 +163,7 @@ Real sign-in cannot return to `http://localhost:3000`. Use the mock backend (sec
 3. **Put it in your browser:** open http://localhost:3000, DevTools → Application (Chrome/Edge) or Storage (Firefox) → Cookies → `http://localhost:3000` → add a cookie: Name `playnext_session`, Value = the printed string, Path `/`. Leave Secure off.
 4. Reload. `http://localhost:3000/api/auth/me` should now show `authenticated: true`, and the gate lets you in.
 
-This only works while the backend runs with `AUTH_SESSION_VALIDATION=legacy` (the default). In `auth` mode the backend asks Global Auth about the cookie, and a hand-made one is rejected. The cookie lasts 30 days; delete it in DevTools to test the signed-out path. The app's **Sign out** button posts to Auth; after Auth revokes the global session, the browser returns to the PC-hosted `/auth/logout/complete` callback, which clears only the PC host-only legacy cookie (including localhost during local testing).
+This only works while the backend runs with `AUTH_SESSION_VALIDATION=legacy` (the default). In `auth` mode the backend asks Global Auth about the cookie, and a hand-made one is rejected. The cookie lasts 30 days; delete it in DevTools to test the signed-out path. The app's **Sign out** button posts to the same-origin PC relay; the backend invalidates its positive Auth cache and forwards to Auth. After Auth revokes the global session, the browser returns to the PC-hosted `/auth/logout/complete` callback, which clears only the PC host-only legacy cookie (including localhost during local testing).
 
 The real sign-in is tested on staging: backend guide **15.2**.
 
@@ -281,7 +281,7 @@ The full end-to-end checklist (cross-subdomain cookie over HTTPS, revocation wit
 ### 9.1 `npm test` — 43 logic tests, no browser, no backend
 | File | Covers |
 |---|---|
-| `auth.test.ts` | sign-in is exactly `auth/login?return_url=<encoded PC callback>`; deep links ride as an encoded `next`; Steam/Google link URLs and account/logout URLs point at the Auth host; logout uses the same-origin relay and includes the encoded PC cleanup callback (or a venture root for other clients); unsafe destinations (`//evil.com`, `javascript:`, backslashes, the callback itself) fall back to `/discover`; callback decisions (failed / consent / onboarding / destination) |
+| `auth.test.ts` | sign-in is exactly `auth/login?return_url=<encoded PC callback>`; deep links ride as an encoded `next`; Steam/Google link URLs and account URLs point at the Auth host; logout uses the same-origin relay and includes the encoded PC cleanup callback (or a venture root for other clients); unsafe destinations (`//evil.com`, `javascript:`, backslashes, the callback itself) fall back to `/discover`; callback decisions (failed / consent / onboarding / destination) |
 | `flow.test.ts` | gate decision order: sign-in → consent → onboarding → ok |
 | `api.test.ts` | same-origin `/api` calls, credentials, JSON bodies, query encoding, 401/429/validation error mapping, `retry_after_sec` |
 | `format.test.ts` | Toman/native formatting, missing price shows "—" |
