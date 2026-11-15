@@ -79,7 +79,7 @@ function route(method, path) {
 
 http.createServer(async (req, res) => {
   const url = new URL(req.url, "http://x");
-  const m = url.pathname.match(/^\\/__scenario\\/(\\w+)$/);
+  const m = url.pathname.match(/^\/__scenario\/(\w+)$/);
   let status = 200, body;
   if (m) { scenario = m[1]; body = { scenario }; }
   else if (req.method === "GET" && url.pathname === "/__logout-state") {
