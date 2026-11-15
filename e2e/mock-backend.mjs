@@ -81,6 +81,17 @@ http.createServer((req, res) => {
   const m = url.pathname.match(/^\/__scenario\/(\w+)$/);
   let status = 200, body;
   if (m) { scenario = m[1]; body = { scenario }; }
+  else if (req.method === "POST" && url.pathname === "/auth/logout") {
+    const returnUrl = url.searchParams.get("return_url") || "http://localhost:3000/";
+    res.writeHead(307, {
+      Location: `http://localhost:8000/mock-auth/logout?return_url=${encodeURIComponent(returnUrl)}`,
+    });
+    return res.end();
+  }
+  else if (req.method === "POST" && url.pathname === "/mock-auth/logout") {
+    res.writeHead(200, { "content-type": "application/json" });
+    return res.end(JSON.stringify({ method: req.method, origin: req.headers.origin || null }));
+  }
   else { const r = route(req.method, url.pathname + url.search); if (Array.isArray(r)) [status, body] = r; else body = r; }
   res.writeHead(status, { "content-type": "application/json" });
   res.end(JSON.stringify(body));
