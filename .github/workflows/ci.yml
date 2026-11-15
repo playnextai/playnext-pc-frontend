@@ -58,6 +58,9 @@ jobs:
           for i in $(seq 1 40); do curl -sf localhost:3000/ > /dev/null && break; sleep 1; done
           node e2e/run.mjs 2>&1 | tee e2e.log
           if ! grep -q "e2e summary" e2e.log; then echo "::error title=e2e crashed::$(tail -c 1500 e2e.log | tr '\n' '|')"; fi
+        env:
+          BACKEND_URL: http://localhost:8000
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
       - name: Publish the report to branch e2e-report (readable without log access)
         if: always()
         run: |
