@@ -242,6 +242,22 @@ await flow("PC post-logout callback clears host-only legacy cookie", async (page
   const cookies = await ctx.cookies(BASE);
   expect(!cookies.some((cookie) => cookie.name === "playnext_session"), "PC host-only legacy cookie was not cleared");
 });
+await flow("logout relay preserves POST and venture Origin across 307", async (page) => {
+  await page.goto(BASE + "/settings", { waitUntil: "networkidle" });
+  const form = page.locator('form[method="post"][action*="/api/auth/logout"]');
+  expect(await form.count() > 0, "same-origin logout relay form is missing");
+  if (await form.count() > 0) {
+    const [response] = await Promise.all([
+      page.waitForNavigation({ waitUntil: "domcontentloaded" }),
+      form.evaluate((node) => node.submit()),
+    ]);
+    let payload = {};
+    try { payload = JSON.parse(await page.locator("body").innerText()); } catch {}
+    expect(payload.method === "POST", `307 did not preserve POST: ${JSON.stringify(payload)}`);
+    expect(payload.origin === new URL(BASE).origin, `307 did not preserve the configured venture Origin: ${JSON.stringify(payload)}`);
+    expect(response?.status() === 200, `mock Auth did not receive the relayed logout: ${response?.status()}`);
+  }
+});
 await flow("settings: grouped sections, language select switches direction, sign-out present", async (page) => {
   await page.goto(BASE + "/settings", { waitUntil: "networkidle" });
   const t = await page.locator("main").innerText();
