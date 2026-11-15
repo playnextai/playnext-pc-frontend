@@ -233,8 +233,11 @@ await flow("Farsi: regions, reasons and genres are translated", async (page) => 
 });
 await flow("PC post-logout callback clears host-only legacy cookie", async (page, ctx) => {
   await ctx.addCookies([{ name: "playnext_session", value: "legacy-pc-cookie", url: BASE }]);
-  await page.goto(BASE + "/auth/logout/complete", { waitUntil: "networkidle" });
-  expect(new URL(page.url()).pathname === "/", "logout cleanup callback did not return to the PC root");
+  const response = await page.goto(BASE + "/auth/logout/complete", { waitUntil: "domcontentloaded" });
+  expect(
+    new URL(page.url()).pathname === "/",
+    `logout cleanup callback did not return to the PC root: url=${page.url()} status=${response?.status()}`,
+  );
   const cookies = await ctx.cookies(BASE);
   expect(!cookies.some((cookie) => cookie.name === "playnext_session"), "PC host-only legacy cookie was not cleared");
 });
