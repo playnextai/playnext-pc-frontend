@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import AppShell from "@/components/AppShell";
@@ -26,7 +26,9 @@ function Inner() {
   const { t, num, toman } = useI18n();
   const router = useRouter();
   const sp = useSearchParams();
-  const query = useMemo(() => parseQuery(sp), [sp]);
+  // The query is React state first (controls respond instantly) and is mirrored into the URL;
+  // when the URL changes from outside (Back, the header search) the state follows it.
+  const [query, setQuery] = useState<DiscoverQuery>(() => parseQuery(sp));
   const [genreList, setGenreList] = useState<string[] | null>(null);
   const [items, setItems] = useState<DiscoverItem[] | null>(null);
   const [total, setTotal] = useState(0);
@@ -38,9 +40,16 @@ function Inner() {
   const latest = useRef(0);
 
   const apply = useCallback((q: DiscoverQuery) => {
+    setQuery(q);
     const s = toSearchString(q);
     router.replace(s ? `/search?${s}` : "/search", { scroll: false });
   }, [router]);
+
+  const urlKey = sp.toString();
+  useEffect(() => {
+    const fromUrl = parseQuery(sp);
+    setQuery((cur) => (toSearchString(cur) === toSearchString(fromUrl) ? cur : fromUrl));
+  }, [urlKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { api.genres().then((r) => setGenreList(r.genres)).catch(() => setGenreList([])); }, []);
   useEffect(() => { setText(query.q); }, [query.q]);
