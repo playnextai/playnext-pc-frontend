@@ -12,7 +12,7 @@ import type { DiscoverItem } from "@/lib/types";
 /** The header search box: type, see the best few matches with their Toman price, Enter (or the last
  *  row) opens the full Search and Discover page. It searches the whole catalog, including games already owned. */
 export default function HeaderSearch() {
-  const { t, toman } = useI18n();
+  const { t, toman, genre } = useI18n();
   const router = useRouter();
   const onSearchPage = usePathname() === "/search"; // the page has its own, bigger search box
   const [q, setQ] = useState("");
@@ -80,7 +80,7 @@ export default function HeaderSearch() {
               {g.cover_url ? <img src={g.cover_url} alt="" width={34} height={44} /> : <span className="hs-thumb" />}
               <span className="hs-info">
                 <strong dir="auto">{g.title}</strong>
-                <span className="muted" dir="auto">{[g.genres[0], g.developer].filter(Boolean).join(" · ")}</span>
+                <span className="muted" dir="auto">{[g.genres[0] ? genre(g.genres[0]) : null, g.developer].filter(Boolean).join(" · ")}</span>
               </span>
               <span className="price hs-price">{toman(g.price_toman)}</span>
             </Link>

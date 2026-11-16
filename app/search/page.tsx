@@ -23,7 +23,7 @@ export default function SearchPage() {
 }
 
 function Inner() {
-  const { t, num, toman } = useI18n();
+  const { t, num, toman, genre } = useI18n();
   const router = useRouter();
   const sp = useSearchParams();
   // The query is React state first (controls respond instantly) and is mirrored into the URL;
@@ -99,7 +99,7 @@ function Inner() {
         {(genreList ?? []).map((g) => {
           const on = query.genres.some((x) => x.toLowerCase() === g.toLowerCase());
           return (
-            <label key={g} className="opt"><input type="checkbox" checked={on} onChange={() => apply(toggleGenre(query, g))} /><span dir="auto">{g}</span></label>
+            <label key={g} className="opt"><input type="checkbox" checked={on} onChange={() => apply(toggleGenre(query, g))} /><span dir="auto">{genre(g)}</span></label>
           );
         })}
       </section>
@@ -142,7 +142,7 @@ function Inner() {
         {query.genres.length > 0 && (
           <div className="find-chips">
             {query.genres.map((g) => (
-              <button key={g} className="chip" aria-label={t("find.remove", { name: g })} onClick={() => apply(toggleGenre(query, g))}>{g} <Icon name="x" /></button>
+              <button key={g} className="chip" aria-label={t("find.remove", { name: genre(g) })} onClick={() => apply(toggleGenre(query, g))}>{genre(g)} <Icon name="x" /></button>
             ))}
           </div>
         )}
@@ -174,7 +174,7 @@ function Inner() {
                       </span>
                       <span className="gc-body">
                         <h3 dir="auto">{g.title}</h3>
-                        <span className="muted find-sub" dir="auto">{[g.genres[0], g.developer].filter(Boolean).join(" · ")}</span>
+                        <span className="muted find-sub" dir="auto">{[g.genres[0] ? genre(g.genres[0]) : null, g.developer].filter(Boolean).join(" · ")}</span>
                         <span className="price" style={{ fontSize: "1.05rem" }}>{toman(g.price_toman)}</span>
                         {g.owned && <span className="chip lib-chip">{t("find.owned")}</span>}
                       </span>

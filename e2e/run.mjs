@@ -388,7 +388,7 @@ for (const vp of VIEWPORTS) for (const lang of ["en", "fa"]) {
   await page.screenshot({ path: `shots/region-${lang}-${vp.id}.png`, fullPage: true });
   await ctx.close();
 }
-for (const [name, path] of [["discover", "/discover"], ["library-page", "/library"], ["wishlist", "/wishlist"], ["cart", "/cart"], ["settings", "/settings"], ["dna", "/dna"], ["game", "/game/1"]]) for (const vp of VIEWPORTS) for (const lang of ["en", "fa"]) {
+for (const [name, path] of [["discover", "/discover"], ["library-page", "/library"], ["wishlist", "/wishlist"], ["cart", "/cart"], ["settings", "/settings"], ["dna", "/dna"], ["game", "/game/1"], ["search", "/search?genres=Indie%2CAction&library=all"]]) for (const vp of VIEWPORTS) for (const lang of ["en", "fa"]) {
   const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
   await ctx.addInitScript((l) => { try { localStorage.setItem("playnext:lang", l); } catch {} }, lang);
   const page = await ctx.newPage();
@@ -419,6 +419,7 @@ const STATES = [
   { id: "cold", scenario: "empty", path: "/discover" },
   { id: "cart-empty", scenario: "empty", path: "/cart" },
   { id: "no-results", scenario: "empty", path: "/library", run: async (page) => { await page.locator("main input").first().fill("zzzz"); await page.waitForTimeout(1200); } },
+  { id: "header-search", scenario: "full", path: "/library", run: async (page) => { await page.getByLabel(/Search the catalog|جست‌وجو در کاتالوگ/).fill("Hollow"); await page.locator(".hs-row").first().waitFor({ timeout: 4000 }); } },
   { id: "consent", scenario: "consent", path: "/consent" },
   { id: "skeleton", scenario: "full", path: "/discover", noWait: true, routes: async (page) => { await page.route("**/api/recommendations*", async (r) => { await new Promise((x) => setTimeout(x, 6000)); await r.continue().catch(() => {}); }); }, after: async (page) => { await page.waitForTimeout(1200); } },
   { id: "404", scenario: "full", path: "/no-such-page" },
