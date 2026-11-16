@@ -237,7 +237,7 @@ input[type="range"] { accent-color: var(--mint); }
 .set-title { font-size: 1.25rem; font-weight: 600; margin: 28px 0 6px; }
 
 /* ---- search: header box + Search and Discover page ---- */
-.hsearch { position: relative; display: flex; align-items: center; gap: 10px; flex: 1 1 260px; max-width: 420px; min-height: 40px; padding: 0 14px; margin-inline-start: 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--muted); }
+.hsearch { position: relative; display: flex; align-items: center; gap: 10px; flex: 1 1 160px; min-width: 120px; max-width: 320px; min-height: 40px; padding: 0 14px; margin-inline-start: 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--muted); }
 .hsearch:focus-within { border-color: var(--mint); color: var(--text); }
 .hsearch input { all: unset; flex: 1; min-width: 0; align-self: stretch; min-height: 38px; box-sizing: border-box; color: var(--text); font-size: .95rem; }
 .hsearch.big { max-width: none; margin: 0; min-height: 46px; }
@@ -287,3 +287,7 @@ input[type="range"] { accent-color: var(--mint); }
   .find-main { width: 100%; }
   .find-grid { grid-template-columns: 1fr; }
 }
+.nav .item .label { white-space: nowrap; }
+/* the search box needs room: on mid-size screens the less-used pills show their icon only (names stay as aria-labels) */
+@media (max-width: 1400px) { .nav .region-link .label, .nav a[href="/dna"] .label { display: none; } }
+@media (max-width: 1100px) { .nav .item:not(.budget-chip) .label { display: none; } }
