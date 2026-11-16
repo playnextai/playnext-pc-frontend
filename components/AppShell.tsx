@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Gate from "@/components/Gate";
+import HeaderSearch from "@/components/HeaderSearch";
 import BudgetControl from "@/components/BudgetControl";
 import Icon from "@/components/Icon";
 import LangToggle from "@/components/LangToggle";
@@ -46,6 +47,7 @@ function Nav({ onBudgetChange }: { onBudgetChange?: () => void }) {
     <header className="nav" style={{ position: "sticky" }}>
       <nav className="nav-inner" aria-label={t("nav.main")}>
         <Link className="wordmark" href="/discover" aria-label="PlayNext">PlayNext</Link>
+        <HeaderSearch />
         <span className="spacer" />
         <Link className="item" href="/library" aria-label={t("nav.library")}><Icon name="library" /><span className="label">{t("nav.library")}</span></Link>
         <Link className="item" href="/wishlist" aria-label={t("nav.wishlist")}><Icon name="bookmark" /><span className="label">{t("nav.wishlist")}</span></Link>

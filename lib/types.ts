@@ -148,3 +148,24 @@ export interface SearchResult {
   release_year: number | null;
   cover_url: string | null;
 }
+
+export interface DiscoverItem extends PriceFields {
+  game_id: number;
+  title: string;
+  developer: string | null;
+  genres: string[];
+  cover_url: string | null;
+  release_year: number | null;
+  review_score: number | null;
+  owned: boolean;
+  in_wishlist: boolean;
+  in_cart: boolean;
+}
+
+export interface DiscoverPage {
+  items: DiscoverItem[];
+  total: number;
+  offset: number;
+  limit: number;
+  max_price_toman: number | null;
+}

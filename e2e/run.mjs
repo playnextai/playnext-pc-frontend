@@ -26,6 +26,8 @@ const PAGES = [
   { path: "/cart", scenario: "empty", name: "cart(empty)" },
   { path: "/settings", scenario: "full", name: "settings" },
   { path: "/settings", scenario: "empty", name: "settings(email-only)" },
+  { path: "/search?genres=Indie", scenario: "full", name: "search" },
+  { path: "/search?q=zzzz", scenario: "full", name: "search(no results)" },
   { path: "/dna", scenario: "full", name: "dna" },
   { path: "/dna", scenario: "empty", name: "dna(email-only)" },
   { path: "/game/1", scenario: "full", name: "game" },
@@ -182,6 +184,44 @@ await flow("search-and-add shows result and no-results copy", async (page) => {
   await page.getByText("Hollow Knight").waitFor({ timeout: 3000 });
 });
 
+await flow("header search: dropdown shows matches with prices, Enter opens the page, a result opens the game", async (page) => {
+  await page.goto(BASE + "/library", { waitUntil: "networkidle" });
+  const box = page.getByLabel("Search the catalog");
+  await box.fill("Hollow");
+  await page.locator(".hs-row").first().waitFor({ timeout: 3000 });
+  expect((await page.locator(".hs-row").count()) === 2, "expected 2 dropdown rows");
+  expect((await page.locator(".hs-row .price").first().innerText()).includes("620"), "dropdown price missing");
+  expect(await page.getByText("See all results for").isVisible(), "see-all link missing");
+  await box.press("Enter");
+  await page.waitForURL(/\/search\?.*q=Hollow/, { timeout: 4000 });
+  await page.locator(".find-card").first().waitFor({ timeout: 4000 });
+  expect((await page.locator(".find-card").count()) === 2, "page should list both Hollow Knight games");
+  expect((await page.getByLabel("Search the catalog").count()) === 0 || !(await page.locator(".nav .hsearch").count()), "header search should hide on the search page");
+});
+await flow("search page: genre, owned and price filters narrow the list, URL holds the state, clear resets", async (page) => {
+  await page.goto(BASE + "/search", { waitUntil: "networkidle" });
+  await page.locator(".find-card").first().waitFor({ timeout: 4000 });
+  expect((await page.locator(".find-card").count()) === 3, "default hides owned games (3 expected)");
+  await page.getByLabel("Already owned").check();
+  await page.waitForURL(/library=owned/, { timeout: 4000 });
+  await page.getByText("Hades").first().waitFor({ timeout: 4000 });
+  expect((await page.getByText("In your library").count()) === 1, "owned tag missing");
+  await page.getByLabel("Show all").check();
+  await page.getByLabel("Indie").check();
+  await page.waitForURL(/genres=Indie/, { timeout: 4000 });
+  await page.waitForFunction(() => document.querySelectorAll(".find-card").length === 2, null, { timeout: 4000 });
+  await page.getByRole("button", { name: "Clear filters" }).click();
+  await page.waitForFunction(() => !location.search.includes("genres"), null, { timeout: 4000 });
+  await page.goto(BASE + "/search?q=zzzz", { waitUntil: "networkidle" });
+  expect(await page.getByText("Nothing matches these filters").isVisible(), "no-results card missing");
+});
+await flow("search page (phone): filters collapse behind one button", async (page) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(BASE + "/search?genres=Indie", { waitUntil: "networkidle" });
+  expect(!(await page.locator(".fpanel").isVisible()), "filters should be hidden until opened");
+  await page.getByRole("button", { name: /Filters/ }).click();
+  expect(await page.locator(".fpanel").isVisible(), "filters panel did not open");
+});
 await flow("library: summary line, synced chip, gauge cycles, note shown", async (page) => {
   await page.goto(BASE + "/library", { waitUntil: "networkidle" });
   const t = await page.locator("main").innerText();
@@ -363,7 +403,7 @@ for (const vp of VIEWPORTS) for (const lang of ["en", "fa"]) {
   await ctx.addInitScript((l) => { try { localStorage.setItem("playnext:lang", l); } catch {} }, lang);
   const page = await ctx.newPage();
   await page.goto(BASE + "/onboarding/library", { waitUntil: "networkidle" });
-  await page.getByRole("searchbox").or(page.locator("input").first()).fill("Hollow");
+  await page.locator("main input").first().fill("Hollow");
   await page.locator("[role=listbox] >> text=Hollow Knight").or(page.getByText("Hollow Knight").first()).first().click();
   await page.locator(".gauge-btn").first().click();
   await page.locator(".gauge-btn").first().click();
@@ -378,7 +418,7 @@ const fulfil = (status, body) => (r) => r.fulfill({ status, contentType: "applic
 const STATES = [
   { id: "cold", scenario: "empty", path: "/discover" },
   { id: "cart-empty", scenario: "empty", path: "/cart" },
-  { id: "no-results", scenario: "empty", path: "/library", run: async (page) => { await page.locator("input").first().fill("zzzz"); await page.waitForTimeout(1200); } },
+  { id: "no-results", scenario: "empty", path: "/library", run: async (page) => { await page.locator("main input").first().fill("zzzz"); await page.waitForTimeout(1200); } },
   { id: "consent", scenario: "consent", path: "/consent" },
   { id: "skeleton", scenario: "full", path: "/discover", noWait: true, routes: async (page) => { await page.route("**/api/recommendations*", async (r) => { await new Promise((x) => setTimeout(x, 6000)); await r.continue().catch(() => {}); }); }, after: async (page) => { await page.waitForTimeout(1200); } },
   { id: "404", scenario: "full", path: "/no-such-page" },

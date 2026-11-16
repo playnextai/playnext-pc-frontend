@@ -8,8 +8,8 @@
 
 | Verified automatically on every push (GitHub Actions, `frontend-ci`) | Never verified |
 |---|---|
-| `npm run typecheck`, `npm test` (43 tests), `npm run build` on a clean machine (job `check`). | Anything against the **real backend**: real Postgres data, Steam, Redis, Celery, IGDB covers, Bonbast rates. |
-| A real Chromium browser drives every page against a **mock backend** in English and Farsi, at desktop (1280 px) and phone (390 px) width, and checks layout, direction, digits, clipped text, touch targets, unnamed controls, plus 18 named user flows (job `e2e`). It also saves screenshots. | The real **Global Auth** service: cross-subdomain cookie over HTTPS, real `/auth/me` and `/auth/identities` answers, central logout. Steps: backend guide 15.2. |
+| `npm run typecheck`, `npm test` (50 tests), `npm run build` on a clean machine (job `check`). | Anything against the **real backend**: real Postgres data, Steam, Redis, Celery, IGDB covers, Bonbast rates. |
+| A real Chromium browser drives every page against a **mock backend** in English and Farsi, at desktop (1280 px) and phone (390 px) width, and checks layout, direction, digits, clipped text, touch targets, unnamed controls, plus 21 named user flows (job `e2e`). It also saves screenshots. | The real **Global Auth** service: cross-subdomain cookie over HTTPS, real `/auth/me` and `/auth/identities` answers, central logout. Steps: backend guide 15.2. |
 | | Real phones/browsers other than Chromium; a screen-reader and keyboard audit; performance. |
 
 So: the code compiles, builds and passes the mock-backend browser tests. Section 8 is your manual check against the real backend, which is the first time those two meet.
@@ -105,7 +105,7 @@ Run these three, in this order, from the project root. CI runs exactly these (pl
 Runs `tsc --noEmit` over everything. Expected: no output and exit code 0. If it complains that `next-env.d.ts` is missing, run `npm run dev` or `npm run build` once; Next generates it.
 
 ### 5.2 `npm test`
-Runs the seven test files in `tests/` with Node's built-in runner. Expected: `# pass 43`, `# fail 0` (the number grows as tests are added; there must be no failures). If it fails to start, check `node -v` ≥ 22.6.
+Runs the eight test files in `tests/` with Node's built-in runner. Expected: `# pass 50`, `# fail 0` (the number grows as tests are added; there must be no failures). If it fails to start, check `node -v` ≥ 22.6.
 
 ### 5.3 `npm run build`
 Production build. It type-checks again and compiles every route. Expected end state: a route table without errors. Routes: `/`, `/auth/sso/callback`, `/cart`, `/consent`, `/discover`, `/dna`, `/game/[id]`, `/library`, `/onboarding/library`, `/onboarding/quiz`, `/onboarding/region`, `/settings`, `/wishlist` and the 404 page.
@@ -219,6 +219,12 @@ Bump `PRIVACY_POLICY_VERSION` in the backend `.env` and restart it. Reload the a
 - Summary line, rows with cover, title, price (Toman primary), **From Steam / Added by you** label, **Add to cart** (becomes "In cart"), **Remove** for your own entries only (Steam-synced ones follow your Steam wishlist). No stray discount badge when there is no discount; "—" when there is no price.
 - Empty: "Nothing here yet" with search to add. An email-only person sees the Connect Steam banner.
 
+### 8.8a Search: header box and `/search`
+- Header: type 2+ letters → after a short pause up to 5 matches appear with cover, title, genre · developer and the **Toman price** ("—" when no price). Arrow keys move the highlight; Enter opens the highlighted game, or the full page when you have not used the arrows; Esc closes. The last row "See all results for …" opens `/search?q=…&library=all`. The header box hides on `/search` (the page has its own).
+- `/search`: filters on the left (genre checkboxes, price from/to sliders with "No limit" at the top, library: Not in my library (default) / Already owned / Show all), sort (Best match, Price low→high, high→low, Newest), count line, card grid, **Show more** (24 per page). Everything is in the URL, so Back works and a search can be shared.
+- Check: a game with no known price disappears as soon as you move a price slider (by design). Your budget ceiling is **not** applied here. Games you own carry an "In your library" tag. Nothing matching: "Nothing matches these filters" + Clear filters (keeps your text and sort).
+- Phone: filters sit behind one "Filters · N" button, picked genres show as removable chips.
+
 ### 8.9 `/cart`
 - Title "Cart"; "N games · checkout happens on each platform separately"; items **grouped by platform** with a **Buy on {platform}** link each.
 - Price rule: when the price changed since you added the game, the **main price is the current (new) price, bold in mint, with a "Price changed" tag**, and the line beneath says "Was {old price} when you added it." Otherwise the locked price shows with "Locked in when added". The **Total** is computed from the prices shown (current price where changed).
@@ -276,7 +282,7 @@ The full end-to-end checklist (cross-subdomain cookie over HTTPS, revocation wit
 
 ## 9. Automated tests: what they cover and what they cannot
 
-### 9.1 `npm test` — 43 logic tests, no browser, no backend
+### 9.1 `npm test` — 50 logic tests, no browser, no backend
 | File | Covers |
 |---|---|
 | `auth.test.ts` | sign-in is exactly `auth/login?return_url=<encoded PC callback>`; deep links ride as an encoded `next`; Steam/Google link URLs and account/logout URLs point at the Auth host; unsafe destinations (`//evil.com`, `javascript:`, backslashes, the callback itself) fall back to `/discover`; the return URL can never point at another host; callback decisions (failed / consent / onboarding / destination) |
@@ -285,12 +291,13 @@ The full end-to-end checklist (cross-subdomain cookie over HTTPS, revocation wit
 | `format.test.ts` | Toman/native formatting, missing price shows "—" |
 | `i18n.test.ts` | English and Farsi dictionaries have the same keys and the same `{placeholders}`; Persian digit conversion; language detection and storage; price, hours and percent text |
 | `ui_logic.test.ts` | search threshold, quiz selection, counter and genre-spread rule, dismissal storage failure-safety, the four card actions |
+| `discover.test.ts` | Search and Discover URL state: defaults give an empty URL and round-trip, bad values fall back, API params leave out defaults (free-only `max_price=0` is kept), filter count, genre toggle, price slider mapping |
 | `feed.test.ts` | row de-duplication, cold-start rule, sync banner states, polling rule, budget slider mapping |
 
 ### 9.2 Browser tests in CI (job `e2e`)
 `e2e/run.mjs` drives the production build in Chromium against `e2e/mock-backend.mjs`:
-- Every page (22 entries, including signed-out, empty, email-only and not-found variants) × English and Farsi × desktop and phone. For each it checks `lang`/`dir`, horizontal overflow, unnamed controls, digit style, clipped text, touch targets under 36 px and exactly one `h1`.
-- 18 named user flows: language toggle and reload, budget menu and slider, feed card actions and Undo, quiz counter/spread/region radio, search-and-add, library gauge, cart price rules and total, wishlist, game detail (signed in and out), Farsi translations, Settings (two sections, sign-out form POST, Auth link routes for an email-only person), the callback (safe/unsafe `next`, failed state), Gamer DNA, onboarding gauge, landing sign-in link.
+- Every page (24 entries, including signed-out, empty, email-only and not-found variants) × English and Farsi × desktop and phone. For each it checks `lang`/`dir`, horizontal overflow, unnamed controls, digit style, clipped text, touch targets under 36 px and exactly one `h1`.
+- 21 named user flows: header search dropdown and Enter, search page filters (genre, library, clear, no results), phone filter panel, language toggle and reload, budget menu and slider, feed card actions and Undo, quiz counter/spread/region radio, search-and-add, library gauge, cart price rules and total, wishlist, game detail (signed in and out), Farsi translations, Settings (two sections, sign-out form POST, Auth link routes for an email-only person), the callback (safe/unsafe `next`, failed state), Gamer DNA, onboarding gauge, landing sign-in link.
 - Screenshots of the main pages (English and Farsi, desktop and phone).
 
 **Reading the result without the Actions log:** after a run, the branch `e2e-report` (do not merge or delete it) holds `e2e-report.txt` (lines `ERROR`, `WARN`, `INFO [flow: …] ok`), `e2e.log`, and `shots/*.png`. Always check that the run's commit matches the commit you pushed before trusting it:
@@ -371,7 +378,7 @@ app/                       routes (App Router): page.tsx per folder
   auth/sso/callback/       PC-owned landing after Global Auth
   consent/                 privacy re-accept screen
   onboarding/{region,quiz,library}/
-  discover/ library/ wishlist/ cart/ dna/ settings/
+  discover/ search/ library/ wishlist/ cart/ dna/ settings/
   game/[id]/               game detail (public)
   error.tsx not-found.tsx layout.tsx globals.css
 components/
@@ -380,13 +387,14 @@ components/
   I18nProvider.tsx LangToggle.tsx   language, direction, number/price/genre/region/reason formatting
   BudgetControl.tsx        the one budget slider (nav menu and Settings)
   SearchAndAdd.tsx         shared search-and-add (library | wishlist)
+  HeaderSearch.tsx         header search box + live dropdown (opens /search and /game/[id])
   ConnectSteam.tsx         card + banner that sends people to Auth's Steam link
   GameCardView.tsx FeedRow.tsx SyncBanner.tsx Playtime.tsx Thumb.tsx Empty.tsx Skeleton.tsx Icon.tsx
 lib/                       pure logic, unit-tested, no React imports
   api.ts types.ts          typed client for every backend endpoint
   auth.ts flow.ts          Auth URLs + safe destinations; gate and callback decisions
   i18n.ts                  English + Farsi dictionaries and helpers
-  feed.ts cards.ts quiz.ts search.ts dismiss.ts format.ts
+  feed.ts cards.ts quiz.ts search.ts discover.ts dismiss.ts format.ts
 tests/                     node:test files for lib/ (7 files)
 e2e/                       mock-backend.mjs + run.mjs (Playwright, run by CI)
 .github/workflows/ci.yml   job `check` (typecheck, test, build) and job `e2e`

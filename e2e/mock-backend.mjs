@@ -61,6 +61,20 @@ function route(method, path) {
   if (path.startsWith("/wishlist")) return empty ? { items: [], count: 0, region: "TR" } : { count: 2, region: "TR", items: [
     { game_id: 3, title: "Baldur's Gate 3", cover_url: cover, source: "steam_sync", removable: false, added_at: null, game_edition_id: 31, ...price(3317470, 1249.5, "TRY", 20) },
     { game_id: 4, title: "Balatro", cover_url: cover, source: "manual", removable: true, added_at: null, game_edition_id: null, ...price(null, null, null, 20) }] };
+  if (path === "/games/genres") return { genres: ["Action", "Indie", "Roguelike", "RPG", "Strategy"] };
+  if (path.startsWith("/games/discover")) {
+    const u = new URL(path, "http://x"); const q = (u.searchParams.get("q") || "").toLowerCase(); const gs = (u.searchParams.get("genres") || "").toLowerCase().split(",").filter(Boolean);
+    const lib = u.searchParams.get("library") || "not_owned"; const max = u.searchParams.get("max_price");
+    const ALL = [
+      { game_id: 2, title: "Hades", developer: "Supergiant", genres: ["Roguelike", "Action"], owned: true, ...price(1200000, 400, "TRY", 0) },
+      { game_id: 5, title: "Hollow Knight", developer: "Team Cherry", genres: ["Indie", "Action"], owned: false, ...price(620000, 207, "TRY", 0) },
+      { game_id: 6, title: "Hollow Knight: Silksong", developer: "Team Cherry", genres: ["Indie", "Action"], owned: false, ...price(null, null, null, 0) },
+      { game_id: 7, title: "Dead Cells", developer: "Motion Twin", genres: ["Roguelike"], owned: false, ...price(0, 0, "TRY", 0) },
+    ].map((g) => ({ cover_url: cover, release_year: 2020, review_score: 90, in_wishlist: false, in_cart: false, ...g }));
+    const items = ALL.filter((g) => (!q || g.title.toLowerCase().includes(q)) && (!gs.length || g.genres.some((x) => gs.includes(x.toLowerCase())))
+      && (lib === "all" || (lib === "owned") === g.owned) && (max === null || (g.price_toman !== null && g.price_toman <= Number(max))));
+    return { items, total: items.length, offset: 0, limit: 24, max_price_toman: 5000000 };
+  }
   if (path.startsWith("/games/search") && /q=zzz/.test(path)) return { results: [] };
   if (path.startsWith("/games/search")) return { results: [{ game_id: 5, title: "Hollow Knight", developer: "Team Cherry", release_year: 2017, cover_url: cover }] };
   if (path.startsWith("/onboarding/quiz-options")) {

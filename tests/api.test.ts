@@ -53,3 +53,9 @@ test("PATCH settings sends only provided fields", async () => {
   assert.equal(calls[0].init.method, "PATCH");
   assert.equal(calls[0].init.body, JSON.stringify({ region: "TR" }));
 });
+
+test("discover sends only the params that are set", async () => {
+  const calls = fake(200, { items: [], total: 0, offset: 0, limit: 5, max_price_toman: null });
+  await api.discover({ q: "ha", library: "all", limit: 5, min_price: undefined });
+  assert.equal(calls[0].url, "/api/games/discover?q=ha&library=all&limit=5");
+});

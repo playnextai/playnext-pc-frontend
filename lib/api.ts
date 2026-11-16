@@ -1,5 +1,5 @@
 import type {
-  CartView, FeedbackAction, GameCard, GameDetail, GamerDna, LibraryItem, Me, OnboardingStatus,
+  CartView, DiscoverPage, FeedbackAction, GameCard, GameDetail, GamerDna, LibraryItem, Me, OnboardingStatus,
   OnboardingStep, QuizOption, Region, SearchResult, SettingsView, SignInMethods, SyncStatus, WishlistItem,
 } from "./types.ts";
 
@@ -89,6 +89,8 @@ export const api = {
 
   // library / wishlist (search-and-add component)
   searchGames: (q: string) => request<{ results: SearchResult[] }>("GET", `/games/search${qs({ q })}`),
+  discover: (params: Record<string, string | number | undefined>) => request<DiscoverPage>("GET", `/games/discover${qs(params)}`),
+  genres: () => request<{ genres: string[] }>("GET", "/games/genres"),
   library: (source: "all" | "synced" | "manual" = "all") =>
     request<{ items: LibraryItem[]; count: number }>("GET", `/library${qs({ source })}`),
   addToLibrary: (gameId: number, playtimeBucket?: string, userRating?: number) =>
