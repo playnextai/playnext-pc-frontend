@@ -13,13 +13,13 @@ page-by-page manual tests, CI, troubleshooting.
   (`/discover` by default). Linking Steam/Google goes to Auth's `/auth/steam/link` and `/auth/google/link`; sign-out is a
   top-level form POST to Auth's `/auth/logout`; account management is a link to `https://auth.playnextai.com/`.
   `lib/auth.ts` is the only file that knows these URLs. Contract: "PlayNext:PC - Global Auth Integration Hand-off" v1.0 (see the
-  backend repo's `GLOBAL_AUTH_INTEGRATION.md`).
+  backend repo's `docs/GLOBAL_AUTH_INTEGRATION.md`).
 - Settings shows two separate areas: **PlayNext:PC Settings** (owned here) and **PlayNext Account** (owned by Auth).
 - The browser talks only to same-origin `/api/*`; `next.config.mjs` forwards that to the backend (`BACKEND_URL`). The client never
   sends a user id.
 - Every signed-in page is wrapped in `components/Gate.tsx`: signed out -> Auth; `consent_required` -> `/consent`; onboarding
   incomplete -> the next step (`GET /onboarding/status`).
-- Endpoint shapes: the backend repo's `PHASE_9_CONTRACT.md`, mirrored in `lib/types.ts` / `lib/api.ts`.
+- Endpoint shapes: the backend repo's `docs/API_CONTRACT.md`, mirrored in `lib/types.ts` / `lib/api.ts`.
 - Prices: Toman primary, native regional price secondary; a missing price shows "—", never 0.
 - Every visible string is in `lib/i18n.ts` in English and Farsi (checked by the type system and `tests/i18n.test.ts`).
 

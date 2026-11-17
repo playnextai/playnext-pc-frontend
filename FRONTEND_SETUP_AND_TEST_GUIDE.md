@@ -2,7 +2,7 @@
 
 **Audience:** you (or a new developer) with this repository (`playnextai/playnext-pc-frontend`) and nothing else set up. **Goal:** compile it, run it, and prove each screen works, in English and in Farsi.
 
-**Last reviewed: 2026-11-15.** Companion documents in the backend repository (`playnextai/playnext-pc-backend`): `COMPLETE_SETUP_AND_TEST_GUIDE.md` (including **15.2, the Global Auth staging test**), `PHASE_9_CONTRACT.md` (every endpoint), `GLOBAL_AUTH_INTEGRATION.md`.
+**Last reviewed: 2026-11-15.** Companion documents in the backend repository (`playnextai/playnext-pc-backend`): `docs/SETUP.md` (including **15.2, the Global Auth staging test**), `docs/API_CONTRACT.md` (every endpoint), `docs/GLOBAL_AUTH_INTEGRATION.md`.
 
 ## What has and has not been verified (read first)
 
@@ -42,7 +42,7 @@ PlayNext:PC's web frontend: Next.js 15 (App Router) + React 19 + TypeScript, ser
 
 | Rule | Why | Where |
 |---|---|---|
-| **No sign-in UI here.** Every sign-in is a redirect to the central auth site: `https://auth.playnextai.com/login?return_url=<PC callback>`. The PC callback `/auth/sso/callback` asks the backend who the session belongs to and applies PC onboarding. Linking Steam/Google, account management and sign-out are also Auth's (links and a form POST). | Global Auth owns identity, sign-in methods, sessions and logout. Contract: "PlayNext:PC - Global Auth Integration Hand-off" v1.0 (Auth B2 0.3.0), summarized in the backend repo's `GLOBAL_AUTH_INTEGRATION.md`. | `lib/auth.ts` is the only file that knows Auth URLs; `app/auth/sso/callback/page.tsx` |
+| **No sign-in UI here.** Every sign-in is a redirect to the central auth site: `https://auth.playnextai.com/login?return_url=<PC callback>`. The PC callback `/auth/sso/callback` asks the backend who the session belongs to and applies PC onboarding. Linking Steam/Google, account management and sign-out are also Auth's (links and a form POST). | Global Auth owns identity, sign-in methods, sessions and logout. Contract: "PlayNext:PC - Global Auth Integration Hand-off" v1.0 (Auth B2 0.3.0), summarized in the backend repo's `docs/GLOBAL_AUTH_INTEGRATION.md`. | `lib/auth.ts` is the only file that knows Auth URLs; `app/auth/sso/callback/page.tsx` |
 | The browser only calls **same-origin `/api/*`**, which Next forwards to the backend. | No CORS, and the session cookie flows through untouched. | `next.config.mjs` |
 | The client **never sends a user id**. | The backend takes it from the session (it asks Global Auth). | `lib/api.ts` |
 | Every signed-in page is wrapped in the **gate**: signed out → auth site; consent needed → `/consent`; onboarding unfinished → the next step. | Onboarding is tracked by the backend (`GET /onboarding/status`), never guessed from "new account". | `components/Gate.tsx`, `lib/flow.ts` |
@@ -135,7 +135,7 @@ This is the same fake backend CI uses, with realistic data for every page.
    Reload the app after switching. Nothing you do is saved beyond the mock's memory.
 
 ### B. Against the real backend
-1. **Start the backend first** (separate terminals), following the backend repo's `COMPLETE_SETUP_AND_TEST_GUIDE.md` sections 4–9: Postgres, Redis, `uvicorn main:app --reload --port 8000`, and for the sync banner also the Celery worker. Load data (catalog, exchange rates, prices) per its section 10, otherwise the feed is empty.
+1. **Start the backend first** (separate terminals), following the backend repo's `docs/SETUP.md` sections 4–9: Postgres, Redis, `uvicorn main:app --reload --port 8000`, and for the sync banner also the Celery worker. Load data (catalog, exchange rates, prices) per its section 10, otherwise the feed is empty.
 2. Check the backend answers: `curl http://localhost:8000/auth/me` → `{"authenticated":false}`.
 3. In `.env.local` set `NEXT_PUBLIC_SITE_URL=http://localhost:3000` and confirm `BACKEND_URL=http://localhost:8000`.
 4. Start the frontend: `npm run dev` → open **http://localhost:3000**.
@@ -276,7 +276,7 @@ Signed out: logo, headline, one **Continue to PlayNext Account** button (the top
 - Genre names, regions and recommendation reasons are translated; game descriptions stay English by decision.
 
 ### 8.16 Staging test, step by step
-The full end-to-end checklist (cross-subdomain cookie over HTTPS, revocation within 30 s, Auth outage = 503, global consent, provider linking, Steam sync trigger, rollback) lives in the backend repo: `COMPLETE_SETUP_AND_TEST_GUIDE.md` → **15.2 Global Auth integration: step-by-step staging test**. Parts B (callback), D (sign-out) and F (Settings) are the frontend's. None of it has been run against the real Auth service yet.
+The full end-to-end checklist (cross-subdomain cookie over HTTPS, revocation within 30 s, Auth outage = 503, global consent, provider linking, Steam sync trigger, rollback) lives in the backend repo: `docs/SETUP.md` → **15.2 Global Auth integration: step-by-step staging test**. Parts B (callback), D (sign-out) and F (Settings) are the frontend's. None of it has been run against the real Auth service yet.
 
 ---
 
@@ -341,7 +341,7 @@ gh api "repos/playnextai/playnext-pc-frontend/contents/e2e-report.txt?ref=e2e-re
 
 ## 11. Deployment notes (preview of Phase 10)
 
-Not a full runbook — that is Phase 10 in the backend repo's `ACTION_PLAN.md` — but decisions to make:
+Not a full runbook — that is Phase 10 in the backend repo's `docs/ACTION_PLAN.md` — but decisions to make:
 
 - **Build with production values:** `NEXT_PUBLIC_SITE_URL=https://pc.playnextai.com`, `NEXT_PUBLIC_AUTH_URL=https://auth.playnextai.com`, and `BACKEND_URL` set to the backend's internal/public address **before** `npm run build`.
 - **Run:** `npm run build && npm run start` (Node server, port 3000) behind a reverse proxy/TLS. Next also deploys to Vercel-style platforms; if you pick one, `BACKEND_URL` must be reachable from it.
@@ -402,4 +402,4 @@ public/brand/              logos
 next.config.mjs            /api -> BACKEND_URL rewrite
 ```
 
-**To add a page:** (1) confirm the endpoint in the backend repo's `PHASE_9_CONTRACT.md` and that `lib/api.ts` has a typed function for it (add one, with its type in `lib/types.ts`, if not); (2) put decisions that can be pure (filtering, ordering, labels) in `lib/` with a test; (3) add every visible string to **both** dictionaries in `lib/i18n.ts`; (4) create `app/<route>/page.tsx` as a `"use client"` component wrapped in `<AppShell>` (or `<Gate>` for onboarding-like screens); (5) handle loading, empty, error and 429 states, and use logical CSS properties so it works right-to-left; (6) add mock data for it in `e2e/mock-backend.mjs`, an entry in `PAGES` (and a flow if it has behaviour) in `e2e/run.mjs`; (7) run `npm run typecheck && npm test && npm run build`; (8) add a subsection to section 8 of this guide.
+**To add a page:** (1) confirm the endpoint in the backend repo's `docs/API_CONTRACT.md` and that `lib/api.ts` has a typed function for it (add one, with its type in `lib/types.ts`, if not); (2) put decisions that can be pure (filtering, ordering, labels) in `lib/` with a test; (3) add every visible string to **both** dictionaries in `lib/i18n.ts`; (4) create `app/<route>/page.tsx` as a `"use client"` component wrapped in `<AppShell>` (or `<Gate>` for onboarding-like screens); (5) handle loading, empty, error and 429 states, and use logical CSS properties so it works right-to-left; (6) add mock data for it in `e2e/mock-backend.mjs`, an entry in `PAGES` (and a flow if it has behaviour) in `e2e/run.mjs`; (7) run `npm run typecheck && npm test && npm run build`; (8) add a subsection to section 8 of this guide.

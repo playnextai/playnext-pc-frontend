@@ -1,5 +1,5 @@
 // Response shapes of the PlayNext:PC backend. Source of truth:
-// playnext/PHASE_9_CONTRACT.md. Keep in sync when the backend changes.
+// playnext-pc-backend/docs/API_CONTRACT.md. Keep in sync when the backend changes.
 
 export type Region = "US" | "UK" | "EU" | "UA" | "TR" | "AR";
 export type FeedbackAction = "liked" | "disliked" | "not_interested" | "already_own" | "dismissed";
