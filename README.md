@@ -1,4 +1,4 @@
-# PlayNext:PC frontend (pc.playnextai.com)
+# PlayNext:PC frontend (pc.playnext.ir)
 
 Next.js 15 (App Router) + React 19 + TypeScript. A separate repository from the Python backend
 (`playnextai/playnext-pc-backend`). Bilingual: English (LTR) and Farsi (RTL, Persian digits).
@@ -8,10 +8,10 @@ page-by-page manual tests, CI, troubleshooting.
 
 ## Rules this repo follows
 - **No sign-in here; Global Auth owns identity.** Sign-in is a redirect to
-  `https://auth.playnextai.com/login?return_url=<PC callback>`. The PC callback `/auth/sso/callback` asks the backend who the
+  `https://auth.playnext.ir/login?return_url=<PC callback>`. The PC callback `/auth/sso/callback` asks the backend who the
   session belongs to (the backend validates it with Auth), then applies consent -> PC onboarding -> a validated destination
   (`/discover` by default). Linking Steam/Google goes to Auth's `/auth/steam/link` and `/auth/google/link`; sign-out is a
-  top-level form POST to Auth's `/auth/logout`; account management is a link to `https://auth.playnextai.com/`.
+  top-level form POST to Auth's `/auth/logout`; account management is a link to `https://auth.playnext.ir/`.
   `lib/auth.ts` is the only file that knows these URLs. Contract: "PlayNext:PC - Global Auth Integration Hand-off" v1.0 (see the
   backend repo's `docs/GLOBAL_AUTH_INTEGRATION.md`).
 - Settings shows two separate areas: **PlayNext:PC Settings** (owned here) and **PlayNext Account** (owned by Auth).
@@ -36,7 +36,7 @@ UI work with no backend: `node e2e/mock-backend.mjs` (port 8000) and `npm run de
 `http://localhost:8000/__scenario/full|empty|out|consent`.
 
 ## Local-development catch
-Auth only returns people to allow-listed hosts (`*.playnextai.com`), so real sign-in cannot return to
+Auth only returns people to allow-listed hosts (`*.playnext.ir`), so real sign-in cannot return to
 `http://localhost:3000`. Use the mock backend, or (legacy backend mode only) a hand-made session cookie; see guide section 7.
 
 ## Status (honest)

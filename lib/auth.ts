@@ -1,12 +1,12 @@
 // Sign-in, account linking and sign-out are NOT implemented in this app. They belong to Global Auth
-// (auth.playnextai.com). Contract: "PlayNext:PC - Global Auth Integration Hand-off" v1.0 (Auth B2 0.3.0).
+// (auth.playnext.ir). Contract: "PlayNext:PC - Global Auth Integration Hand-off" v1.0 (Auth B2 0.3.0).
 //
 // PC owns only: the callback page (/auth/sso/callback), PC onboarding and PC settings.
 // PC never writes provider identities and never trusts a user id from the browser; identity comes from
 // the session cookie, which the PC backend validates against Auth /auth/me.
 
-export const AUTH_URL = (process.env.NEXT_PUBLIC_AUTH_URL ?? "https://auth.playnextai.com").replace(/\/+$/, "");
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://pc.playnextai.com").replace(/\/+$/, "");
+export const AUTH_URL = (process.env.NEXT_PUBLIC_AUTH_URL ?? "https://auth.playnext.ir").replace(/\/+$/, "");
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://pc.playnext.ir").replace(/\/+$/, "");
 
 export const CALLBACK_PATH = "/auth/sso/callback";
 export const DEFAULT_DESTINATION = "/discover";

@@ -12,7 +12,7 @@ import { useI18n } from "@/components/I18nProvider";
 /**
  * Wrap every signed-in page. On load it asks the backend who you are and
  * whether onboarding is finished, then:
- *   signed out        -> auth.playnextai.com (we never show a sign-in form here)
+ *   signed out        -> auth.playnext.ir (we never show a sign-in form here)
  *   consent required  -> /consent
  *   onboarding open   -> the next onboarding step (unless you're already on one)
  *   otherwise         -> renders the page

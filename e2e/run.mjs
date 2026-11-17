@@ -278,9 +278,9 @@ await flow("settings: grouped sections, language select switches direction, sign
   expect(t.includes("Google sign-in") && t.includes("Connected"), "Google sign-in status row missing");
   expect(!t.includes("Your data"), "Your data box should be gone (Auth owns it)");
   const manage = await page.getByRole("link", { name: "Manage PlayNext Account" }).getAttribute("href");
-  expect(manage === "https://auth.playnextai.com/", `manage link wrong: ${manage}`);
+  expect(manage === "https://auth.playnext.ir/", `manage link wrong: ${manage}`);
   const logout = await page.locator("form").evaluate((f) => ({ m: f.method, a: f.action }));
-  expect(logout.m === "post" && logout.a === "https://auth.playnextai.com/auth/logout", `sign-out is not a form POST to Auth: ${JSON.stringify(logout)}`);
+  expect(logout.m === "post" && logout.a === "https://auth.playnext.ir/auth/logout", `sign-out is not a form POST to Auth: ${JSON.stringify(logout)}`);
   expect((await page.getByRole("button", { name: "Sign out" }).count()) === 1, "sign-out button missing");
   await page.selectOption("#ui-lang", "fa");
   await page.waitForFunction(() => document.documentElement.dir === "rtl", null, { timeout: 3000 });
@@ -300,7 +300,7 @@ await flow("callback: validates session, honors a safe next, ignores an unsafe o
   const t = await page.locator("main").innerText();
   expect(t.includes("couldn't confirm your sign-in"), "failed state missing");
   const href = await page.getByRole("link", { name: "Continue to PlayNext Account" }).getAttribute("href");
-  expect(href === `https://auth.playnextai.com/login?return_url=${encodeURIComponent(BASE + "/auth/sso/callback?next=%2Fcart")}`, `retry link wrong: ${href}`);
+  expect(href === `https://auth.playnext.ir/login?return_url=${encodeURIComponent(BASE + "/auth/sso/callback?next=%2Fcart")}`, `retry link wrong: ${href}`);
   } finally { await setScenario("full"); }
 });
 await flow("settings (email-only): Google and Steam offer Auth link routes", async (page) => {
@@ -308,9 +308,9 @@ await flow("settings (email-only): Google and Steam offer Auth link routes", asy
   try {
     await page.goto(BASE + "/settings", { waitUntil: "networkidle" });
     const g = await page.getByRole("link", { name: "Connect Google" }).getAttribute("href");
-    expect(g.startsWith("https://auth.playnextai.com/auth/google/link?return_url="), `google link wrong: ${g}`);
+    expect(g.startsWith("https://auth.playnext.ir/auth/google/link?return_url="), `google link wrong: ${g}`);
     const st = await page.getByRole("link", { name: "Connect Steam" }).first().getAttribute("href");
-    expect(st.startsWith("https://auth.playnextai.com/auth/steam/link?return_url="), `steam link wrong: ${st}`);
+    expect(st.startsWith("https://auth.playnext.ir/auth/steam/link?return_url="), `steam link wrong: ${st}`);
   } finally { await setScenario("full"); }
 });
 await flow("gamer DNA: type description and Six types note", async (page) => {
@@ -341,10 +341,10 @@ await flow("landing: sign-in links go to the auth site with a return_url, sectio
   await page.goto(BASE + "/", { waitUntil: "networkidle" });
   const hrefs = await page.locator("a.btn").evaluateAll((els) => els.map((e) => e.getAttribute("href")));
   expect(hrefs.length >= 3, "expected sign-in buttons (nav, hero, final)");
-  for (const h of hrefs) expect(/^https:\/\/auth\.playnextai\.com\/.+return_url=/.test(h), `bad sign-in link: ${h}`);
+  for (const h of hrefs) expect(/^https:\/\/auth\.playnext\.ir\/.+return_url=/.test(h), `bad sign-in link: ${h}`);
   const cb = encodeURIComponent(BASE + "/auth/sso/callback"); // CI builds with SITE_URL = the local server
-  for (const h of hrefs) expect(h === `https://auth.playnextai.com/login?return_url=${cb}`, `sign-in link is not the bare central login + PC callback: ${h}`);
-  expect((await page.locator('a[href="https://auth.playnextai.com"]').count()) >= 1, "no visible link to auth.playnextai.com");
+  for (const h of hrefs) expect(h === `https://auth.playnext.ir/login?return_url=${cb}`, `sign-in link is not the bare central login + PC callback: ${h}`);
+  expect((await page.locator('a[href="https://auth.playnext.ir"]').count()) >= 1, "no visible link to auth.playnext.ir");
   expect((await page.locator("body").innerText()).includes("Continue to PlayNext Account"), "primary action copy missing");
   const t = await page.locator("body").innerText();
   for (const s of ["How it works", "Real regional pricing", "Every edition, one place", "Contact"]) expect(t.includes(s), `missing: ${s}`);

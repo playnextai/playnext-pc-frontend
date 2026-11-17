@@ -36,13 +36,13 @@ So: the code compiles, builds and passes the mock-backend browser tests. Section
 
 ## 1. What this app is (and is not)
 
-PlayNext:PC's web frontend: Next.js 15 (App Router) + React 19 + TypeScript, served at `pc.playnextai.com`. A **separate repository** from the Python backend. **Bilingual:** English (left-to-right) and Farsi (right-to-left, Persian digits), switchable at any time.
+PlayNext:PC's web frontend: Next.js 15 (App Router) + React 19 + TypeScript, served at `pc.playnext.ir`. A **separate repository** from the Python backend. **Bilingual:** English (left-to-right) and Farsi (right-to-left, Persian digits), switchable at any time.
 
 **Rules it follows (do not break them when adding code):**
 
 | Rule | Why | Where |
 |---|---|---|
-| **No sign-in UI here.** Every sign-in is a redirect to the central auth site: `https://auth.playnextai.com/login?return_url=<PC callback>`. The PC callback `/auth/sso/callback` asks the backend who the session belongs to and applies PC onboarding. Linking Steam/Google, account management and sign-out are also Auth's (links and a form POST). | Global Auth owns identity, sign-in methods, sessions and logout. Contract: "PlayNext:PC - Global Auth Integration Hand-off" v1.0 (Auth B2 0.3.0), summarized in the backend repo's `docs/GLOBAL_AUTH_INTEGRATION.md`. | `lib/auth.ts` is the only file that knows Auth URLs; `app/auth/sso/callback/page.tsx` |
+| **No sign-in UI here.** Every sign-in is a redirect to the central auth site: `https://auth.playnext.ir/login?return_url=<PC callback>`. The PC callback `/auth/sso/callback` asks the backend who the session belongs to and applies PC onboarding. Linking Steam/Google, account management and sign-out are also Auth's (links and a form POST). | Global Auth owns identity, sign-in methods, sessions and logout. Contract: "PlayNext:PC - Global Auth Integration Hand-off" v1.0 (Auth B2 0.3.0), summarized in the backend repo's `docs/GLOBAL_AUTH_INTEGRATION.md`. | `lib/auth.ts` is the only file that knows Auth URLs; `app/auth/sso/callback/page.tsx` |
 | The browser only calls **same-origin `/api/*`**, which Next forwards to the backend. | No CORS, and the session cookie flows through untouched. | `next.config.mjs` |
 | The client **never sends a user id**. | The backend takes it from the session (it asks Global Auth). | `lib/api.ts` |
 | Every signed-in page is wrapped in the **gate**: signed out → auth site; consent needed → `/consent`; onboarding unfinished → the next step. | Onboarding is tracked by the backend (`GET /onboarding/status`), never guessed from "new account". | `components/Gate.tsx`, `lib/flow.ts` |
@@ -86,8 +86,8 @@ Edit `.env.local`:
 | Variable | Default | Meaning | When it is read |
 |---|---|---|---|
 | `BACKEND_URL` | `http://localhost:8000` | Where `/api/*` is forwarded (the FastAPI server). Server-side only. | **At build time and server start** (rewrites are fixed when the build runs) |
-| `NEXT_PUBLIC_SITE_URL` | `https://pc.playnextai.com` | This site's public origin. Used to build the PC callback (`/auth/sso/callback`) that is sent to the auth site as `return_url`. | **Baked into the JavaScript at build time** |
-| `NEXT_PUBLIC_AUTH_URL` | `https://auth.playnextai.com` | The Global Auth site (sign-in `/login`, linking `/auth/steam/link` and `/auth/google/link`, account `/`, sign-out `/auth/logout`). The paths are fixed by the contract, not configurable. | Baked at build time |
+| `NEXT_PUBLIC_SITE_URL` | `https://pc.playnext.ir` | This site's public origin. Used to build the PC callback (`/auth/sso/callback`) that is sent to the auth site as `return_url`. | **Baked into the JavaScript at build time** |
+| `NEXT_PUBLIC_AUTH_URL` | `https://auth.playnext.ir` | The Global Auth site (sign-in `/login`, linking `/auth/steam/link` and `/auth/google/link`, account `/`, sign-out `/auth/logout`). The paths are fixed by the contract, not configurable. | Baked at build time |
 
 Important gotchas:
 - Anything starting with `NEXT_PUBLIC_` is compiled into the browser code. **Changing it requires a rebuild** (`npm run build`), or a restart of `npm run dev`.
@@ -141,7 +141,7 @@ This is the same fake backend CI uses, with realistic data for every page.
 4. Start the frontend: `npm run dev` → open **http://localhost:3000**.
 5. Check the proxy works from a terminal: `curl http://localhost:3000/api/auth/me` → the same JSON as step 2. If this fails, the rewrite or `BACKEND_URL` is wrong.
 
-With no session, any signed-in page redirects to the auth site. On localhost that sign-in **cannot bring you back** (the auth site only returns people to `*.playnextai.com`) — see section 7.
+With no session, any signed-in page redirects to the auth site. On localhost that sign-in **cannot bring you back** (the auth site only returns people to `*.playnext.ir`) — see section 7.
 
 ---
 
@@ -319,7 +319,7 @@ gh api "repos/playnextai/playnext-pc-frontend/contents/e2e-report.txt?ref=e2e-re
 | `node --experimental-strip-types` unknown | Node older than 22.6. |
 | Page shows "Loading…" forever | The `/api` proxy is failing. `curl http://localhost:3000/api/auth/me`; check backend/mock is up and `BACKEND_URL`. |
 | Everything redirects to the auth site | No/invalid session. Section 7. With a hand-made cookie: `SESSION_SECRET_KEY` differs between the signer and the backend, or the backend is in `auth` mode (a hand-made cookie is then rejected). Use the mock backend (6A) for UI work. |
-| Callback shows "We couldn't confirm your sign-in" right after signing in at Auth | The browser has no `playnext_session` for this host (cookie domain not `.playnextai.com`), or the backend cannot validate it with Auth (`AUTH_BASE_URL`, outage). Check `curl -b "playnext_session=…" https://<pc>/api/auth/me` and the backend log. |
+| Callback shows "We couldn't confirm your sign-in" right after signing in at Auth | The browser has no `playnext_session` for this host (cookie domain not `.playnext.ir`), or the backend cannot validate it with Auth (`AUTH_BASE_URL`, outage). Check `curl -b "playnext_session=…" https://<pc>/api/auth/me` and the backend log. |
 | App says to refresh / API returns 503 `auth_unavailable` | The backend cannot reach Global Auth (backend guide, section 16). It is a deliberate fail-closed answer, not a sign-out. |
 | Settings "Status unavailable right now" | `/api/settings/identities` could not read Auth `/auth/identities`. |
 | Stays signed in on PC after signing out elsewhere | Backend still in `legacy` mode, or less than the 30 s cache window has passed. |
@@ -343,11 +343,11 @@ gh api "repos/playnextai/playnext-pc-frontend/contents/e2e-report.txt?ref=e2e-re
 
 Not a full runbook — that is Phase 10 in the backend repo's `docs/ACTION_PLAN.md` — but decisions to make:
 
-- **Build with production values:** `NEXT_PUBLIC_SITE_URL=https://pc.playnextai.com`, `NEXT_PUBLIC_AUTH_URL=https://auth.playnextai.com`, and `BACKEND_URL` set to the backend's internal/public address **before** `npm run build`.
+- **Build with production values:** `NEXT_PUBLIC_SITE_URL=https://pc.playnext.ir`, `NEXT_PUBLIC_AUTH_URL=https://auth.playnext.ir`, and `BACKEND_URL` set to the backend's internal/public address **before** `npm run build`.
 - **Run:** `npm run build && npm run start` (Node server, port 3000) behind a reverse proxy/TLS. Next also deploys to Vercel-style platforms; if you pick one, `BACKEND_URL` must be reachable from it.
-- **Cookies:** the shared session cookie `playnext_session` (`Domain=.playnextai.com`, Secure, HttpOnly, SameSite=Lax) is set by Global Auth. It flows through the proxy untouched; do not strip `Cookie` or `Set-Cookie` in front of the app.
+- **Cookies:** the shared session cookie `playnext_session` (`Domain=.playnext.ir`, Secure, HttpOnly, SameSite=Lax) is set by Global Auth. It flows through the proxy untouched; do not strip `Cookie` or `Set-Cookie` in front of the app.
 - **Backend `TRUSTED_PROXY_COUNT`:** with Next in front of the API, the client IP the backend sees is Next's unless forwarded headers are set correctly. Set `TRUSTED_PROXY_COUNT` to the real number of proxies, otherwise rate limiting treats all users as one. Verify with a test before launch.
-- **The auth site** must allow-list `https://pc.playnextai.com` as a return host (it keeps the callback's `?next=` query string; confirmed by the Auth team, not yet tested end to end).
+- **The auth site** must allow-list `https://pc.playnext.ir` as a return host (it keeps the callback's `?next=` query string; confirmed by the Auth team, not yet tested end to end).
 - **Sign-out** is a form POST to Auth, so it works only when the Auth host is reachable from the browser; Auth redirects to its own default return URL afterwards (not back to PC) until the Auth team adds a caller-provided logout return URL.
 - **Who deploys and where** is an open Phase 10 decision.
 

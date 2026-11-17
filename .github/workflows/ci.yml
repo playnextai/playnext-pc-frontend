@@ -31,7 +31,7 @@ jobs:
           exit $rc
         env:
           BACKEND_URL: http://localhost:8000
-          NEXT_PUBLIC_SITE_URL: https://pc.playnextai.com
+          NEXT_PUBLIC_SITE_URL: https://pc.playnext.ir
 
   e2e:
     runs-on: ubuntu-latest
