@@ -105,7 +105,7 @@ Run these three, in this order, from the project root. CI runs exactly these (pl
 Runs `tsc --noEmit` over everything. Expected: no output and exit code 0. If it complains that `next-env.d.ts` is missing, run `npm run dev` or `npm run build` once; Next generates it.
 
 ### 5.2 `npm test`
-Runs the eight test files in `tests/` with Node's built-in runner. Expected: `# pass 50`, `# fail 0` (the number grows as tests are added; there must be no failures). If it fails to start, check `node -v` ≥ 22.6.
+Runs the eight test files in `tests/` with Node's built-in runner. Expected: `# pass 51`, `# fail 0` (the number grows as tests are added; there must be no failures). If it fails to start, check `node -v` ≥ 22.6.
 
 ### 5.3 `npm run build`
 Production build. It type-checks again and compiles every route. Expected end state: a route table without errors. Routes: `/`, `/auth/sso/callback`, `/cart`, `/consent`, `/discover`, `/dna`, `/game/[id]`, `/library`, `/onboarding/library`, `/onboarding/quiz`, `/onboarding/region`, `/settings`, `/wishlist` and the 404 page.
