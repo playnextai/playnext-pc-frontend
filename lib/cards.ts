@@ -22,3 +22,9 @@ export function feedbackFor(action: CardAction): FeedbackAction | null {
 
 /** Actions that remove the card from the feed once recorded (the person has answered for that game). */
 export const REMOVES_CARD: ReadonlySet<CardAction> = new Set(["not_interested", "already_own"]);
+
+/** "% match" shown on feed cards: the backend's similarity score (0..1) as a whole percent.
+ *  It is a relative taste score, not a probability; clamp so a stray value never shows 130%. */
+export function matchPercent(score: number): number {
+  return Math.round(Math.min(1, Math.max(0, score)) * 100);
+}

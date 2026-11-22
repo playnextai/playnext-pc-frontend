@@ -5,6 +5,7 @@ import { CARD_ACTIONS, REMOVES_CARD, feedbackFor, type CardAction } from "@/lib/
 import Icon from "@/components/Icon";
 import { useI18n } from "@/components/I18nProvider";
 import type { GameCard } from "@/lib/types";
+import { matchPercent } from "@/lib/cards";
 
 /** Feed card: cover, title, Toman-primary price with the native price beneath, and the four
  *  designed actions on their own line (price and actions are separate rows by design).
@@ -49,6 +50,9 @@ export default function GameCardView({ game, onRemove, onOpen }: {
         <h3 dir="auto">{game.title}</h3>
       </button>
       <div className="gc-body">
+        {typeof game.score === "number" && game.score > 0 && (
+          <p className="gc-match">{t("card.match", { n: matchPercent(game.score) })}</p>
+        )}
         {game.reason && <p className="muted gc-reason">{reason(game.reason)}</p>}
         <div className="price" style={{ fontSize: "1.05rem" }}>{toman(game.price_toman)}</div>
         {native && <div className="muted" style={{ fontSize: ".85rem" }}>{native} {t("card.yourRegion")}</div>}

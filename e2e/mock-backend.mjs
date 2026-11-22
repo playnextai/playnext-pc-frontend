@@ -10,7 +10,7 @@ let scenario = "full";
 const cover = null; // placeholders (the design's gradient box); real covers are IGDB URLs
 const price = (t, n, c, d = null) => ({ price_toman: t, price_native: n, price_currency: c, discount_pct: d });
 const card = (id, title, extra = {}) => ({ game_id: id, title, cover_url: cover, genres: ["Action RPG"], ...price(3317470, 1249.5, "TRY", id % 2 ? 20 : null), ...extra });
-const CARDS = [card(1, "Elden Ring", { reason: "Because you liked Dark Souls III" }), card(2, "Hades"), card(3, "Baldur's Gate 3", { price_toman: null, price_native: null, price_currency: null }), card(4, "Balatro")];
+const CARDS = [card(1, "Elden Ring", { reason: "Because you liked Dark Souls III", score: 0.874 }), card(2, "Hades"), card(3, "Baldur's Gate 3", { price_toman: null, price_native: null, price_currency: null }), card(4, "Balatro")];
 const regionOptions = ["US:United States", "UK:United Kingdom", "EU:Europe (Eurozone)", "UA:Ukraine", "TR:Turkey", "AR:Argentina"].map((x) => { const [code, label] = x.split(":"); return { code, label }; });
 
 const settings = () => ({

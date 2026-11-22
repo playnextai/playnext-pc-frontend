@@ -8,7 +8,7 @@
 
 | Verified automatically on every push (GitHub Actions, `frontend-ci`) | Never verified |
 |---|---|
-| `npm run typecheck`, `npm test` (50 tests), `npm run build` on a clean machine (job `check`). | Anything against the **real backend**: real Postgres data, Steam, Redis, Celery, IGDB covers, Bonbast rates. |
+| `npm run typecheck`, `npm test` (51 tests), `npm run build` on a clean machine (job `check`). | Anything against the **real backend**: real Postgres data, Steam, Redis, Celery, IGDB covers, Bonbast rates. |
 | A real Chromium browser drives every page against a **mock backend** in English and Farsi, at desktop (1280 px) and phone (390 px) width, and checks layout, direction, digits, clipped text, touch targets, unnamed controls, plus 21 named user flows (job `e2e`). It also saves screenshots. | The real **Global Auth** service: cross-subdomain cookie over HTTPS, real `/auth/me` and `/auth/identities` answers, central logout. Steps: backend guide 15.2. |
 | | Real phones/browsers other than Chromium; a screen-reader and keyboard audit; performance. |
 
@@ -205,7 +205,7 @@ Bump `PRIVACY_POLICY_VERSION` in the backend `.env` and restart it. Reload the a
 - **Cold start** (new person, no data): *Popular right now* plus two buttons back to the quiz and manual add.
 - Price on each card: Toman large, native price beneath; "—" when unknown; a discount badge when discounted.
 - Card actions (hover / aria labels): ♥ like, ✕ not interested and ✓ already own (card disappears and an **Undo** bar appears for the last one; DB: `feedback` row, "already own" also adds a library row; Undo removes it again), bookmark = wishlist (DB: `user_wishlist`, `source='manual'`). Clicking the card opens the game page. Errors show inline.
-- **Budget:** the nav chip opens a menu (on phones, the filters button opens the same menu) with a slider from 0 to the highest price in the database; the top end reads "No budget limit" and is the default. Move it → rows reload and expensive games disappear; `users.budget_ceiling_toman` is updated (null = no limit). The same control is in Settings.
+- **Price limit (stored as the budget ceiling):** the nav chip opens a menu (on phones, the filters button opens the same menu) with a slider from 0 to the highest price in the database; the top end reads "No budget limit" and is the default. Move it → rows reload and expensive games disappear; `users.budget_ceiling_toman` is updated (null = no limit). The same control is in Settings.
 - **Cart badge** shows the number of items (0 hides it).
 - **Sync banner:** right after a Steam sync starts, a banner "Syncing your Steam library…" appears and clears itself when the worker finishes, then the feed reloads. To fake it: `redis-cli SET lsync:1 '{"status":"running","at":<now epoch>}'`; it turns into "couldn't sync" if older than 30 minutes.
 
@@ -229,7 +229,7 @@ Bump `PRIVACY_POLICY_VERSION` in the backend `.env` and restart it. Reload the a
 - Title "Cart"; "N games · checkout happens on each platform separately"; items **grouped by platform** with a **Buy on {platform}** link each.
 - Price rule: when the price changed since you added the game, the **main price is the current (new) price, bold in mint, with a "Price changed" tag**, and the line beneath says "Was {old price} when you added it." Otherwise the locked price shows with "Locked in when added". The **Total** is computed from the prices shown (current price where changed).
 - Remove works; empty cart: "Your cart is empty" with **Browse recommendations**. Cart only holds Steam editions.
-- Known: the backend's own `total_toman` still sums the locked prices; the page does not use it.
+- The backend `total_toman` and the page total now agree: both use today's price per line.
 
 ### 8.10 `/game/[id]`
 - **Hero:** the full cover in a smaller box (on the right in English, the left in Farsi) with a colour backdrop drawn from the cover; title, developer, year, up to three genres and the review score.
@@ -246,9 +246,9 @@ Bump `PRIVACY_POLICY_VERSION` in the backend `.env` and restart it. Reload the a
 ### 8.12 `/settings`: PlayNext:PC Settings and PlayNext Account
 | Do | Expect |
 |---|---|
-| Open Settings | Two visibly separate sections: **PlayNext:PC Settings** (pricing region, default budget filter, Steam library, language) and **PlayNext Account** (Google sign-in, Steam sign-in, email, **Manage PlayNext Account**, **Sign out**). No "Your data" box (Auth owns account data). |
+| Open Settings | Two visibly separate sections: **PlayNext:PC Settings** (pricing region, default price limit, Steam library, language) and **PlayNext Account** (Google sign-in, Steam sign-in, email, **Manage PlayNext Account**, **Sign out**). No "Your data" box (Auth owns account data). |
 | Pricing region | Choose another region: saved immediately; the feed prices follow. |
-| Default budget filter | The same slider as the nav chip; one stored value, two editors; mint accent. |
+| Default price limit | The same slider as the nav chip; one stored value, two editors; mint accent. |
 | Steam library | Shows PC's own sync state (separate from the Steam sign-in row). |
 | Language | A select that switches English/Farsi and direction instantly; remembered in this browser only. |
 | Rows in PlayNext Account | Status from Auth: Connected (check mark), Unverified, Not connected (with **Connect Google** / **Connect Steam**), or "Status unavailable right now" if Auth cannot be reached. |
@@ -361,7 +361,7 @@ Not a full runbook — that is Phase 10 in the backend repo's `docs/ACTION_PLAN.
 - The empty and error screens have had one pass; a final design pass is still open.
 - "% match" is not shown on cards (the backend does not send it).
 - The budget chip text differs slightly from the design board.
-- The backend cart `total_toman` still sums locked prices; the page computes its own total from the prices shown (current price where changed).
+- The backend cart `total_toman` and the page total both use the current price per line (the page still computes its own from the rows shown).
 - The onboarding heart stores a rating of 5 but cannot be un-set (the backend can set, not clear, `user_rating`), and the recommender does not use ratings yet. The playtime gauge stores a bucket the recommender uses as a weak signal.
 - The quiz page is guarded by the gate, not by step order (a person can open it before choosing a region and is routed back from `/discover`).
 - More recommendation reasons than the three above are not planned for now.

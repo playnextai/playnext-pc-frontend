@@ -161,6 +161,7 @@ html[lang="fa"] .lp-hero h1 { line-height: 1.4; }
 .gc-open h3 { margin: 12px 16px 0; font-size: 1rem; font-weight: 600; }
 .gc-body { padding: 4px 16px 14px; }
 .gc-reason { font-size: .82rem; margin: 2px 0 6px; }
+.gc-match { font-size: .8rem; font-weight: 600; color: var(--mint); margin: 2px 0 0; }
 .gc-body .icon-btn { width: 36px; height: 36px; }
 @media (max-width: 640px) { .feed-grid { grid-template-columns: 1fr; } }
 /* nav items as outlined pills, as designed */

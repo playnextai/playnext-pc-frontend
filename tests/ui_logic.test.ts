@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { shouldSearch, normalizeQuery } from "../lib/search.ts";
 import { genreSpread, counterKey, toggleSelection } from "../lib/quiz.ts";
 import { dismiss, isDismissed } from "../lib/dismiss.ts";
-import { CARD_ACTIONS, REMOVES_CARD, feedbackFor } from "../lib/cards.ts";
+import { CARD_ACTIONS, REMOVES_CARD, feedbackFor, matchPercent } from "../lib/cards.ts";
 
 test("search only fires for 2+ real characters", () => {
   assert.equal(shouldSearch(""), false);
@@ -56,4 +56,10 @@ test("genre spread counts distinct first genres among the picks only", () => {
   assert.equal(genreSpread(opts, new Set([1, 2, 3, 4])), 2);
   assert.equal(genreSpread(opts, new Set([1, 3, 5])), 3);
   assert.equal(genreSpread(opts, new Set()), 0);
+});
+
+test("matchPercent rounds the similarity score and clamps to 0..100", () => {
+  assert.equal(matchPercent(0.874), 87);
+  assert.equal(matchPercent(1.3), 100);
+  assert.equal(matchPercent(-0.2), 0);
 });

@@ -138,6 +138,8 @@ await flow("budget menu opens and slider shows 'no limit' by default", async (pa
 });
 await flow("feed card actions and card opens detail", async (page) => {
   await page.goto(BASE + "/discover", { waitUntil: "networkidle" });
+  expect((await page.getByText("87% match").count()) >= 1, "feed card is missing its % match");
+  expect((await page.getByText("% match").count()) === (await page.locator(".gc-match").count()), "unexpected match badge");
   await page.getByRole("button", { name: "Add to wishlist" }).first().click();
   await page.waitForTimeout(300);
   expect((await page.getByRole("button", { name: "Add to wishlist" }).first().getAttribute("aria-pressed")) === "true", "wishlist button did not toggle");
@@ -274,7 +276,7 @@ await flow("Farsi: regions, reasons and genres are translated", async (page) => 
 await flow("settings: grouped sections, language select switches direction, sign-out present", async (page) => {
   await page.goto(BASE + "/settings", { waitUntil: "networkidle" });
   const t = await page.locator("main").innerText();
-  expect(t.includes("PlayNext:PC Settings") && t.includes("PlayNext Account") && /pricing/i.test(t) && t.includes("Default budget filter"), "two settings sections missing");
+  expect(t.includes("PlayNext:PC Settings") && t.includes("PlayNext Account") && /pricing/i.test(t) && t.includes("Default price limit"), "two settings sections missing");
   expect(t.includes("Google sign-in") && t.includes("Connected"), "Google sign-in status row missing");
   expect(!t.includes("Your data"), "Your data box should be gone (Auth owns it)");
   const manage = await page.getByRole("link", { name: "Manage PlayNext Account" }).getAttribute("href");

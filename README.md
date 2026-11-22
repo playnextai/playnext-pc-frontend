@@ -42,7 +42,7 @@ Auth only returns people to allow-listed hosts (`*.playnext.ir`), so real sign-i
 ## Status (honest)
 - **Built:** every page on the approved design board: landing, `/auth/sso/callback`, `/consent`, onboarding (region, taste quiz,
   library), feed `/discover`, `/search` (header search + Search and Discover), `/library`, `/wishlist`, `/cart`, `/game/[id]` (public), `/dna`, `/settings`, 404/error pages.
-- **Verified on every push (GitHub Actions `frontend-ci`):** typecheck, 50 tests, production build, and a real Chromium run
+- **Verified on every push (GitHub Actions `frontend-ci`):** typecheck, 51 tests, production build, and a real Chromium run
   against a mock backend (every page x English/Farsi x desktop/phone, 21 named flows, screenshots). Results are readable on the
   `e2e-report` branch (do not merge or delete it).
 - **Not verified:** the real backend (Postgres, Steam, Redis, Celery, IGDB, Bonbast), the real Global Auth service
